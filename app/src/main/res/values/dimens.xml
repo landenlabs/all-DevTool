@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="title_size">18sp</dimen>
+    <dimen name="icon_dlg_title_size">16sp</dimen>
+    <dimen name="text_dlg_title_height">60dp</dimen>
+    <dimen name="dlg_share_size">40dp</dimen>
+    <dimen name="rounded_btn_radius">10dp</dimen>
+    <!-- Graph -->
+    <dimen name="title_font_size">16sp</dimen>
+    <dimen name="range_tick_label_font_size">12sp</dimen>
+    <dimen name="domain_tick_label_font_size">12sp</dimen>
+    <dimen name="domain_label_font_size">14sp</dimen>
+    <dimen name="range_label_font_size">14sp</dimen>
+    <dimen name="legend_text_font_size">12sp</dimen>
+
+    <!-- Includes padding of 10 -->
+    <dimen name="console_col1Width">80dp</dimen>
+    <dimen name="console_col2Width">110dp</dimen>
+    <dimen name="console_col3Width">110dp</dimen>
+    <dimen name="console_col4Width">90dp</dimen>
+
+</resources>

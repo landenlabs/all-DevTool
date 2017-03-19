@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <item
+        android:id="@+id/net_clean_networks"
+        app:showAsAction="always"
+        android:title="@string/sys_menu_clean_networks" />
+
+</menu>

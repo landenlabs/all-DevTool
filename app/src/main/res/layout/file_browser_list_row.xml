@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="#444"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/fb_icon"
+        android:layout_width="64dp"
+        android:layout_height="48dp"
+        android:adjustViewBounds="true"
+        android:maxHeight="48dp"
+        android:maxWidth="64dp"
+        android:text="123"
+        android:background="@drawable/folder" />
+
+    <!--  -->
+    <CheckBox
+        android:id="@+id/fb_checked"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_alignBottom="@id/fb_icon"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/fb_icon"
+        android:layout_centerVertical="true"
+        android:background="@drawable/rounded_btn"
+        android:button="?android:attr/textCheckMark"
+        android:minWidth="20dp" />
+
+    <TextView
+        android:id="@+id/fb_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@id/fb_icon"
+        android:layout_toLeftOf="@id/fb_checked"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        tools:text="filename"
+        android:text="filename"/>
+
+    <TextView
+        android:id="@+id/fb_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fb_name"
+        android:layout_marginRight="10dp"
+        android:layout_toLeftOf="@id/fb_checked"
+        tools:text="123,456"
+        android:textColor="@color/sizeRed"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/fb_aux"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fb_name"
+        android:layout_marginLeft="10dp"
+        android:layout_toLeftOf="@id/fb_size"
+        android:layout_toRightOf="@id/fb_icon"
+        tools:text="date perm"
+        android:textColor="@color/textBlue"
+        android:textStyle="italic" />
+
+</RelativeLayout>

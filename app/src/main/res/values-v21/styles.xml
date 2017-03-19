@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Use this to get material themes only to work
+    <style name="AppTheme" parent="@style/Theme_13">
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
+    -->
+
+    <style name="Theme_11" parent="@android:style/Theme.Material" />
+    <style name="Theme_12" parent="@android:style/Theme.Material.Light" />
+    <style name="Theme_13" parent="@android:style/Theme.Material.Light.DarkActionBar" />
+
+    <style name="Theme_14" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme_15" parent="Theme.AppCompat.Light" />
+    <style name="Theme_16" parent="Theme.AppCompat.NoActionBar" />
+    <style name="Theme_17" parent="Theme.AppCompat" />
+
+    <!-- Part of api 21, can be used to set theme per layout -->
+    <style name="OverlayTheme_00" parent="@android:style/ThemeOverlay.Material.Dark" />
+    <style name="OverlayTheme_01" parent="@android:style/ThemeOverlay.Material.Light" />
+    <style name="OverlayTheme_02" parent="@android:style/ThemeOverlay.Material.Dark.ActionBar" />
+
+</resources>

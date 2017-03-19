@@ -1,0 +1,90 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+File javaDocDstDir= file('javadoc')
+File zipDstDir= file('zip')
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+
+        // Firebase
+        classpath 'com.google.gms:google-services:3.0.0'
+
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+task cleanAll(type: Delete, dependsOn: clean) {
+    description = 'Clean by removing build, javadoc and zip directories'
+    // delete rootProject.buildDir
+
+    println "delete " + zipDstDir
+    delete zipDstDir
+
+    println "delete " + javaDocDstDir
+    delete javaDocDstDir
+}
+
+task zipSrc(type: Zip)   {
+    outputs.upToDateWhen { false }
+    def outDir= zipDstDir.path
+
+    archiveName = "NbcDemoSrc.zip"
+    destinationDir = new File(outDir)
+
+    println "----------Zip  JavaSrc-----------------"
+    println "  Src= " + projectDir
+    println "  Dst= " + outDir + "/" + archiveName
+    println "---------------------------------------"
+
+    // classifier = 'src'
+    from (projectDir) {
+        include 'app/**'
+        include 'gradle/**'
+        include 'gradle*'
+        include 'build.gradle'
+        include 'settings.gradle'
+        exclude '**/build'
+        exclude '**/zip'
+        exclude '**/accounts.xml'
+        exclude '**/*.keystore'
+    }
+}
+
+//   ./gradlew cleanAll build genJavadocs zipFiles
+task zipFiles(type: Zip)  {
+    // outputs.upToDateWhen { false }
+    description = 'Build distribution package'
+    group = 'package'
+
+    // dependsOn genJavadocs, zipSrc
+    dependsOn zipSrc
+    def outDir = zipDstDir.path
+
+    archiveName = "NbcDemoDoc.zip"
+    destinationDir = new File(outDir)
+
+    println "----------Zip  JavaDoc-----------------"
+    println "  Src= " + javaDocDstDir.path
+    println "  Dst= " + outDir + "/" + archiveName
+    println "---------------------------------------"
+
+    from(javaDocDstDir.path) {
+        include '**'
+        exclude '**/src-html'
+    }
+}
+
+

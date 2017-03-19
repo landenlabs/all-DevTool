@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/consoleTtile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:text="@string/console_title"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/consoleSnap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/consoleTtile"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/rounded_btn"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:text="@string/console_snap" />
+
+    <CheckBox
+        android:id="@+id/consoleRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/consoleTtile"
+        android:layout_toRightOf="@id/consoleSnap"
+        android:background="@drawable/rounded_btn"
+        android:layout_margin="10dp"
+        android:padding="8dp"
+        android:text="  Auto Refesh"
+        android:checked="true" />
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_below="@id/consoleRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/consoleMemoryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/console_system"
+                android:textColor="#8080ff" />
+
+            <RelativeLayout
+                android:id="@+id/consoleSystemLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/consoleMemoryTitle"
+                android:background="#408080ff"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/consoleSystemTitle"
+                android:layout_width="@dimen/console_col1Width"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/consoleSystemLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_memory"
+                android:textColor="#80ff80" />
+
+
+            <TextView
+                android:id="@+id/consoleMemoryTitle2"
+                android:layout_width="@dimen/console_col2Width"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/consoleSystemTitle"
+                android:layout_below="@id/consoleSystemLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_col2"
+                android:textColor="#80ff80" />
+
+            <TextView
+                android:id="@+id/consoleMemoryTitle3"
+                android:layout_width="@dimen/console_col3Width"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/consoleMemoryTitle2"
+                android:layout_below="@id/consoleSystemLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_col3"
+                android:textColor="#80ff80" />
+
+            <TextView
+                android:id="@+id/consoleMemoryTitle4"
+                android:layout_width="@dimen/console_col4Width"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/consoleMemoryTitle3"
+                android:layout_below="@id/consoleSystemLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_col4"
+                android:textColor="#80ff80" />
+
+
+            <RelativeLayout
+                android:id="@+id/consoleMemoryLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/consoleSystemTitle"
+                android:background="#40c0ffc0"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/consoleNetworkTitle"
+                android:layout_width="@dimen/console_col1Width"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/consoleMemoryLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_network"
+                android:textColor="#ff8080" />
+
+            <TextView
+                android:id="@+id/consoleNetworkTitle2"
+                android:layout_width="@dimen/console_col2Width"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/consoleNetworkTitle"
+                android:layout_below="@id/consoleMemoryLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_col2"
+                android:textColor="#ff8080" />
+
+            <TextView
+                android:id="@+id/consoleNetworkTitle3"
+                android:layout_width="@dimen/console_col3Width"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/consoleNetworkTitle2"
+                android:layout_below="@id/consoleMemoryLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_col3"
+                android:textColor="#ff8080" />
+
+            <TextView
+                android:id="@+id/consoleNetworkTitle4"
+                android:layout_width="@dimen/console_col4Width"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/consoleNetworkTitle3"
+                android:layout_below="@id/consoleMemoryLayout"
+                android:paddingLeft="10dp"
+                android:text="@string/console_col4"
+                android:textColor="#ff8080" />
+
+
+            <RelativeLayout
+                android:id="@+id/consoleNetworkTrafficLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/consoleNetworkTitle"
+                android:background="#40ff8080"
+                android:orientation="vertical" />
+
+            <RelativeLayout
+                android:id="@+id/consoleNetworkWifiLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/consoleNetworkTrafficLayout"
+                android:background="#40ff8080"
+                android:orientation="vertical" />
+
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

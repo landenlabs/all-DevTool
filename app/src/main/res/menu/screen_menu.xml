@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <item
+        android:id="@+id/screen_clear_menu"
+        app:showAsAction="always"
+        android:title="@string/clear_screen" />
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/screen_freeze_menu"
+            app:showAsAction="always"
+            android:title="@string/freeze_screen" />
+
+        <item
+            android:id="@+id/screen_prune_menu"
+            app:showAsAction="always"
+            android:title="@string/prune_path" />
+    </group>
+
+</menu>

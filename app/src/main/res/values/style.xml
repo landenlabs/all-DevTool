@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@style/Theme_06">
+
+        <!--
+
+   	  	  <item name="android:actionBarTabTextStyle">@style/ActionBarTabTextWhite</item>
+   	  	
+   	  	  <item name="android:actionBarTabStyle">@style/CustomTabPageIndicator</item>
+          <item name="android:actionMenuTextColor">#ffff00</item>
+          <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
+            <item name="android:windowActionBarOverlay">true</item>
+     	-->
+        <item name="android:windowActionBarOverlay">true</item>
+   	</style>
+
+    <!--
+   <style name="MyActionBarTitleText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title" />
+  	-->
+   <style name="ActionBarTabTextWhite" parent="@android:style/Widget.Holo.ActionBar.TabText" >
+          <item name="android:textColor">@android:color/white</item>
+   </style>
+
+      <!--  ======Theme_x  must be kept in order with nothing inbetween======== -->
+    <style name="Theme_00" parent="@android:style/Theme" />
+    <style name="Theme_01" parent="@android:style/Theme.Black">
+		<!-- Fix radio buttons so they are visible -->
+     	<item name="android:spinnerDropDownItemStyle">@style/dropDownItem_Black</item>
+    </style>
+    <style name="Theme_02" parent="@android:style/Theme.WithActionBar" >
+        <!-- Fix action bar text -->
+        <item name="android:actionBarTabTextStyle">@style/ActionBarTabTextWhite</item>
+    </style>
+    <style name="Theme_03" parent="@android:style/Theme.Translucent" />
+    <style name="Theme_04" parent="@android:style/Theme.Wallpaper" />
+    <style name="Theme_05" parent="@android:style/Theme.Holo.Light" />
+    <style name="Theme_06" parent="@android:style/Theme.Holo" >
+		<!-- Fix radio buttons so they are visible -->
+        <item name="android:spinnerDropDownItemStyle">@style/dropDownItem_Black</item>
+        <!-- Fix text color -->
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+    <style name="Theme_07" parent="@android:style/Theme.Holo.Light.DarkActionBar" />
+    <style name="Theme_08" parent="@android:style/Theme.Holo.Dialog" />
+    <style name="Theme_09" parent="@android:style/Theme.Dialog" />
+    <style name="Theme_10" parent="@android:style/Theme.Panel" />
+
+	<!--  =========================================================== -->
+    
+    
+    <style name="dropDownItem_Black" parent="@android:style/Widget.DropDownItem.Spinner">
+         <item name="android:background">@android:drawable/dark_header</item> 
+    	<item name="android:textAppearance">@style/TextAppearanceWhite</item>
+	</style>
+    
+ 	<style name="TextAppearanceWhite" parent="@android:style/TextAppearance.Widget.TextView.SpinnerItem" > 
+      	<item name="android:textColor">@android:color/white</item>
+    </style>
+     
+    <style name="AlertDialogStyle_0" parent="@android:style/Theme.Dialog"></style>
+    <style name="AlertDialogStyle_1" parent="@android:style/Theme.Holo.Dialog"></style>
+    <style name="AlertDialogStyle_2" parent="@android:style/Theme.Holo.Light.Dialog"></style>
+    <style name="AlertDialogStyle_3" parent="@android:style/Theme.Wallpaper"></style>
+    <style name="AlertDialogStyle_4" parent="@android:style/Theme.DeviceDefault.Dialog"></style>
+    <style name="AlertDialogStyle_5" parent="@android:style/Theme.DeviceDefault.Panel"></style>
+    <style name="AlertDialogStyle_6" parent="@android:style/Theme.DeviceDefault.Light.Dialog"></style>
+
+    <style name="AlertDialogStyle" parent="@android:style/Theme.Dialog"></style>
+     
+     
+     
+    <!--  =========================================================== -->
+    <!--
+   	<style name="Theme.TranslucentActionBar" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@android:style/Widget.ActionBar</item>
+    </style>
+
+    <style name="Theme.TranslucentActionBar.ActionBar" />
+    
+    <style name="Theme.TranslucentActionBar.ActionBar.Overlay">
+        <item name="android:actionBarStyle">@style/Widget.ActionBar.Transparent</item>
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
+    
+     <style name="Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    </style>
+
+    <style name="Widget.ActionBar.Transparent">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+      -->
+</resources>

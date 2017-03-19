@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="4dp"
+    android:orientation="vertical">
+
+    <!--
+      Move paper lite / dark into theme.
+      android:background="@drawable/paper_lite"
+      android:background="@android:color/transparent"
+    -->
+
+    <LinearLayout
+        android:id="@+id/fb_menu_bar"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_btn"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/fb_load_label"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="2dp"
+                android:text="Load:"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/fb_load_spinner"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:entries="@array/fb_load_array" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_btn"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/fb_sort_label"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="2dp"
+                android:text="Sort:"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/fb_sort_spinner"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_weight="1"
+                android:entries="@array/fb_sort_array" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ToggleButton
+        android:id="@+id/fb_plus_minus_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fb_menu_bar"
+        android:checked="true"
+        android:textOff="Expand"
+        android:textOn="Collapse" />
+
+
+    <Button
+        android:id="@+id/fb_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/fb_menu_bar"
+        android:checked="true"
+        android:text="@string/filebrowser_delete" />
+
+    <Button
+        android:id="@+id/fb_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/fb_plus_minus_toggle"
+        android:layout_below="@id/fb_menu_bar"
+        android:layout_toLeftOf="@id/fb_delete"
+        android:layout_toRightOf="@id/fb_plus_minus_toggle"
+        android:gravity="center"
+        android:text="" />
+
+
+    <HorizontalScrollView
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:id="@+id/fb_dirBarScroll"
+        android:layout_below="@id/fb_plus_minus_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/fb_dirBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffff00">
+
+            <Button
+                android:id="@+id/fb_dir1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="/Root" />
+
+            <Button
+                android:id="@+id/fb_dir2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="/Root" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+    <com.landenlabs.all_devtool.dialogs.BounceExpandableListView
+        android:id="@+id/fb_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fb_dirBarScroll"
+        android:background="@drawable/paper_lite"
+        android:divider="#ff0000"
+        android:dividerHeight="1px"
+        android:fadingEdgeLength="60dp"
+        android:focusable="false"
+        android:footerDividersEnabled="true"
+        android:groupIndicator="@android:color/transparent"
+        android:headerDividersEnabled="true"
+        android:listSelector="#8080ff80"
+        android:longClickable="false"
+        android:overScrollFooter="@null"
+        android:requiresFadingEdge="vertical"
+        android:scrollbars="none"
+        android:transcriptMode="disabled" />
+
+
+</RelativeLayout>

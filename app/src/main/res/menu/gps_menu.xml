@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <group
+        android:title="foo"
+        android:id="@+id/clock_fmt"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/clock_12"
+            android:title="@string/clock_menu_12hour" />
+
+        <item
+            android:id="@+id/clock_24"
+            android:checked="true"
+            android:title="@string/clock_menu_24hour" />
+    </group>
+
+    <item
+        android:id="@+id/gps_clear_list"
+        android:title="Clear List" />
+
+    <group
+        android:id="@+id/gps_mode"
+        android:checkableBehavior="single">
+        <item
+            android:checked="true"
+            android:id="@+id/gps_fast_accurate"
+            android:title="@string/gps_fast_accurate" />
+
+        <item
+            android:id="@+id/gps_fast_accurate_one_mile"
+            android:title="@string/gps_fast_accurate_one_mile" />
+
+        <item
+            android:id="@+id/gps_fast_balanced"
+            android:title="@string/gps_fast_balanced" />
+        <item
+            android:id="@+id/gps_fast_balanced_one_mile"
+            android:title="@string/gps_fast_balanced_one_mile" />
+        <item
+            android:id="@+id/gps_slow_balanced_one_mile"
+            android:title="@string/gps_slow_balanced_one_mile" />
+    </group>
+</menu>

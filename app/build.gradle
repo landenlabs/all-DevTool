@@ -1,0 +1,157 @@
+apply plugin: 'com.android.application'
+
+File javaDocDstDir = file('../javadoc')
+File zipDstDir = file('../zip')
+
+
+android {
+    signingConfigs {
+        release
+    }
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
+    defaultConfig {
+        applicationId 'com.landenlabs.all_devtool'
+        minSdkVersion 17
+        targetSdkVersion 25
+
+        versionCode 1920
+        versionName '1.9.20'
+
+        // signingConfig signingConfigs.release
+        resValue "string", "targetSdkVersion", targetSdkVersion.apiString
+        resValue "string", "compileSdkVersion", compileSdkVersion
+        resValue "string", "buildToolsVersion", buildToolsVersion
+        resValue "string", "javaVersion", org.gradle.internal.jvm.Jvm.current().javaVersion.toString()
+        resValue "string", "gradleVersion", GradleVersion.current().getVersion()
+
+        // Disable creation of png for vector drawables.
+        vectorDrawables.useSupportLibrary = true
+
+        // Limit languages to following list.
+        resConfigs "en", "es", "fr"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            debuggable false
+            jniDebuggable false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            applicationVariants.all { variant ->
+                appendVersionNameVersionCode(variant, defaultConfig)
+            }
+
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            jniDebuggable true
+            debuggable true
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'DefaultLocale', 'SimpleDateFormat', 'InflateParams', 'SpUsage',
+                'UseCompoundDrawables', 'HandlerLeak', 'ViewConstructor', 'SetTextI18n',
+                'RtlSymmetry', 'RtlHardcoded', 'ContentDescription',
+                'MissingTranslation', 'ValidFragment', 'UnusedAttribute'
+    }
+    productFlavors {
+        legacy {
+        }
+        standard {
+        }
+    }
+    compileOptions {
+    }
+
+    // Load signing config.
+    def props = new Properties()
+    props.load(new FileInputStream(rootProject.file("release.properties")))
+    android.signingConfigs.release.storeFile rootProject.file(props.keyStore)
+    android.signingConfigs.release.storePassword props.keyStorePassword
+    android.signingConfigs.release.keyAlias props.keyAlias
+    android.signingConfigs.release.keyPassword props.keyAliasPassword
+}
+
+ext {
+    supportLibVersion = '25.2.0'
+    leakCanaryVersion = '1.4-beta2'
+    playServicesVersion = '9.6.1'   // '10.0.1'
+}
+
+dependencies {
+    compile "com.android.support:support-v4:${supportLibVersion}"
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+
+    //  compile "com.google.android.gms:play-services:${playServicesVersion}"
+    //  compile "com.google.android.gms:play-services-ads:${playServicesVersion}"
+    //  compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-identity:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-gcm:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-auth:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-analytics:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-location:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-drive:${playServicesVersion}"
+
+    // Firebase
+    compile "com.google.firebase:firebase-core:${playServicesVersion}"
+
+    // HockeyApp crash reporting
+    compile 'net.hockeyapp.android:HockeySDK:4.1.1'
+
+    // 3rdparty libraries
+    // Memory leaks tool - see main activity to see LeakCanary.install(this.getApplication());
+    // debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
+    // releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+
+    compile 'com.androidplot:androidplot-core:1.4.1'
+    compile 'net.danlew:android.joda:2.9.2'
+}
+
+
+def appendVersionNameVersionCode(variant, defaultConfig) {
+    variant.outputs.each { output ->
+        if (output.zipAlign) {
+            def file = output.outputFile
+            def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
+            def ourname = project.parent.name;
+            fileName = fileName.replace("app-", "$ourname-");
+            output.outputFile = new File(file.parent, fileName)
+        }
+
+        def file = output.packageApplication.outputFile
+        def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
+        def ourname = project.parent.name;
+        fileName = fileName.replace("app-", "$ourname-");
+        output.packageApplication.outputFile = new File(file.parent, fileName)
+    }
+}
+
+// Generate Java doc files
+task genJavadocs(type: Javadoc) {
+    // outputs.upToDateWhen { false }
+
+    source = project.android.sourceSets.main.java.srcDirs
+    destinationDir = javaDocDstDir
+
+    println "----------Generate JavaDocs-------------"
+    println "  Src= " + source.join(",")
+    println "  Dst= " + destinationDir.path
+    println "----------------------------------------"
+
+    options.linkSource true
+    options.addBooleanOption('Xdoclint:none', true)
+    options.addBooleanOption('quiet', true)
+    options.addBooleanOption('public', true)
+
+    classpath += project.files(project.android.getBootClasspath().join(File.pathSeparator))
+    ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+    classpath += files(ext.androidJar)
+
+    classpath += fileTree(dir: "$buildDir/intermediates/exploded-aar/", include: "**/classes.jar")
+
+    failOnError false
+    exclude '**/*.xml'
+}

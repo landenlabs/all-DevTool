@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="theme_array">
+        <item> 0 Theme</item>
+        <item> 1 Theme.Black</item>
+        <item> 2 Theme.WithActionBar</item>
+        <item> 3 Theme.Translucent</item>
+        <item> 4 Theme.Wallpaper</item>
+        <item> 5 Theme.Holo.Light</item>
+        <item> 6 Theme.Holo</item>
+        <item> 7 Theme.Holo.Light.DarkActionBar</item>
+        <item> 8 Theme.Holo.Dialog</item>
+        <item> 9 Theme.Dialog</item>
+        <item>10 Theme.Panel</item>
+
+        <!-- Following themes crash app -->
+        <item>11 Theme.Material</item>
+        <item>12 Theme.Material.Light</item>
+        <item>13 Theme.Material.Light.DarkActionBar</item>
+
+        <item>14 Theme.AppCompat.Light.NoActionBar</item>
+        <item>15 Theme.AppCompat.Light</item>
+        <item>16 Theme.AppCompat.NoActionBar</item>
+        <item>17 Theme.AppCompat</item>
+
+    </string-array>
+</resources>

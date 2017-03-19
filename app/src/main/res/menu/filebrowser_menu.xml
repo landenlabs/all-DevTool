@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@id/filebrowser_sort_by_name"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_sort_by_name" />
+
+        <item
+            android:id="@id/filebrowser_sort_by_dir"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_sort_by_dir" />
+
+        <item
+            android:id="@id/filebrowser_sort_by_size"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_sort_by_size" />
+
+        <item
+            android:id="@id/filebrowser_sort_by_date"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_sort_by_date" />
+    </group>
+
+    <item
+        app:showAsAction="always"
+        android:title=" " />
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@id/filebrowser_root"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_root" />
+        <item
+            android:id="@id/filebrowser_sdcard"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_sdcard" />
+        <item
+            android:id="@id/filebrowser_download"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_download" />
+        <item
+            android:id="@id/filebrowser_data"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_data" />
+
+        <item android:id="@id/filebrowser_dcim"
+            android:title="@string/filebrowser_menu_dcim" />
+        <item android:id="@id/filebrowser_documents"
+            android:title="@string/filebrowser_menu_documents" />
+        <item android:id="@id/filebrowser_movies"
+            android:title="@string/filebrowser_menu_movies" />
+        <item android:id="@id/filebrowser_music"
+            android:title="@string/filebrowser_menu_music" />
+        <item android:id="@id/filebrowser_picture"
+            android:title="@string/filebrowser_menu_picture" />
+        <item android:id="@id/filebrowser_podcast"
+            android:title="@string/filebrowser_menu_podcast" />
+        <item android:id="@id/filebrowser_ringtones"
+            android:title="@string/filebrowser_menu_ringtones" />
+
+    </group>
+
+    <item
+        app:showAsAction="always"
+        android:title=" " />
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@id/filebrowser_collapseAll"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_collapseAll" />
+        <item
+            android:id="@id/filebrowser_expandAll"
+            app:showAsAction="always"
+            android:title="@string/filebrowser_menu_expandAll" />
+    </group>
+
+    <item
+        android:checkable="true"
+        android:checked="true"
+        android:id="@id/filebrowser_show_extra"
+        app:showAsAction="always"
+        android:title="@string/filebrowser_show_extra" />
+
+    <!--
+    <item
+        android:id="@id/filebrowser_search"
+        app:showAsAction="always"
+        android:title="@string/filebrowser_search" />
+    -->
+
+    <item
+        android:id="@id/filebrowser_delete"
+        app:showAsAction="always"
+        android:title="@string/filebrowser_delete" />
+</menu>

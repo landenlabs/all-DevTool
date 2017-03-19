@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/packageIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:maxHeight="64dp"
+        android:maxWidth="64dp"
+        android:src="@drawable/dev_tool" />
+
+    <CheckBox
+        android:id="@+id/pkgChecked"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_alignBottom="@id/packageIcon"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/packageIcon"
+        android:layout_centerVertical="true"
+        android:background="@drawable/rounded_btn"
+        android:button="?android:attr/textCheckMark"
+        android:minWidth="20dp" />
+
+    <TextView
+        android:id="@+id/packageName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toLeftOf="@id/pkgChecked"
+        android:textColor="@android:color/black"
+        android:text="packageName"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/pkgSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/packageName"
+        android:layout_marginRight="10dp"
+        android:layout_toLeftOf="@id/pkgChecked"
+        android:text="123,456"
+        android:textColor="@color/sizeRed"
+        android:textStyle="italic"
+        android:shadowColor="@android:color/black"
+        android:phoneNumber="true"
+        android:shadowRadius="2" />
+
+    <TextView
+        android:id="@+id/appName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/packageName"
+        android:layout_marginLeft="10dp"
+        android:layout_toLeftOf="@id/pkgSize"
+        android:layout_toRightOf="@id/packageIcon"
+        android:text="appName"
+        android:textColor="@color/textBlue"
+        android:textStyle="italic" />
+
+</RelativeLayout>
