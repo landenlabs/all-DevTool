@@ -201,8 +201,8 @@ public class DiskFragment extends DevFragment {
         // checkPermissions(Manifest.permission.DUMP);
     }
 
-    private static final int MY_PERMISSIONS_REQUEST = 28;
-    private boolean checkPermissions(String needPermission) {
+    @Override
+    protected boolean checkPermissions(String needPermission) {
         boolean okay = true;
         if (Build.VERSION.SDK_INT >= 23) {
             if (getContext().checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {

@@ -199,36 +199,6 @@ public class NetFragment extends DevFragment {
         return new NetFragment();
     }
 
-    // ============================================================================================
-    // Permissions
-    private static final int MY_PERMISSIONS_REQUEST = 27;
-    private boolean checkPermissions(String needPermission) {
-        boolean okay = true;
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (getContext().checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
-                okay = false;
-                requestPermissions(new String[]{ needPermission }, MY_PERMISSIONS_REQUEST);
-            }
-        }
-
-        return okay;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null) {
-            switch (requestCode) {
-                case MY_PERMISSIONS_REQUEST: {
-                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        updateList();
-                    } else {
-                    }
-                }
-            }
-        }
-    }
-
-
 
     // ============================================================================================
     // DevFragment methods
@@ -267,7 +237,7 @@ public class NetFragment extends DevFragment {
         m_adapter = new BuildArrayAdapter(this.getActivity());
         m_listView.setAdapter(m_adapter);
 
-         wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         return rootView;
     }
@@ -506,7 +476,9 @@ public class NetFragment extends DevFragment {
         // --------------- Wifi Services -------------
         // final WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (wifiMgr != null && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null) {
+        if (wifiMgr != null) {
+            boolean wifiEnabled = wifiMgr.isWifiEnabled();
+            boolean dhcpiEnabled = wifiMgr.getDhcpInfo() != null;
 
             if (mNetBroadcastReceiver == null) {
                 mNetBroadcastReceiver = new NetBroadcastReceiver(wifiMgr);
@@ -514,6 +486,8 @@ public class NetFragment extends DevFragment {
             }
 
             if (wifiMgr.getScanResults() == null || wifiMgr.getScanResults().isEmpty() ) {
+                checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+                checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
                 wifiMgr.startScan();
             }
 
@@ -739,6 +713,13 @@ public class NetFragment extends DevFragment {
             mNetBroadcastReceiver = null;
         }
         super.onStop();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if (grantResults != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            updateList();
+        }
     }
 
     // ============================================================================================

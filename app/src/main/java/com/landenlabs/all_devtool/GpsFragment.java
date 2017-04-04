@@ -270,6 +270,7 @@ public class GpsFragment extends DevFragment implements
                     m_gpsMonitor = !m_gpsMonitor;
                     view.setSelected(m_gpsMonitor);
                     addMsgToDetailRow(s_colorMsg, m_gpsMonitor ? "Start Monitor" : "Stop Monitor");
+                    checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
                     showProviders();
                 }
             });

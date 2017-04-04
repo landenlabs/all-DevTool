@@ -25,8 +25,11 @@ package com.landenlabs.all_devtool;
 
 
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
@@ -114,5 +117,25 @@ public abstract class DevFragment extends Fragment {
     public static DevFragment getFragmentByName(String fragName) {
         WeakReference<DevFragment> devFragWeakRef = s_devFragmentCache.get(fragName);
         return devFragWeakRef != null ? devFragWeakRef.get() : null;
+    }
+
+    // ============================================================================================
+    // Permissions
+    protected static final int MY_PERMISSIONS_REQUEST = 27;
+    protected boolean checkPermissions(String needPermission) {
+        boolean okay = true;
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (getContext().checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
+                okay = false;
+                requestPermissions(new String[]{ needPermission }, MY_PERMISSIONS_REQUEST);
+            }
+        }
+
+        return okay;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+
     }
 }

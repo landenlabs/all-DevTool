@@ -435,20 +435,6 @@ public class SensorFragment extends DevFragment
 
     // ============================================================================================
     // Permission
-    private static final int MY_PERMISSIONS_REQUEST = 29;
-
-    private boolean checkPermissions(String needPermission) {
-        boolean okay = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getContext().checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
-                okay = false;
-                requestPermissions(new String[]{needPermission}, MY_PERMISSIONS_REQUEST);
-            }
-        }
-
-        return okay;
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (grantResults != null)
