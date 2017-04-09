@@ -337,7 +337,10 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
      */
     private void updateClock() {
         m_date.setTime(System.currentTimeMillis());
-        m_timeZone = TimeZone.getDefault();
+        // m_timeZone = TimeZone.getDefault();
+
+        m_timeZone = Calendar.getInstance().getTimeZone();
+
         s_timeZoneFormat.setTimeZone(m_timeZone);
         String localTmStr = s_timeZoneFormat.format(m_date);
 
@@ -384,7 +387,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
                         format.print(next)));
                 current = next;
             }
-            m_localeTv.setText(tzStr1.toString());
+        //    m_localeTv.setText(tzStr1.toString());
 
 
             String[] ids = TimeZone.getAvailableIDs();
@@ -428,6 +431,8 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
             }
 
         }
+
+        m_localeTv.setText(tzStr1.toString());
         m_dayLight.setText(tzStr2.toString());
 
         m_clockSysClkUpTm.setText("uptimeMillis:"+ formatInterval(SystemClock.uptimeMillis()));

@@ -28,6 +28,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -56,6 +57,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -69,6 +71,7 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.StepMode;
 import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.XYSeries;
 import com.landenlabs.all_devtool.util.SoundMeter;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -83,6 +86,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.androidplot.xy.BoundaryMode.AUTO;
+import static com.androidplot.xy.BoundaryMode.FIXED;
 import static com.landenlabs.all_devtool.R.id.plot;
 
 /**
@@ -121,9 +126,9 @@ public class SensorFragment extends DevFragment
     private static final String MEMORY_STR = "Free Memory";
 
     private static final String ACCELEROMETER_STR = "Accelerometer";
-    private static final String MAGNETOMETER_STR = "Magnetometer";
+    private static final String MAGNETOMETER_STR = "Magnet";
     private static final String GYROSCOPE_STR = "Gyroscope";
-    private static final String BAROMETER_STR = "Barometer";
+    private static final String PRESSURE_STR = "Pressure";
     private static final String GRAVITY_STR = "Gravity";
     private static final String STEP_COUNTER_STR = "Step Counter";
 
@@ -133,7 +138,7 @@ public class SensorFragment extends DevFragment
                     // , ACCELEROMETER_STR
                     , MAGNETOMETER_STR
                     // , GYROSCOPE_STR
-                    , BAROMETER_STR
+                    , PRESSURE_STR
                     , GRAVITY_STR
                     // , STEP_COUNTER_STR
             };
@@ -144,11 +149,13 @@ public class SensorFragment extends DevFragment
     final int ORIENTATION_ROLL_SERIES = 2;
     final int SINGLE_SERIES = 0;
 
+    static SimpleXYSeries m_seriesChg;  // Shared by all graphs.
+
     static SimpleXYSeries m_seriesWifi;
     static SimpleXYSeries m_seriesBattery;
     static SimpleXYSeries m_seriesAudio;
     static SimpleXYSeries m_seriesAudioAvg;
-    static SimpleXYSeries m_seriesAudioChg;
+
     static SimpleXYSeries m_seriesOrientation_az;
     static SimpleXYSeries m_seriesOrientation_pitch;
     static SimpleXYSeries m_seriesOrientation_roll;
@@ -159,7 +166,7 @@ public class SensorFragment extends DevFragment
     static SimpleXYSeries m_seriesAccelerometer;
     static SimpleXYSeries m_seriesMagnetometer;
     static SimpleXYSeries m_seriesGyroscope;
-    static SimpleXYSeries m_seriesBarometer;
+    static SimpleXYSeries m_seriesPressure;
     static SimpleXYSeries m_seriesGravity;
     static SimpleXYSeries m_seriesStepCounter;
 
@@ -182,6 +189,7 @@ public class SensorFragment extends DevFragment
 
     long m_maxAudio = 1000;
     final int MAX_LIGHT = 250;
+    final int MAX_PROC_CNT = 200;
 
     long m_sleepMsec = 100;
     int m_menuSelected = R.id.sensor_menu_100_msec;
@@ -242,6 +250,12 @@ public class SensorFragment extends DevFragment
         return bitmapList;
     }
 
+    @Override
+    public void onSelected() {
+        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -256,31 +270,28 @@ public class SensorFragment extends DevFragment
 
         // Make all series - update them all the time
         if (false && m_seriesOrientation_az == null) {
-            m_seriesOrientation_az = new SimpleXYSeries("Az.");
-            m_seriesOrientation_az.useImplicitXVals();
-            m_seriesOrientation_pitch = new SimpleXYSeries("Pitch");
-            m_seriesOrientation_pitch.useImplicitXVals();
-            m_seriesOrientation_roll = new SimpleXYSeries("Roll");
-            m_seriesOrientation_roll.useImplicitXVals();
-            m_seriesLight = new SimpleXYSeries("Lux");
-            m_seriesLight.useImplicitXVals();
-            m_seriesAudio = new SimpleXYSeries("Sound");
-            m_seriesAudio.useImplicitXVals();
-            m_seriesAudioAvg = new SimpleXYSeries("Avg");
-            m_seriesAudioAvg.useImplicitXVals();
-            m_seriesAudioChg = new SimpleXYSeries("Chg");
-            m_seriesAudioChg.useImplicitXVals();
-            m_seriesProcCnt = new SimpleXYSeries("Proc");
-            m_seriesProcCnt.useImplicitXVals();
-            m_seriesFreeMem = new SimpleXYSeries("Mem");
-            m_seriesFreeMem.useImplicitXVals();
-            m_seriesBattery = new SimpleXYSeries("Battery");
-            m_seriesBattery.useImplicitXVals();
-            m_seriesWifi = new SimpleXYSeries("WiFi");
-            m_seriesWifi.useImplicitXVals();
+            m_seriesChg = createChgSeries();
+            m_seriesOrientation_az = createSeries("Az.");
+            m_seriesOrientation_pitch = createSeries("Pitch");
+            m_seriesOrientation_roll = createSeries("Roll");
+            m_seriesLight = createSeries("Lux");
+            m_seriesAudio = createSeries("Sound");
+            m_seriesAudioAvg = createSeries("Avg");
+            m_seriesProcCnt = createSeries("Proc");
+            m_seriesFreeMem = createSeries("Mem");
+            m_seriesBattery = createSeries("Battery");
+            m_seriesWifi = createSeries("WiFi");
+            m_seriesPressure = createSeries("Pressure");
 
-            m_seriesBarometer = new SimpleXYSeries("Pressure");
-            m_seriesBarometer.useImplicitXVals();
+            /*
+            Currently not pre-making these less common sensor graphs
+             m_seriesAccelerometer;
+             m_seriesMagnetometer;
+             m_seriesGyroscope;
+             m_seriesPressure;
+             m_seriesGravity;
+             m_seriesStepCounter;
+             */
         }
 
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_ORIENTATION));
@@ -302,7 +313,7 @@ public class SensorFragment extends DevFragment
             sensorNames.remove(ACCELEROMETER_STR);
             sensorNames.remove(MAGNETOMETER_STR);
             sensorNames.remove(GYROSCOPE_STR);  // Orientation ?
-            sensorNames.remove(BAROMETER_STR);
+            sensorNames.remove(PRESSURE_STR);
             sensorNames.remove(GRAVITY_STR);
             sensorNames.remove(STEP_COUNTER_STR);
         } else {
@@ -472,6 +483,13 @@ public class SensorFragment extends DevFragment
 
         // setup the APR History plot:
         m_plot = Ui.viewById(rootView, plot);
+
+        // Clear plot and change slope series so X-bounds is computed correctly.
+        m_plot.clear();
+        if (m_seriesChg != null) {
+            m_seriesChg.clear();
+        }
+
         detachSeries();
 
         m_sensorName = m_consoleSpinner.getSelectedItem().toString();
@@ -494,16 +512,13 @@ public class SensorFragment extends DevFragment
         final boolean LINE_MODE = false;
         final boolean FILL_MODE = true;
         if (m_sensorName.equals(ORIENTATION_STR)) {
-            m_plot.setRangeBoundaries(-180, 359, BoundaryMode.FIXED);
+            m_plot.setRangeBoundaries(-180, 359, FIXED);
             m_plot.setRangeLabel("Angle (Degs)");
 
             if (m_seriesOrientation_az == null) {
-                m_seriesOrientation_az = new SimpleXYSeries("Az.");
-                m_seriesOrientation_az.useImplicitXVals();
-                m_seriesOrientation_pitch = new SimpleXYSeries("Pitch");
-                m_seriesOrientation_pitch.useImplicitXVals();
-                m_seriesOrientation_roll = new SimpleXYSeries("Roll");
-                m_seriesOrientation_roll.useImplicitXVals();
+                m_seriesOrientation_az = createSeries("Az.");
+                m_seriesOrientation_pitch = createSeries("Pitch");
+                m_seriesOrientation_roll = createSeries("Roll");
             }
 
             m_plot.addSeries(m_seriesOrientation_az, makeFormatter(lineOnlyWidth, Color.rgb(40, 40, 255), Color.BLUE, 0, height / 3, LINE_MODE));
@@ -512,23 +527,21 @@ public class SensorFragment extends DevFragment
         } else if (m_sensorName.equals(LIGHT_STR)) {
 
             if (m_seriesLight == null) {
-                m_seriesLight = new SimpleXYSeries("Lux");
-                m_seriesLight.useImplicitXVals();
+                m_seriesLight = createSeries("Lux");
+                m_seriesChg = createChgSeries();
             }
 
-            m_plot.setRangeBoundaries(0, MAX_LIGHT, BoundaryMode.FIXED);
+            m_plot.setRangeBoundaries(0, MAX_LIGHT, FIXED);
             m_plot.setRangeLabel("LUX");
 
             m_plot.addSeries(m_seriesLight, makeFormatter(lineFillWidth, Color.rgb(128, 0, 0), Color.WHITE, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.GREEN, Color.GREEN, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(AUDIO_STR)) {
 
             if (m_seriesAudio == null) {
-                m_seriesAudio = new SimpleXYSeries("Sound");
-                m_seriesAudio.useImplicitXVals();
-                m_seriesAudioAvg = new SimpleXYSeries("Avg");
-                m_seriesAudioAvg.useImplicitXVals();
-                m_seriesAudioChg = new SimpleXYSeries("Chg");
-                // m_seriesAudioChg.useImplicitXVals();
+                m_seriesAudio = createSeries("Sound");
+                m_seriesAudioAvg = createSeries("Avg");
+                m_seriesChg = createChgSeries();
             }
 
             if (m_soundMeter == null && checkPermissions(Manifest.permission.RECORD_AUDIO)) {
@@ -536,40 +549,40 @@ public class SensorFragment extends DevFragment
                 m_soundMeter.start();
             }
 
-            m_plot.setRangeBoundaries(0, m_maxAudio, BoundaryMode.FIXED);
+            m_plot.setRangeBoundaries(0, m_maxAudio, FIXED);
             m_plot.setRangeLabel("Sound");
 
             m_plot.addSeries(m_seriesAudio, makeFormatter(2, Color.WHITE, Color.RED, 0, height, LINE_MODE));
             m_plot.addSeries(m_seriesAudioAvg, makeFormatter(1, Color.BLUE, Color.BLUE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesAudioChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.GREEN, Color.GREEN, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(PROCESSES_STR)) {
             if (m_seriesProcCnt == null) {
-                m_seriesProcCnt = new SimpleXYSeries("Proc");
-                m_seriesProcCnt.useImplicitXVals();
+                m_seriesProcCnt = createSeries("#Running");
             }
 
-            m_plot.setRangeBoundaries(0, 100, BoundaryMode.GROW);
-            m_plot.setRangeLabel("#Processes%");
+            m_plot.setRangeBoundaries(0, 10, AUTO);
+            m_plot.setRangeLabel("#Process Running");
 
             m_plot.addSeries(m_seriesProcCnt, makeFormatter(lineFillWidth, Color.YELLOW, Color.RED, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(MEMORY_STR)) {
 
             if (m_seriesFreeMem == null) {
-                m_seriesFreeMem = new SimpleXYSeries("Mem");
-                m_seriesFreeMem.useImplicitXVals();
+                m_seriesFreeMem = createSeries("Mem");
+                m_seriesChg = createChgSeries();
             }
 
-            m_plot.setRangeBoundaries(0, 100, BoundaryMode.FIXED);
+            m_plot.setRangeBoundaries(0, 100, FIXED);
             m_plot.setRangeLabel("Memory Free %");
 
             m_plot.addSeries(m_seriesFreeMem, makeFormatter(lineFillWidth, Color.RED, Color.YELLOW, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.WHITE, Color.WHITE, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(BATTERY_STR)) {
             if (m_seriesBattery == null) {
-                m_seriesBattery = new SimpleXYSeries("Battery");
-                m_seriesBattery.useImplicitXVals();
+                m_seriesBattery = createSeries("Battery");
             }
 
-            m_plot.setRangeBoundaries(0, 110, BoundaryMode.FIXED);
+            m_plot.setRangeBoundaries(0, 110, FIXED);
             m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 10);
             //2 m_plot.setTicksPerRangeLabel(2);
             m_plot.setRangeLabel("Battery%");
@@ -577,50 +590,65 @@ public class SensorFragment extends DevFragment
             m_plot.addSeries(m_seriesBattery, makeFormatter(lineFillWidth, Color.rgb(255, 128, 0), Color.GREEN, 0, height, FILL_MODE));
         } else if (m_sensorName.equals(WIFI_STR)) {
             if (m_seriesWifi == null) {
-                m_seriesWifi = new SimpleXYSeries("WiFi");
-                m_seriesWifi.useImplicitXVals();
+                m_seriesWifi = createSeries("WiFi");
+                m_seriesChg = createChgSeries();
             }
 
-            m_plot.setRangeBoundaries(0, 110, BoundaryMode.FIXED);
+            m_plot.setRangeBoundaries(0, 110, FIXED);
             m_plot.setRangeStep(StepMode.SUBDIVIDE, 11 + 1);
             //2 m_plot.setTicksPerRangeLabel(2);
 
             m_plot.setRangeLabel("WiFi Signal%");
             m_plot.addSeries(m_seriesWifi, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
-        } else if (m_sensorName.equals(BAROMETER_STR)) {
-            if (m_seriesBarometer == null) {
-                m_seriesBarometer = new SimpleXYSeries("Pressure");
-                m_seriesBarometer.useImplicitXVals();
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+        } else if (m_sensorName.equals(PRESSURE_STR)) {
+            if (m_seriesPressure == null) {
+                m_seriesPressure = createSeries("Pressure");
+                m_seriesChg = createChgSeries();
             }
 
             if (true) {
                 m_plot.setRangeBoundaries(990, 1020, BoundaryMode.AUTO);
             } else {
                 // Lowest tornadoe 870mb,  strong high press 1030mb,  highest ever 1086mb.
-                m_plot.setRangeBoundaries(850, 1030, BoundaryMode.FIXED);
+                m_plot.setRangeBoundaries(850, 1030, FIXED);
                 m_plot.setRangeStep(StepMode.SUBDIVIDE, 9 + 1);  // 1030 - 850 = 180 / 9 = 20
                 //2 m_plot.setTicksPerRangeLabel(1);
             }
 
             m_plot.setRangeLabel("Pressure mB");
-            m_plot.addSeries(m_seriesBarometer, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesPressure, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(MAGNETOMETER_STR)) {
             if (m_seriesMagnetometer == null) {
-                m_seriesMagnetometer = new SimpleXYSeries("Magnetometer");
-                m_seriesMagnetometer.useImplicitXVals();
+                m_seriesMagnetometer = createSeries("Magnetometer");
+                m_seriesChg = createChgSeries();
             }
-            m_plot.setRangeBoundaries(0, 200, BoundaryMode.AUTO);
+
+            m_plot.setRangeLabel("Magnetic");
+            m_plot.setRangeBoundaries(-10, 10, AUTO);
             m_plot.addSeries(m_seriesMagnetometer, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(GRAVITY_STR)) {
             if (m_seriesGravity == null) {
-                m_seriesGravity = new SimpleXYSeries("Gravity");
-                m_seriesGravity.useImplicitXVals();
+                m_seriesGravity = createSeries("Gravity");
+                m_seriesChg = createChgSeries();
             }
-            m_plot.setRangeBoundaries(0, 200, BoundaryMode.AUTO);
+
+            m_plot.setRangeLabel("Gavity");
+            m_plot.setRangeBoundaries(-10, 10, AUTO);
             m_plot.addSeries(m_seriesGravity, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
         }
 
-        m_plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
+          /*
+            TODO  - add these graphs
+             m_seriesAccelerometer;
+             m_seriesGyroscope;
+             m_seriesStepCounter;
+             */
+
+        m_plot.setDomainBoundaries(0, HISTORY_SIZE, FIXED);
         m_plot.setDomainStepMode(StepMode.INCREMENT_BY_VAL);
         m_plot.setDomainStepValue(HISTORY_SIZE / 10);
 
@@ -698,34 +726,55 @@ public class SensorFragment extends DevFragment
                 long eventMsec = sensorEvent.timestamp / 1000000;
                 long deltaMsec = nowMsec - eventMsec;
 
-                if (sensorName.contains(ORIENTATION_STR) && m_seriesOrientation_az != null) {
+                if (isSensor(sensorName, ORIENTATION_STR) && m_seriesOrientation_az != null) {
                     add(m_seriesOrientation_az, null, sensorEvent.values[0]);
                     add(m_seriesOrientation_pitch, null, sensorEvent.values[1]);
                     add(m_seriesOrientation_roll, null, sensorEvent.values[2]);
                     m_plotValues.put(ORIENTATION_STR, String.format("%.0f, %.0f, %.0f",
                             sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
-                } else if (sensorName.contains(LIGHT_STR) && m_seriesLight != null) {
+                } else if (isSensor(sensorName, LIGHT_STR) && m_seriesLight != null) {
                     int lux = (deltaMsec < MaxAgeMsec) ? (int) sensorEvent.values[0] : NO_LIGHT;
                     lux = Math.min(lux, MAX_LIGHT);
                     add(m_seriesLight, null, lux);
+
                     if (deltaMsec > MaxAgeMsec) {
                         m_plotValues.put(LIGHT_STR, "Light N/A");
                     } else {
                         m_plotValues.put(LIGHT_STR, String.format("Lux %d", lux));
                     }
-                } else if (sensorName.contains(BAROMETER_STR) && m_seriesBarometer != null) {
+                    if (m_sensorName.equals(LIGHT_STR)) {
+                        setChangeSeries(m_seriesLight);
+                        setRange(m_plot, m_seriesLight);
+                    }
+                } else if (isSensor(sensorName, PRESSURE_STR) && m_seriesPressure != null) {
                     float value = sensorEvent.values[0];
-                    add(m_seriesBarometer, null, value);
-                    m_plotValues.put(BAROMETER_STR, String.valueOf(value));
-                } else if (sensorName.contains(MAGNETOMETER_STR) && m_seriesMagnetometer != null) {
+                    add(m_seriesPressure, null, value);
+                    m_plotValues.put(PRESSURE_STR, String.valueOf(value));
+                    if (m_sensorName.equals(PRESSURE_STR)) {
+                        setChangeSeries(m_seriesPressure);
+                        setRange(m_plot, m_seriesPressure);
+                    }
+                } else if (isSensor(sensorName, MAGNETOMETER_STR) && m_seriesMagnetometer != null) {
                     float value = sensorEvent.values[0];
                     add(m_seriesMagnetometer, null, value);
                     m_plotValues.put(MAGNETOMETER_STR, String.valueOf(value));
-                } else if (sensorName.contains(GRAVITY_STR) && m_seriesGravity != null) {
+                    if (m_sensorName.equals(MAGNETOMETER_STR)) {
+                        setChangeSeries(m_seriesMagnetometer);
+                        setRange(m_plot, m_seriesMagnetometer);
+                    }
+                } else if (isSensor(sensorName, GRAVITY_STR) && m_seriesGravity != null) {
                     float value = sensorEvent.values[0] * 100;
                     add(m_seriesGravity, null, value);
                     m_plotValues.put(GRAVITY_STR, String.valueOf(value));
+                    if (m_sensorName.equals(GRAVITY_STR)) {
+                        setChangeSeries(m_seriesGravity);
+                        setRange(m_plot, m_seriesGravity);
+                    }
                 }
+                /* TODO
+                        Gravity
+                        Step counter
+                 */
             }
         }
 
@@ -737,7 +786,6 @@ public class SensorFragment extends DevFragment
 
             int lastIdx = m_seriesAudioAvg.size();
             if (lastIdx == 0) {
-                add(m_seriesAudioChg, null, dbValue);
                 add(m_seriesAudioAvg, null, dbValue);
             } else {
                 final int avgSpan = 20;
@@ -754,13 +802,9 @@ public class SensorFragment extends DevFragment
                     maxDb = Math.max(maxDb, m_seriesAudio.getY(idx).doubleValue());
                 }
 
-                while (m_seriesAudioChg.size() > 0) {
-                    m_seriesAudioChg.removeLast();
+                if (m_sensorName.equals(AUDIO_STR)) {
+                    setChangeSeries(m_seriesAudioAvg);
                 }
-
-                m_seriesAudioChg.addLast(0, m_seriesAudioAvg.getY(0));
-                m_seriesAudioChg.addLast(lastIdx-1, m_seriesAudioAvg.getY(lastIdx-1));
-                // add(m_seriesAudioChg, null, maxDb);
 
                 if (m_sensorName.equals(AUDIO_STR)) {
                     // Adjust graph Range to match data.
@@ -775,11 +819,11 @@ public class SensorFragment extends DevFragment
                     final long AUDIO_STEP = 100;
                     if (maxDb > m_maxAudio) {
                         m_maxAudio = (long) ((maxDb + AUDIO_STEP - 1) / AUDIO_STEP) * AUDIO_STEP;
-                        m_plot.setRangeBoundaries(0, m_maxAudio, BoundaryMode.FIXED);
+                        m_plot.setRangeBoundaries(0, m_maxAudio, FIXED);
                     } else if (maxDb <= m_maxAudio * 0.5) {
                         long maxAudio = Math.max((long) (maxDb / AUDIO_STEP) * AUDIO_STEP, AUDIO_STEP);
                         m_maxAudio = maxAudio;
-                        m_plot.setRangeBoundaries(0, m_maxAudio, BoundaryMode.FIXED);
+                        m_plot.setRangeBoundaries(0, m_maxAudio, FIXED);
                     }
                 }
             }
@@ -794,6 +838,9 @@ public class SensorFragment extends DevFragment
             int wifiLevel = 100 * level / numberOfLevels;
             add(m_seriesWifi, null, wifiLevel);
             m_plotValues.put(WIFI_STR, String.valueOf(wifiLevel));
+            if (m_sensorName.equals(WIFI_STR)) {
+                setChangeSeries(m_seriesWifi);
+            }
         }
 
         Intent batteryIntent = getActivity().getApplicationContext().registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -803,15 +850,23 @@ public class SensorFragment extends DevFragment
             int batteryLevel = level * 100 / scale;
             add(m_seriesBattery, null, batteryLevel);
             m_plotValues.put(BATTERY_STR, String.valueOf(batteryLevel));
+            if (m_sensorName.equals(BATTERY_STR)) {
+                setChangeSeries(m_seriesBattery);
+            }
         }
 
         ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
         if (actMgr != null && m_seriesProcCnt != null) {
             try {
-                final int MAX_PROC_CNT = 200;
                 int processCnt = actMgr.getRunningAppProcesses().size();
                 add(m_seriesProcCnt, null, Math.min(processCnt, MAX_PROC_CNT));
                 m_plotValues.put(PROCESSES_STR, String.valueOf(processCnt));
+
+                if (m_sensorName.equals(PROCESSES_STR)) {
+                    // m_plot.setRangeBoundaries(0, Math.max(10, processCnt), BoundaryMode.GROW);
+                    setChangeSeries(m_seriesProcCnt);
+                    setRange(m_plot, m_seriesProcCnt);
+                }
             } catch (Exception ex) {
             }
         }
@@ -827,6 +882,10 @@ public class SensorFragment extends DevFragment
                 long freeMem = 100 * mi.availMem / mi.totalMem;
                 add(m_seriesFreeMem, null, freeMem);
                 m_plotValues.put(MEMORY_STR, String.valueOf(freeMem));
+                if (m_sensorName.equals(MEMORY_STR)) {
+                    setChangeSeries(m_seriesFreeMem);
+                    setRange(m_plot, m_seriesFreeMem);
+                }
             } catch (Exception ex) {
             }
         }
@@ -835,6 +894,19 @@ public class SensorFragment extends DevFragment
             m_valueTv1.setText(m_plotValues.get(m_sensorName));
     }
 
+    private boolean isSensor(String sensor, String name) {
+        return sensor.toLowerCase().contains(name.toLowerCase());
+    }
+
+    public void setChangeSeries(SimpleXYSeries dataSeries) {
+        if (m_seriesChg != null && dataSeries.size() > 2) {
+            m_seriesChg.clear();
+            m_seriesChg.addLast(0, dataSeries.getY(0));
+            int lastIdx = dataSeries.size() - 1;
+            m_seriesChg.addLast(lastIdx, dataSeries.getY(lastIdx));
+            // Log.d("fxx", dataSeries.getTitle() + " " + lastIdx + " min=" + dataSeries.getY(0) + " max=" + dataSeries.getY(lastIdx));
+        }
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
@@ -843,4 +915,17 @@ public class SensorFragment extends DevFragment
 
     // ============================================================================================
     // Internal methods
+
+    SimpleXYSeries createSeries(String name) {
+        SimpleXYSeries series = new SimpleXYSeries(name);
+        series.useImplicitXVals();
+        return series;
+    }
+    SimpleXYSeries createChgSeries() {
+        SimpleXYSeries series = new SimpleXYSeries("Chg");
+        return series;
+    }
+
+    void setRange(XYPlot plot, XYSeries series) {
+    }
 }

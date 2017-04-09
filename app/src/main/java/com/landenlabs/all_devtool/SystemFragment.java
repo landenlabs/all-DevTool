@@ -30,10 +30,7 @@ import android.accounts.AccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.ActivityManager.ProcessErrorStateInfo;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureInfo;
@@ -74,10 +71,8 @@ import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
 import java.io.IOException;
-import java.net.NetworkInterface;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -87,22 +82,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import static android.telephony.TelephonyManager.NETWORK_TYPE_1xRTT;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_CDMA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EDGE;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EHRPD;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_0;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_A;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_B;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_GPRS;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSDPA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPAP;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_IDEN;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
-
 
 /**
  * Display system information.
@@ -110,93 +89,23 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
  * @author Dennis Lang
  */
 public class SystemFragment extends DevFragment {
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
-
-    final ArrayList<BuildInfo> m_list = new ArrayList<BuildInfo>();
-    ExpandableListView m_listView;
-    TextView m_titleTime;
-    BuildArrayAdapter m_adapter;
-
-    SubMenu m_menu;
-
-    public static String s_name = "System";
+    final static int SUMMARY_LAYOUT = R.layout.build_list_row;
     private static final int MB = 1 << 20;
+    public static String s_name = "System";
     private static int m_rowColor1 = 0;
     private static int m_rowColor2 = 0x80d0ffe0;
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
-    private static IntentFilter INTENT_FILTER_SCAN_AVAILABLE = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+    final ArrayList<BuildInfo> m_list = new ArrayList<BuildInfo>();
 
+    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
+    private final LLog m_log = LLog.DBG;
+    ExpandableListView m_listView;
+    TextView m_titleTime;
+    BuildArrayAdapter m_adapter;
+    SubMenu m_menu;
 
-    class SystemBroadcastReceiver extends BroadcastReceiver {
-        final WifiManager mWifiMgr;
-
-        public SystemBroadcastReceiver(WifiManager wifiMgr) {
-            mWifiMgr = wifiMgr;
-        }
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                // results = wifi.getScanResults();
-                m_listView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mWifiMgr.getScanResults() != null &&
-                                mWifiMgr.getScanResults().size() > 1) {
-                            mLastScanSize = mWifiMgr.getScanResults().size();
-                            // updateList();
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    SystemBroadcastReceiver mSystemBroadcastReceiver;
-
-    // ---------------------------------------------------------------------------------------------
-    String getNetworkTypeName(int type) {
-
-        switch (type) {
-            case NETWORK_TYPE_GPRS:
-                return "GPRS";
-            case NETWORK_TYPE_EDGE:
-                return "EDGE";
-            case NETWORK_TYPE_UMTS:
-                return "UMTS";
-            case NETWORK_TYPE_HSDPA:
-                return "HSDPA";
-            case NETWORK_TYPE_HSUPA:
-                return "HSUPA";
-            case NETWORK_TYPE_HSPA:
-                return "HSPA";
-            case NETWORK_TYPE_CDMA:
-                return "CDMA";
-            case NETWORK_TYPE_EVDO_0:
-                return "CDMA - EvDo rev. 0";
-            case NETWORK_TYPE_EVDO_A:
-                return "CDMA - EvDo rev. A";
-            case NETWORK_TYPE_EVDO_B:
-                return "CDMA - EvDo rev. B";
-            case NETWORK_TYPE_1xRTT:
-                return "CDMA - 1xRTT";
-            case NETWORK_TYPE_LTE:
-                return "LTE";
-            case NETWORK_TYPE_EHRPD:
-                return "CDMA - eHRPD";
-            case NETWORK_TYPE_IDEN:
-                return "iDEN";
-            case NETWORK_TYPE_HSPAP:
-                return "HSPA+";
-            default:
-                return "UNKNOWN";
-        }
-    }
-
+    // ============================================================================================
+    // DevFragment methods
 
     public SystemFragment() {
     }
@@ -205,8 +114,12 @@ public class SystemFragment extends DevFragment {
         return new SystemFragment();
     }
 
-    // ============================================================================================
-    // DevFragment methods
+    // Put values in List ifValue true.
+    private static <M extends Map<E, E>, E> void putIf(M listObj, E v1, E v2, boolean ifValue) {
+        if (ifValue) {
+            listObj.put(v1, v2);
+        }
+    }
 
     @Override
     public String getName() {
@@ -219,8 +132,7 @@ public class SystemFragment extends DevFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
@@ -272,16 +184,12 @@ public class SystemFragment extends DevFragment {
         super.onPrepareOptionsMenu(menu);
     }
 
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         m_menu = menu.addSubMenu("Sys Options");
         inflater.inflate(R.menu.sys_menu, m_menu);
-        // m_menu.findItem(m_sortBy).setChecked(true);
     }
-
-    private static int mLastScanSize = 0;
 
     public void updateList() {
         // Time today = new Time(Time.getCurrentTimezone());
@@ -445,7 +353,7 @@ public class SystemFragment extends DevFragment {
             Location location = null;
             if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
                 location = locMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -484,8 +392,8 @@ public class SystemFragment extends DevFragment {
                 appList.put("PkgName", appInfo.packageName);
                 appList.put("DataDir", appInfo.dataDir);
                 appList.put("SrcDir", appInfo.sourceDir);
-            //    appList.put("PkgResDir", getActivity().getPackageResourcePath());
-           //     appList.put("PkgCodeDir", getActivity().getPackageCodePath());
+                //    appList.put("PkgResDir", getActivity().getPackageResourcePath());
+                //     appList.put("PkgCodeDir", getActivity().getPackageCodePath());
                 String[] dbList = getActivity().databaseList();
                 if (dbList != null && dbList.length != 0)
                     appList.put("DataBase", dbList[0]);
@@ -500,7 +408,7 @@ public class SystemFragment extends DevFragment {
         final AccountManager accMgr = (AccountManager) getActivity().getSystemService(Context.ACCOUNT_SERVICE);
         if (null != accMgr) {
             Map<String, String> strList = new LinkedHashMap<String, String>();
-            try  {
+            try {
                 for (Account account : accMgr.getAccounts()) {
                     strList.put(account.name, account.type);
                 }
@@ -530,7 +438,7 @@ public class SystemFragment extends DevFragment {
             List<Sensor> listSensor = senMgr.getSensorList(Sensor.TYPE_ALL);
             try {
                 for (Sensor sensor : listSensor) {
-                      strList.put(sensor.getName(), sensor.getVendor());
+                    strList.put(sensor.getName(), sensor.getVendor());
                 }
             } catch (Exception ex) {
                 m_log.e(ex.getMessage());
@@ -586,10 +494,16 @@ public class SystemFragment extends DevFragment {
         addBuildIf(name, value, !TextUtils.isEmpty(value));
     }
 
+    // ============================================================================================
+    // DevFragment
+
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
             m_list.add(new BuildInfo(name, value));
     }
+
+    // ============================================================================================
+    // Internal methods
 
     private void clean_networks() {
         StringBuilder sb = new StringBuilder();
@@ -618,52 +532,9 @@ public class SystemFragment extends DevFragment {
         }
     }
 
-    public static String getMacAddr() {
-        try {
-            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface nif : all) {
-                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
-
-                byte[] macBytes = nif.getHardwareAddress();
-                if (macBytes == null) {
-                    return "";
-                }
-
-                StringBuilder res1 = new StringBuilder();
-                for (byte b : macBytes) {
-                    res1.append(Integer.toHexString(b & 0xFF)).append(":");
-                }
-
-                if (res1.length() > 0) {
-                    res1.deleteCharAt(res1.length() - 1);
-                }
-                return res1.toString();
-            }
-        } catch (Exception ex) {
-        }
-        return "02:00:00:00:00:00";
-    }
-
-    // ============================================================================================
-    // DevFragment
-
     @Override
     public void onStop() {
-        if (mSystemBroadcastReceiver != null) {
-            getActivity().unregisterReceiver(mSystemBroadcastReceiver);
-            mSystemBroadcastReceiver = null;
-        }
         super.onStop();
-    }
-
-    // ============================================================================================
-    // Internal methods
-
-    // Put values in List ifValue true.
-    private static <M extends Map<E, E>, E> void putIf(M listObj, E v1, E v2, boolean ifValue) {
-        if (ifValue) {
-            listObj.put(v1, v2);
-        }
     }
 
     class BuildInfo {
@@ -709,9 +580,6 @@ public class SystemFragment extends DevFragment {
         }
     }
 
-    final static int EXPANDED_LAYOUT = R.layout.build_list_row;
-    final static int SUMMARY_LAYOUT = R.layout.build_list_row;
-
     /**
      * ExpandableLis UI 'data model' class
      */
@@ -728,8 +596,8 @@ public class SystemFragment extends DevFragment {
          */
         @Override
         public View getChildView(final int groupPosition,
-                                 final int childPosition, boolean isLastChild, View convertView,
-                                 ViewGroup parent) {
+                final int childPosition, boolean isLastChild, View convertView,
+                ViewGroup parent) {
 
             BuildInfo buildInfo = m_list.get(groupPosition);
 
@@ -798,7 +666,7 @@ public class SystemFragment extends DevFragment {
          */
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded,
-                                 View convertView, ViewGroup parent) {
+                View convertView, ViewGroup parent) {
 
             BuildInfo buildInfo = m_list.get(groupPosition);
 

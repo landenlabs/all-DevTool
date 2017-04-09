@@ -106,8 +106,6 @@ public class FileBrowserFragment extends DevFragment
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-
-    
     ArrayList<FileUtil.FileInfo> m_list = new ArrayList<>();
     ArrayList<FileUtil.FileInfo> m_workList = new ArrayList<>();
     ExpandableListView m_listView;
