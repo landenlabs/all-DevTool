@@ -21,6 +21,7 @@
 
     <string name="Select_Theme">Select Theme</string>
     <string name="build_title">"- Build Info -"</string>
+    <string name="prop_title">"- Properties -"</string>
     <string name="system_title">"- System Info -"</string>
     <string name="icon_title">"- System Icons -"</string>
     <string name="click_for_more">(click items)"</string>

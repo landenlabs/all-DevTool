@@ -9,14 +9,14 @@ android {
         release
     }
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 17
         targetSdkVersion 25
 
-        versionCode 1920
-        versionName '1.9.20'
+        versionCode 1925
+        versionName '1.9.25'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -57,10 +57,16 @@ android {
                 'RtlSymmetry', 'RtlHardcoded', 'ContentDescription',
                 'MissingTranslation', 'ValidFragment', 'UnusedAttribute'
     }
+
+    // New value required with Gradle 3.x
+    flavorDimensions "std"
+
     productFlavors {
         legacy {
+            dimension = "std"
         }
         standard {
+            dimension = "std"
         }
     }
     compileOptions {
@@ -76,57 +82,46 @@ android {
 }
 
 ext {
-    supportLibVersion = '25.2.0'
+    supportLibVersion = '25.0.1'
     leakCanaryVersion = '1.4-beta2'
     playServicesVersion = '9.6.1'   // '10.0.1'
 }
 
 dependencies {
-    compile "com.android.support:support-v4:${supportLibVersion}"
-    compile "com.android.support:appcompat-v7:${supportLibVersion}"
-
-    //  compile "com.google.android.gms:play-services:${playServicesVersion}"
-    //  compile "com.google.android.gms:play-services-ads:${playServicesVersion}"
-    //  compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
-    compile "com.google.android.gms:play-services-identity:${playServicesVersion}"
-    compile "com.google.android.gms:play-services-gcm:${playServicesVersion}"
-    compile "com.google.android.gms:play-services-auth:${playServicesVersion}"
-    compile "com.google.android.gms:play-services-analytics:${playServicesVersion}"
-    compile "com.google.android.gms:play-services-location:${playServicesVersion}"
-    compile "com.google.android.gms:play-services-drive:${playServicesVersion}"
-
+    compile "com.android.support:support-v4:$supportLibVersion"
+    compile "com.android.support:appcompat-v7:$supportLibVersion"
+    //  compile "com.google.android.gms:play-services:$playServicesVersion"
+    //  compile "com.google.android.gms:play-services-ads:$playServicesVersion"
+    //  compile "com.google.android.gms:play-services-maps:$playServicesVersion"
+    compile "com.google.android.gms:play-services-identity:$playServicesVersion"
+    compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
+    compile "com.google.android.gms:play-services-auth:$playServicesVersion"
+    compile "com.google.android.gms:play-services-analytics:$playServicesVersion"
+    compile "com.google.android.gms:play-services-location:$playServicesVersion"
+    compile "com.google.android.gms:play-services-drive:$playServicesVersion"
     // Firebase
-    compile "com.google.firebase:firebase-core:${playServicesVersion}"
-
+    compile "com.google.firebase:firebase-core:$playServicesVersion"
     // HockeyApp crash reporting
     compile 'net.hockeyapp.android:HockeySDK:4.1.1'
-
     // 3rdparty libraries
     // Memory leaks tool - see main activity to see LeakCanary.install(this.getApplication());
     // debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
     // releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
-
     compile 'com.androidplot:androidplot-core:1.4.1'
     compile 'net.danlew:android.joda:2.9.2'
 }
 
 
 def appendVersionNameVersionCode(variant, defaultConfig) {
+    /*
     variant.outputs.each { output ->
-        if (output.zipAlign) {
-            def file = output.outputFile
-            def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
-            def ourname = project.parent.name;
-            fileName = fileName.replace("app-", "$ourname-");
-            output.outputFile = new File(file.parent, fileName)
-        }
-
         def file = output.packageApplication.outputFile
         def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
-        def ourname = project.parent.name;
-        fileName = fileName.replace("app-", "$ourname-");
+        def ourname = project.parent.name
+        fileName = fileName.replace("app-", "$ourname-")
         output.packageApplication.outputFile = new File(file.parent, fileName)
     }
+    */
 }
 
 // Generate Java doc files

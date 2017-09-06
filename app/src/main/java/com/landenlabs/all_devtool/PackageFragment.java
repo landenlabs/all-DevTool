@@ -1519,7 +1519,8 @@ public class PackageFragment extends DevFragment
             // PackageManager.GET_SIGNATURES | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS;
             int flags1 = PackageManager.GET_META_DATA
                     | PackageManager.GET_SHARED_LIBRARY_FILES
-                    | PackageManager.GET_INTENT_FILTERS;
+                    | PackageManager.GET_INTENT_FILTERS
+                    | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
             int flags2 = PackageManager.GET_META_DATA
                     | PackageManager.GET_SHARED_LIBRARY_FILES;
             int flags3 = PackageManager.GET_META_DATA;
@@ -1566,6 +1567,22 @@ public class PackageFragment extends DevFragment
                         }
                     }
 
+                    /*
+                    Method myUserId=UserHandle.class.getDeclaredMethod("myUserId");//ignore check this when u set ur min SDK < 17
+                    int userID = (Integer) myUserId.invoke(getActivity().getPackageManager());
+
+                    getActivity().getPackageManager().getPackageSizeInfoAsUser(packInfo.packageName, userID,
+                            new android.content.pm.IPackageStatsObserver.Stub() {
+
+                                public void onGetStatsCompleted(PackageStats pStats, boolean succeeded)
+                                        throws RemoteException {
+
+                                    Log.i("fxx", "codeSize: " + pStats.codeSize);
+                                }
+                            });
+                    */
+
+
                     if (cacheDirectory != null)
                     {
                         // cacheSize = cacheDirectory.length()/1024;
@@ -1575,7 +1592,8 @@ public class PackageFragment extends DevFragment
                             // Try and map cache dir to one of the sd storage paths
                             for (String storageDir : m_storageDirs) {
                                 try {
-                                    File cacheDirectory2 = new File(cacheDirectory.getCanonicalPath()
+                                    String path = cacheDirectory.getCanonicalPath();
+                                    File cacheDirectory2 = new File(path
                                             .replace("/data/data", storageDir + "/Android/data"));
                                     if (cacheDirectory2.exists()) {
                                         cacheDirectory = cacheDirectory2;

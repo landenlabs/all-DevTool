@@ -312,7 +312,7 @@ public class FileBrowserFragment extends DevFragment
 
         adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                Toast.makeText(getActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
+                // Toast.makeText(getActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
                 int grpPos = (Integer) view.getTag();
                 if (pos >= 0 && pos < m_list.size()) {
                     final FileUtil.FileInfo fileInfo = m_list.get(pos);
@@ -742,7 +742,7 @@ public class FileBrowserFragment extends DevFragment
     // ============================================================================================
     // Permission
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null)
+        if (grantResults != null && grantResults.length > 0)
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -821,7 +821,7 @@ public class FileBrowserFragment extends DevFragment
             
             if (fileInfo.isChecked) {
                 deleteList.add(fileInfo.getAbsolutePath());
-                m_checkCnt--;
+                // m_checkCnt--;
                 updateDeleteBtn();
             }
         }
@@ -829,11 +829,12 @@ public class FileBrowserFragment extends DevFragment
         DeleteDialog.showDialog(this, deleteList, 0).setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
+                m_checkCnt = 0;
                 updateList();
             }
         });
 
-        m_checkCnt = 0;
+        // m_checkCnt = 0;
         updateDeleteBtn();
     }
 

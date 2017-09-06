@@ -73,6 +73,8 @@ import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -120,8 +122,8 @@ public class NetFragment extends DevFragment {
 
     public static String s_name = "Network";
     private static final int MB = 1 << 20;
-    private static int m_rowColor1 = 0;
-    private static int m_rowColor2 = 0x80d0ffe0;
+    private static final int m_rowColor1 = 0;
+    private static final int m_rowColor2 = 0x80d0ffe0;
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
     private static IntentFilter INTENT_FILTER_SCAN_AVAILABLE = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
     private WifiManager wifiMgr;
@@ -288,13 +290,8 @@ public class NetFragment extends DevFragment {
         Date dt = new Date();
         m_titleTime.setText(m_timeFormat.format(dt));
 
-        boolean expandAll = m_list.isEmpty();
+        boolean firstTime = m_list.isEmpty();
         m_list.clear();
-
-        // Swap colors
-        int color = m_rowColor1;
-        m_rowColor1 = m_rowColor2;
-        m_rowColor2 = color;
 
         ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
 
@@ -338,6 +335,119 @@ public class NetFragment extends DevFragment {
         }
 
 
+        // --------------- TEST - available services -------
+        if (true) {
+            Map<String, String> serviceList = new LinkedHashMap<>();
+            Field[] fields = Context.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+
+                    //  && isRightName(f.getName())
+                    String fieldType = f.getType().getName();
+                    if (fieldType.equals(String.class.getName()) && f.getName()
+                            .endsWith("_SERVICE")) {
+                        String key = f.toString();
+                        try {
+                            key = f.get(null).toString();
+                            Object value = getActivity().getSystemService(key);
+                            if (value != null) {
+                                serviceList.put(key, value.getClass().getSimpleName());
+                            }
+                        } catch (Exception ex) {
+
+                        }
+                    }
+                }
+            }
+            addBuild("Services", serviceList);
+        }
+
+        // --------------- Connection Services -------------
+        try {
+            checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+            Map<String, String> cellListStr = new LinkedHashMap<String, String>();
+            TelephonyManager telephonyManager =
+             (TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+
+            // Type of the network
+            int phoneTypeInt = telephonyManager.getPhoneType();
+            String phoneType = "Unknown";
+            phoneType = phoneTypeInt == TelephonyManager.PHONE_TYPE_GSM ? "gsm" : phoneType;
+            phoneType = phoneTypeInt == TelephonyManager.PHONE_TYPE_CDMA ? "cdma" : phoneType;
+            cellListStr.put("Type", phoneType);
+
+            for (CellInfo cellinfo : telephonyManager.getAllCellInfo()) {
+                // CellInfo  CellInfoGsm
+                if (cellinfo instanceof  CellInfoGsm) {
+                    CellInfoGsm cellitem = (CellInfoGsm)cellinfo;
+
+                    int dbm = cellitem.getCellSignalStrength().getDbm();
+
+                    // ASU ranges from 0 to 31 - TS 27.007 Sec 8.5
+                    // asu = 0 (-113dB or less) is very weak
+                    // signal, its better to show 0 bars to the user in such cases.
+                    // asu = 99 is a special case, where the signal strength is unknown.
+                    int asu = cellitem.getCellSignalStrength().getAsuLevel();
+
+                    // Get signal level as an int from 0..4
+                    int level = cellitem.getCellSignalStrength().getLevel();
+                    
+                    String msg = String.format("Db=%d, Asu=%d Level(0..4)=%d", dbm, asu, level);
+                    String id = String.format("GSM LAC=%d CID=%d",
+                            cellitem.getCellIdentity().getLac(),
+                            cellitem.getCellIdentity().getCid());
+                    cellListStr.put(id, msg);
+
+                    // Cell Tower location
+                    // https://api.mylnikov.org/geolocation/cell?v=1.1&data=open&mcc=310&mnc=260&lac=36455&cellid=10022
+
+                } else if (cellinfo instanceof  CellInfoLte) {
+                    CellInfoLte cellitem = (CellInfoLte)cellinfo;
+
+                    int dbm = cellitem.getCellSignalStrength().getDbm();
+                    int asu = cellitem.getCellSignalStrength().getAsuLevel();
+                    int level = cellitem.getCellSignalStrength().getLevel();
+
+                    String msg = String.format("Db=%d, Asu=%d Level(0..4)=%d", dbm, asu, level);
+                    String id = String.format("LTE CI=%d PCI=%d",
+                            cellitem.getCellIdentity().getCi(),
+                            cellitem.getCellIdentity().getPci());
+                    cellListStr.put(id, msg);
+
+                } else if (cellinfo instanceof  CellInfoCdma) {
+                    CellInfoCdma cellitem = (CellInfoCdma)cellinfo;
+
+                    int dbm = cellitem.getCellSignalStrength().getDbm();
+                    int asu = cellitem.getCellSignalStrength().getAsuLevel();
+                    int level = cellitem.getCellSignalStrength().getLevel();
+
+                    String msg = String.format("Db=%d, Asu=%d Level(0..4)=%d", dbm, asu, level);
+                    String id = String.format("Cdma Nid=%d Sid=%d",
+                            cellitem.getCellIdentity().getNetworkId(),
+                            cellitem.getCellIdentity().getSystemId());
+                    cellListStr.put(id, msg);
+                } else if (cellinfo instanceof  CellInfoWcdma) {
+                    if (Build.VERSION.SDK_INT >= 18) {
+                        CellInfoWcdma cellitem = (CellInfoWcdma) cellinfo;
+
+                        int dbm = cellitem.getCellSignalStrength().getDbm();
+                        int asu = cellitem.getCellSignalStrength().getAsuLevel();
+                        int level = cellitem.getCellSignalStrength().getLevel();
+
+                        String msg = String.format("Db=%d, Asu=%d Level(0..4)=%d", dbm, asu, level);
+                        String id = String.format("Wcdma Cid=%d Lac=%d",
+                                cellitem.getCellIdentity().getCid(),
+                                        cellitem.getCellIdentity().getLac());
+                        cellListStr.put(id, msg);
+                    }
+                }
+            }
+
+            addBuild("Cell...", cellListStr);
+        } catch (Exception ex) {
+
+        }
+
         // --------------- Connection Services -------------
         try {
             ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -360,7 +470,13 @@ public class NetFragment extends DevFragment {
                     netListStr.put("Available Networks:", " ");
                     for (NetworkInfo netI : connMgr.getAllNetworkInfo()) {
                         if (netI.isAvailable()) {
-                            netListStr.put(" " + netI.getTypeName(), netI.isAvailable() ? "Yes" : "No");
+                            String state = netI.isAvailable() ? "Yes" : "No";
+                            if (netI.isConnected())
+                                state = "Connected";
+                            else if (netI.isConnectedOrConnecting())
+                                state = "Connecting";
+
+                            netListStr.put("  " + netI.getTypeName(), state);
                         }
                     }
                 }
@@ -557,8 +673,7 @@ public class NetFragment extends DevFragment {
             addConfigNetworks();
         }
 
-
-        if (expandAll) {
+        if (firstTime) {
             // updateList();
             int count = m_list.size();
             for (int position = 0; position < count; position++)
@@ -875,7 +990,7 @@ public class NetFragment extends DevFragment {
 
             TextView textView;
             textView = Ui.viewById(summaryView, R.id.buildField);
-            textView.setText(buildInfo.fieldStr());
+            textView.setText("" + groupPosition + " " + buildInfo.fieldStr());
             textView.setPadding(10, 0, 0, 0);
 
             textView = Ui.viewById(summaryView, R.id.buildValue);

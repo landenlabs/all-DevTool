@@ -8,11 +8,10 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.3'   // 4.1-rc-1
 
         // Firebase
         classpath 'com.google.gms:google-services:3.0.0'
-
     }
 }
 

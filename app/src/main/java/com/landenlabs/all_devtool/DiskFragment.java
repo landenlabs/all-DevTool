@@ -24,6 +24,7 @@ package com.landenlabs.all_devtool;
  */
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,11 +40,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.util.OsUtils;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -58,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static com.landenlabs.all_devtool.FileBrowserFragment.isBit;
 import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
@@ -112,7 +118,7 @@ public class DiskFragment extends DevFragment {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
-// ============================================================================================
+    // ============================================================================================
     // Fragment methods
 
     @SuppressWarnings("deprecation")
@@ -177,6 +183,49 @@ public class DiskFragment extends DevFragment {
             }
         });
 
+        m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (view == null)
+                    return false;
+
+                final TextView field = Ui.viewById(view, R.id.buildField);
+                final TextView value = Ui.viewById(view, R.id.buildValue);
+                if (field != null && value != null) {
+                    Button btn = Ui.ShowMessage(DiskFragment.this.getActivity(), field.getText() + "\n" + value.getText()).getButton(
+                            AlertDialog.BUTTON_POSITIVE);
+                    if (btn != null) {
+                        btn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String[] parts = value.getText().toString().split(" ");
+                                if (parts.length == 2) {
+                                    fireIntentOn(parts[1]);
+                                }
+                            }
+                        });
+                    }
+                    /*
+                    ShowMessage(field.getText() + "\n" + value.getText()).setOnShowListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface dialog) {
+                            Button btn = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                            if (btn != null) {
+                                btn.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        fireIntentOn(field.getText().toString(), value.getText().toString(), grpPos);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    */
+
+                }
+                return false;
+            }
+        });
         return rootView;
     }
 
@@ -304,7 +353,10 @@ public class DiskFragment extends DevFragment {
                 }
 
                 addFile("getExternalStorageDirectory", Environment.getExternalStorageDirectory());
-                addFile("external downloads", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
+                m_javaDirList.put("isExternalStorageEmulated", (Environment.isExternalStorageEmulated() ? "yes" : "no"));
+                m_javaDirList.put("isExternalStorageRemovable", (Environment.isExternalStorageRemovable() ? "yes" : "no"));
+                addFile("external downloads", Environment.getExternalStoragePublicDirectory(
+                        DIRECTORY_DOWNLOADS));
                 addFile("getRootDirectory", Environment.getRootDirectory());
 
 
@@ -644,4 +696,45 @@ public class DiskFragment extends DevFragment {
             return true;
         }
     }
+
+    // =============================================================================================
+    // TODO move thsi into common code and share with PackageFragment (and others)
+
+    FileBrowseDialog m_fileOpenDialog;
+    void fireIntentOn(String value) {
+        try {
+            File root = new File(value);
+            if (root.exists()) {
+                /*
+                Uri uri = Uri.fromFile(root);
+                Intent intent = new Intent();
+                intent.setAction(android.content.Intent.ACTION_VIEW);
+                // intent.setAction(android.content.Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                // intent.setDataAndType(uri, "file/*");
+                // intent.setDataAndType(uri, "directory/*");
+                // intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+                intent.setData(uri);
+                // startActivityForResult(intent, 1);
+                startActivity(intent);
+
+                // intent.setAction(android.content.Intent.ACTION_GET_CONTENT);
+                // intent.setDataAndType(uri, "*");
+                // startActivity(Intent.createChooser(intent, "Open folder"));
+
+                */
+                m_fileOpenDialog = new FileBrowseDialog(this.getActivity(), "Browse",
+                        this.getActivity().getWindow().getDecorView().getHeight(),null);
+
+                m_fileOpenDialog.DefaultFileName = root.getPath();
+                m_fileOpenDialog.choose(root.getPath());
+            } else {
+                ArrayList<String> responseList = runShellCmd(new String[]{"ls", "-l", value });
+                Toast.makeText(getActivity(), TextUtils.join("\n", responseList), Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception ex) {
+            Toast.makeText(getActivity(), ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
 }

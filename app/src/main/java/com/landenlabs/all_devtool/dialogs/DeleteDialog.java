@@ -28,7 +28,7 @@ import java.util.ArrayList;
  * @author Dennis Lang
  *
  */
-public class DeleteDialog extends DialogFragment   {
+public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDialog
 
     Context m_context;
     ArrayList<String> m_fileList;

@@ -81,6 +81,17 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 }
             },
 
+            // Properties
+            new Creator() {
+                public DevFragment creator() {
+                    return PropFragment.create();
+                }
+
+                public String name() {
+                    return PropFragment.s_name;
+                }
+            },
+
             // Proc
             new Creator() {
                 public DevFragment creator() {

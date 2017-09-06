@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="10dp"
-    android:minWidth="1000dp"
-    android:orientation="vertical">
+    android:minWidth="1000dp">
 
     <TextView
         android:id="@+id/delete_dlg_title"
@@ -15,61 +16,52 @@
         android:text="Delete Files"
         android:textSize="@dimen/title_size" />
 
-    <LinearLayout
-        android:id="@+id/delete_inner"
+    <ScrollView
+        android:id="@+id/delete_scroll_group"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/delete_dlg_title"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/button_border_dark"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical">
 
-        <ScrollView
-            android:id="@+id/delete_scroll_group"
+        <LinearLayout
+            android:id="@+id/delete_group"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/delete_group"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Row1"
+                android:textSize="12sp" />
 
-                android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Row2"
+                android:textSize="12sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Row1"
-                    android:textSize="12sp" />
+        </LinearLayout>
+    </ScrollView>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Row2"
-                    android:textSize="12sp" />
-
-
-            </LinearLayout>
-        </ScrollView>
-
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/delete_cancel_btn"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Cancel" />
+        <Button
+            android:id="@+id/delete_all_btn"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:text="Delete" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/delete_cancel_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/delete_inner"
-        android:text="Cancel" />
-    <Button
-        android:id="@+id/delete_all_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/delete_inner"
-        android:text="Delete" />
-
-</RelativeLayout>
+</LinearLayout>

@@ -1,34 +1,11 @@
 package com.landenlabs.all_devtool;
 
-/*
- * Copyright (c) 2016 Dennis Lang (LanDen Labs) landenlabs@gmail.com
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
- * following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial
- * portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
- * LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
- * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @author Dennis Lang  (3/21/2015)
- * @see http://LanDenLabs.com/
- *
- */
-
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,37 +16,39 @@ import android.widget.TextView;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
-import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
 /**
- * Display "Process"  information.
- *
- * @author Dennis Lang
+ * Created by Dennis Lang on 8/20/17.
  */
-public class ProcFragment extends DevFragment {
 
-    private final ArrayList<ProcInfo> m_list = new ArrayList<>();
-    private ExpandableListView m_listView;
-    private TextView m_titleTime;
+public class PropFragment extends DevFragment {
 
-    private static final SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
+    final ArrayList<GroupInfo> m_list = new ArrayList<>();
+    ExpandableListView m_listView;
+    TextView m_titleTime;
 
-    public static final String s_name = "Proc";
+    Map<String, String> m_propList;
 
-    public ProcFragment() {
+    public static String s_name = "Prop";
+    private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
+
+
+    public PropFragment() {
     }
 
     public static DevFragment create() {
-        return new ProcFragment();
+        return new PropFragment();
     }
 
     // ============================================================================================
@@ -85,20 +64,20 @@ public class ProcFragment extends DevFragment {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
-// ============================================================================================
+    // ============================================================================================
     // Fragment methods
 
     @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        View rootView = inflater.inflate(R.layout.proc_tab, container, false);
-        Ui.<TextView>viewById(rootView, R.id.procListTitle).setText(R.string.proc_title);
-        m_listView = Ui.viewById(rootView, R.id.procListView);
+        View rootView = inflater.inflate(R.layout.prop_tab, container, false);
+        Ui.<TextView>viewById(rootView, R.id.propListTitle).setText(R.string.prop_title);
+        m_listView = Ui.viewById(rootView, R.id.propListView);
 
-        m_titleTime = Ui.viewById(rootView, R.id.procListTime);
+        m_titleTime = Ui.viewById(rootView, R.id.propListTime);
         m_titleTime.setVisibility(View.VISIBLE);
         m_titleTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,11 +99,11 @@ public class ProcFragment extends DevFragment {
 
     // ============================================================================================
     // Internal methods
-
     /**
      * Populate list with 'Build' parameters.
      */
-    private void updateList() {
+    void updateList() {
+
         // Time today = new Time(Time.getCurrentTimezone());
         // today.setToNow();
         // today.format(" %H:%M:%S")
@@ -132,59 +111,59 @@ public class ProcFragment extends DevFragment {
         m_titleTime.setText(m_timeFormat.format(dt));
 
         boolean firstTime = m_list.isEmpty();
+        m_list.clear();
 
-        if (m_list.isEmpty()) {
-            if (true) {
-                addString("BOARD", Build.BOARD);
-                addString("BOOTLOADER", Build.BOOTLOADER);
-                addString("BRAND", Build.BRAND);
-                addString("CPU_ABI", Build.CPU_ABI);
-                addString("CPU_ABI2", Build.CPU_ABI2);
-                addString("OS.ARCH", System.getProperty("os.arch"));
-                if (Build.VERSION.SDK_INT >= 21) {
-                    // addString("SUPPORTED_ABIS", Arrays.toString(Build.SUPPORTED_ABIS));
-                    if (Build.SUPPORTED_32_BIT_ABIS != null && Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-                        addString("32_BIT_ABIS", Arrays.toString(Build.SUPPORTED_32_BIT_ABIS));
-                    } else {
-                        addString("64_BIT_ABIS", Arrays.toString(Build.SUPPORTED_64_BIT_ABIS));
-                    }
+        // -----------------------------------------------------------------------------------------
+        // Collect property values
+
+        m_propList = getShellCmd(new String[]{"getprop"});
+        Map<String, Map<String, String>> keyLists = new HashMap<>();
+        for ( Map.Entry<String, String> item : m_propList.entrySet()) {
+            String key = item.getKey().replace("[", "").replace("]", "");
+            String[] split = key.split("\\.", 2);
+
+            if (split.length == 2) {
+                Map<String, String> list = keyLists.get(split[0]);
+                if (list == null) {
+                    list = new HashMap<>();
                 }
-
-                addString("DEVICE", Build.DEVICE);
-                addString("MANUFACTURER", Build.MANUFACTURER);
-                addString("MODEL", Build.MODEL);
-                addString("PRODUCT", Build.PRODUCT);
+                list.put(split[1], item.getValue());
+                keyLists.put(split[0], list);
             }
+        }
 
-            if (true) {
-                ArrayList<String> cpuInfoList = readFile("/proc/cpuinfo", ": ", 2);
-                for (String line : cpuInfoList) {
-                    String[] vals = line.split(": ");
-                    addString(vals[0], vals[1]);
-                }
-            }
+        for (Map.Entry<String, Map<String, String>> item : keyLists.entrySet()){
+            addString(item.getKey(), item.getValue());
+        }
 
-            if (true) {
-                ArrayList<String> procInfo = readFile("/proc/100/stat", " ", 2);
-                for (String line : procInfo) {
-                    String[] vals = line.split(" ");
-                    int rowCnt = 0;
-                    for (String val : vals) {
-                        addString(String.format("100/stat %2d", rowCnt++), val);
-                    }
-                }
-            }
+        // -----------------------------------------------------------------------------------------
+        // Collect Security values
 
-            if (true) {
-                ArrayList<String> memList = getPkgMemInfo("com.wsiscroll.android.weather");
-                if (memList != null && memList.size() > 0) {
-                    int rowCnt = 0;
-                    for (String line : memList) {
-                        addString(String.format("pkgMem %3d", rowCnt++), line);
+        Map<String, String> secureList = new LinkedHashMap<>();
+        Field[] fields = Settings.Secure.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+
+                //  && isRightName(f.getName())
+                String fieldType = f.getType().getName();
+                if (fieldType.equals(String.class.getName())) {
+                    String key = f.toString();
+                    try {
+                        key = f.get(null).toString();
+                        String value =
+                                Settings.Secure.getString(getContext().getContentResolver(), key);
+                        if (!TextUtils.isEmpty(value)) {
+                            secureList.put(key, value);
+                        }
+                    } catch (Exception ex) {
+
                     }
                 }
             }
         }
+        addString("Secure", secureList);
+
+        // -----------------------------------------------------------------------------------------
 
         if (firstTime) {
             final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
@@ -195,61 +174,58 @@ public class ProcFragment extends DevFragment {
                 m_listView.expandGroup(position);
         }
 
-        m_listView.invalidate();
+        // m_listView.invalidate();
         ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
     }
 
+    // ============================================================================================
+    // Internal methods
 
-    private void addString(String name, String value) {
+    void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
-            m_list.add(new ProcInfo(name, value.trim()));
+            m_list.add(new GroupInfo(name, value.trim()));
     }
 
-    void addMap(String name, Map<String, String> value) {
+    void addString(String name, Map<String, String> value) {
         if (!value.isEmpty())
-            m_list.add(new ProcInfo(name, value));
+            m_list.add(new GroupInfo(name, value));
     }
 
-
-    private static ArrayList<String> readFile(String filename, String splitPat, int  minSplitCnt) {
-        ArrayList<String> list = new ArrayList<>();
-        try {
-            Scanner scan = new Scanner(new File(filename));
-            while (scan.hasNextLine()) {
-                String line = scan.nextLine();
-                String[] vals = line.split(splitPat);
-                if (vals.length >= minSplitCnt) {
-                    list.add(line);
-                    // map.put(vals[0].trim(), vals[1].trim());
-                }
+    private Map<String, String> getShellCmd(String[] shellCmd) {
+        Map<String, String> mapList = new LinkedHashMap<>();
+        ArrayList<String> responseList = runShellCmd(shellCmd);
+        for (String line : responseList) {
+            String[] vals = line.split(": ");
+            if (vals.length > 1) {
+                mapList.put(vals[0], vals[1]);
+            } else {
+                mapList.put(line, "");
             }
-        } catch (Exception e) {
-            Log.e("getCpuInfoMap",Log.getStackTraceString(e));
         }
-        return list;
+        return mapList;
     }
 
-    private static ArrayList<String> getPkgMemInfo(String packageName) {
-        ArrayList<String> list = runShellCmd(
-                new String[] {"dumpsys", "meminfo", packageName});
-        return list;
-    }
 
     // =============================================================================================
 
 
-    class ProcInfo {
+    class GroupInfo {
         final String m_fieldStr;
         final String m_valueStr;
         final Map<String, String> m_valueList;
 
-        ProcInfo(String str1, String str2) {
+        GroupInfo() {
+            m_fieldStr = m_valueStr = null;
+            m_valueList = null;
+        }
+
+        GroupInfo(String str1, String str2) {
             m_fieldStr = str1;
             m_valueStr = str2;
             m_valueList = null;
         }
 
-        ProcInfo(String str1, Map<String, String> list2) {
+        GroupInfo(String str1, Map<String, String> list2) {
             m_fieldStr = str1;
             m_valueStr = null;
             m_valueList = list2;
@@ -280,7 +256,7 @@ public class ProcFragment extends DevFragment {
     // =============================================================================================
 
     final static int EXPANDED_LAYOUT = R.layout.build_list_row;
-    private final static int SUMMARY_LAYOUT = R.layout.build_list_row;
+    final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
     /**
      * ExpandableLis UI 'data model' class
@@ -297,11 +273,11 @@ public class ProcFragment extends DevFragment {
          * Generated expanded detail view object.
          */
         @Override
-        public View getChildView(final int groupPosition,
-                 final int childPosition, boolean isLastChild, View convertView,
-                 ViewGroup parent) {
+        public View getChildView(
+                final int groupPosition, final int childPosition, boolean isLastChild,
+                View convertView, ViewGroup parent) {
 
-            ProcInfo buildInfo = m_list.get(groupPosition);
+            GroupInfo buildInfo = m_list.get(groupPosition);
 
             View expandView = convertView;
             // if (null == expandView) {
@@ -365,10 +341,10 @@ public class ProcFragment extends DevFragment {
          * Generate summary (row) presentation view object.
          */
         @Override
-        public View getGroupView(int groupPosition, boolean isExpanded,
-                                 View convertView, ViewGroup parent) {
+        public View getGroupView(
+                int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-            ProcInfo buildInfo = m_list.get(groupPosition);
+            GroupInfo buildInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {
@@ -378,6 +354,7 @@ public class ProcFragment extends DevFragment {
             TextView textView = Ui.viewById(summaryView, R.id.buildField);
             textView.setText(buildInfo.fieldStr());
             textView.setPadding(10, 0, 0, 0);
+            textView.setTypeface(Typeface.MONOSPACE);
 
             textView = Ui.viewById(summaryView, R.id.buildValue);
             textView.setText(buildInfo.valueStr());
@@ -395,4 +372,5 @@ public class ProcFragment extends DevFragment {
             return true;
         }
     }
+
 }
