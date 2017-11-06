@@ -349,9 +349,13 @@ public class NetFragment extends DevFragment {
                         String key = f.toString();
                         try {
                             key = f.get(null).toString();
-                            Object value = getActivity().getSystemService(key);
-                            if (value != null) {
-                                serviceList.put(key, value.getClass().getSimpleName());
+                            if ("sensorhub".equals(key)) {
+                                // Galaxy crashes on this.
+                            } else {
+                                Object value = getActivity().getSystemService(key);
+                                if (value != null) {
+                                    serviceList.put(key, value.getClass().getSimpleName());
+                                }
                             }
                         } catch (Exception ex) {
 

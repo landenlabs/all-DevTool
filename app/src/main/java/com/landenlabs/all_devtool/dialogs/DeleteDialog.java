@@ -170,7 +170,7 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
                 m_checkBoxes.remove(0);
             }
 
-            if (!deleteFile(m_fileList.get(0))) {
+            if (!deleteFile(m_fileList.get(0), true)) {
                 // delete failed.
             }
 
@@ -187,7 +187,7 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
     /**
      * @param fileName file to delete
      */
-    private boolean deleteFile(String fileName)
+    private boolean deleteFile(String fileName, boolean recurse)
     {
         File fileInfo = new File(fileName);
         if (fileInfo != null && fileInfo.exists()) {
@@ -195,6 +195,12 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
                 fileInfo.delete();
             }
             catch (Exception e)  {
+                if (fileInfo.isDirectory() && recurse) {
+                    for (File item : fileInfo.listFiles()) {
+                        deleteFile(item.getAbsolutePath(), true);
+                    }
+                    return deleteFile(fileInfo.getAbsolutePath(), false);
+                }
                 Toast.makeText(this.getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                 // e.printStackTrace();
                 return false;

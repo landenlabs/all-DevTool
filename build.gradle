@@ -8,16 +8,18 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'   // 4.1-rc-1
+        classpath 'com.android.tools.build:gradle:3.0.0'   // 4.1-rc-1
 
         // Firebase
-        classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.google.gms:google-services:3.1.0'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
+        // google()
+        maven { url "https://maven.google.com" }
     }
 }
 

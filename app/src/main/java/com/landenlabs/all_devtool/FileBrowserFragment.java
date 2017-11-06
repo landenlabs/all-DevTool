@@ -88,6 +88,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.landenlabs.all_devtool.util.FileUtil.getMimeType;
+import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
 // import android.system.Os;
 
@@ -356,9 +357,12 @@ public class FileBrowserFragment extends DevFragment
 
                     }
 
+                    AlertDialog fileInfoDlg =
+                            fileInfo.isDirectory()
+                                    ? Ui.ShowFileDlg(FileBrowserFragment.this.getActivity(),fileSb.toString())
+                                    : Ui.ShowMessage(FileBrowserFragment.this.getActivity(),fileSb.toString());
 
-                    Button btn = Ui.ShowMessage(FileBrowserFragment.this.getActivity(),
-                            fileSb.toString()).getButton(AlertDialog.BUTTON_POSITIVE);
+                    Button btn = fileInfoDlg.getButton(AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
                         // btn.setVisibility(View.GONE);
 
@@ -377,6 +381,35 @@ public class FileBrowserFragment extends DevFragment
                             }
                         });
 
+                    }
+
+                    if (fileInfo.isDirectory()) {
+                        Button btn3 = fileInfoDlg.getButton(AlertDialog.BUTTON_NEUTRAL);
+                        if (btn3 != null) {
+                            // btn.setVisibility(View.GONE);
+
+                            btn3.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    // Run DU command on directory.
+                                    List<String> duList = runShellCmd(new String[] { "du", "-chHL", fileInfo.getAbsolutePath() });
+                                    // addString("du -chHL /sdcard", m_duSdcardList);
+                                    if (duList.size() > 0) {
+                                        StringBuffer sb = new StringBuffer("--Disk Usage--\n");
+                                        for (String item : duList) {
+                                            String[] parts = item.split("\t");
+                                            if (parts.length == 2) {
+                                                sb.append(String.format("%8s   %s\n", parts[0],
+                                                        parts[1]));
+                                            }
+                                        }
+                                        Ui.ShowMessage(FileBrowserFragment.this.getActivity(),
+                                                sb.toString());
+                                    }
+                                }
+                            });
+
+                        }
                     }
                     return true;
                 }
@@ -428,6 +461,7 @@ public class FileBrowserFragment extends DevFragment
         updateList();
         return m_rootView;
     }
+
 
     List<SpannableString> mDirItems = new ArrayList<>();
 

@@ -8,15 +8,18 @@ android {
     signingConfigs {
         release
     }
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 26
+
+    // As of gradle 3.x this is no longer needed.
+    // buildToolsVersion '26.0.1'
+
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
 
-        versionCode 1925
-        versionName '1.9.25'
+        versionCode 1926
+        versionName '1.9.26'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -82,13 +85,13 @@ android {
 }
 
 ext {
-    supportLibVersion = '25.0.1'
+    supportLibVersion = '26.0.2'
     leakCanaryVersion = '1.4-beta2'
-    playServicesVersion = '9.6.1'   // '10.0.1'
+    playServicesVersion = '10.2.1'   // '10.0.1'
 }
 
 dependencies {
-    compile "com.android.support:support-v4:$supportLibVersion"
+    compile 'com.android.support:support-v4:26.0.2'
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     //  compile "com.google.android.gms:play-services:$playServicesVersion"
     //  compile "com.google.android.gms:play-services-ads:$playServicesVersion"

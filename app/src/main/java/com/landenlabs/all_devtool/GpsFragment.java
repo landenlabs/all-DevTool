@@ -688,7 +688,7 @@ public class GpsFragment extends DevFragment implements
         if (null != location) {
             addLocToDetailRow(locInfo);
 
-            String msg = String.format("%8.5f,%9.5f %5.0fm %s",
+            String msg = String.format("%8.6f,%9.6f %5.0fm %s",
                     location.getLatitude(), location.getLongitude(),
                     location.getAccuracy(), location.getProvider());
             GpsItem gpsItem = m_lastUpdates.get(provider);
@@ -715,7 +715,7 @@ public class GpsFragment extends DevFragment implements
         double feet = km * 3280.84;
         int color = m_providersCb.get(currLoc.getProvider()).getCurrentTextColor();
 
-        String msg = String.format("%.5f,%.5f  %.0fm %.0ft %s",
+        String msg = String.format("%.7f,%.7f  %.0fm %.0ft %s",
                 currLoc.getLatitude(), currLoc.getLongitude(), km * 1000, feet, currLoc.getProvider());
         m_log.i("GPS "+ msg);
         GpsItem item = new GpsItem(currLoc.getTime(), msg, color);

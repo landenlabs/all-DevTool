@@ -54,7 +54,20 @@ public class Ui {
                 .setNegativeButton("Close", null)
                 .show();
         dialog.setCanceledOnTouchOutside(true);
-        TextView textView = (TextView) dialog.findViewById(android.R.id.message);
+        TextView textView = dialog.findViewById(android.R.id.message);
+        textView.setSingleLine(false);
+        textView.setTextSize(20);
+        return dialog;
+    }
+
+    public static AlertDialog ShowFileDlg(Activity activity, String message) {
+        AlertDialog dialog = new AlertDialog.Builder(activity).setMessage(message)
+                .setPositiveButton("More", null)
+                .setNegativeButton("Close", null)
+                .setNeutralButton("Disk", null)
+                .show();
+        dialog.setCanceledOnTouchOutside(true);
+        TextView textView = dialog.findViewById(android.R.id.message);
         textView.setSingleLine(false);
         textView.setTextSize(20);
         return dialog;
