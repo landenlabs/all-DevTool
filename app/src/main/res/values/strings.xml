@@ -31,7 +31,7 @@
     <string name="sensor_title">"- Sensor -"</string>
     <string name="console_title">"- Console -"</string>
     <string name="package_title">"- Package -"</string>
-    <string name="proc_title">"- Proc Info -"</string>
+    <string name="proc_title">"- Processor Info -"</string>
     <string name="disk_title">"- Disk Info -"</string>
 
     <string name="console_snap">Snap</string>

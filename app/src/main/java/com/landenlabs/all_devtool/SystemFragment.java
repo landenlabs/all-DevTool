@@ -52,6 +52,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -59,8 +60,11 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -101,6 +105,10 @@ public class SystemFragment extends DevFragment {
     private final LLog m_log = LLog.DBG;
     ExpandableListView m_listView;
     TextView m_titleTime;
+    ImageButton m_search;
+    View m_refresh;
+    String m_filter;
+
     BuildArrayAdapter m_adapter;
     SubMenu m_menu;
 
@@ -146,7 +154,41 @@ public class SystemFragment extends DevFragment {
         Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.system_title);
         Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
         m_titleTime = Ui.viewById(rootView, R.id.list_time);
-        m_titleTime.setOnClickListener(new View.OnClickListener() {
+
+        m_search = Ui.viewById(rootView, R.id.list_search);
+        m_search.setVisibility(View.VISIBLE);
+        m_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                m_titleTime.setText("");
+                m_titleTime.setHint("enter search text");
+                InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(m_titleTime, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
+        m_titleTime.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView edView, int actionId, KeyEvent event)
+            {
+                if(actionId == EditorInfo.IME_ACTION_DONE)
+                {
+                    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                    imm.toggleSoftInput(0, 0);
+
+                    Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
+                    m_filter = edView.getText().toString();
+                    updateList();
+                    return true; // consume.
+                }
+                return false; // pass on to other listeners.
+            }
+        });
+
+        m_refresh = Ui.viewById(rootView, R.id.list_refresh);
+        m_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateList();
@@ -154,8 +196,8 @@ public class SystemFragment extends DevFragment {
             }
         });
 
-        m_listView = Ui.viewById(rootView, R.id.buildListView);
 
+        m_listView = Ui.viewById(rootView, R.id.buildListView);
         m_adapter = new BuildArrayAdapter(this.getActivity());
         m_listView.setAdapter(m_adapter);
 
@@ -622,10 +664,18 @@ public class SystemFragment extends DevFragment {
                 textView = Ui.viewById(expandView, R.id.buildValue);
                 textView.setText(val);
 
-                if ((groupPosition & 1) == 1)
-                    expandView.setBackgroundColor(m_rowColor1);
-                else
-                    expandView.setBackgroundColor(m_rowColor2);
+                String text = key + val;
+
+                if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
+                        || text.matches(m_filter)
+                        || Utils.containsIgnoreCase(text, m_filter))  ) {
+                    expandView.setBackgroundColor(0x80ffff00);
+                } else {
+                    if ((groupPosition & 1) == 1)
+                        expandView.setBackgroundColor(m_rowColor1);
+                    else
+                        expandView.setBackgroundColor(m_rowColor2);
+                }
             }
 
             return expandView;

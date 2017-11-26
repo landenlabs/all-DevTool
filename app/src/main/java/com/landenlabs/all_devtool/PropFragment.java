@@ -35,6 +35,8 @@ import java.util.Map;
 import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
 /**
+ * Show system property information
+ * <p>
  * Created by Dennis Lang on 8/20/17.
  */
 
@@ -89,12 +91,12 @@ public class PropFragment extends DevFragment {
 
         View rootView = inflater.inflate(R.layout.prop_tab, container, false);
         Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.prop_title);
-        m_search = Ui.viewById(rootView, R.id.list_search);
         m_listView = Ui.viewById(rootView, R.id.propListView);
 
         Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
         m_titleTime = Ui.viewById(rootView, R.id.list_time);
 
+        m_search = Ui.viewById(rootView, R.id.list_search);
         m_search.setVisibility(View.VISIBLE);
         m_search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -350,7 +352,7 @@ public class PropFragment extends DevFragment {
 
             if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
                     || text.matches(m_filter)
-                    || text.contains(m_filter))  ) {
+                    || Utils.containsIgnoreCase(text, m_filter))  ) {
                 expandView.setBackgroundColor(0x80ffff00);
             } else {
 

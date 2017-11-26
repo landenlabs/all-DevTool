@@ -29,12 +29,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -60,6 +65,9 @@ public class ProcFragment extends DevFragment {
     private final ArrayList<ProcInfo> m_list = new ArrayList<>();
     private ExpandableListView m_listView;
     private TextView m_titleTime;
+    ImageButton m_search;
+    View m_refresh;
+    String m_filter;
 
     private static final SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
 
@@ -106,13 +114,48 @@ public class ProcFragment extends DevFragment {
 
         Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
         m_titleTime = Ui.viewById(rootView, R.id.list_time);
-        m_titleTime.setOnClickListener(new View.OnClickListener() {
+
+        m_search = Ui.viewById(rootView, R.id.list_search);
+        m_search.setVisibility(View.VISIBLE);
+        m_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                m_titleTime.setText("");
+                m_titleTime.setHint("enter search text");
+                InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(m_titleTime, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
+        m_titleTime.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView edView, int actionId, KeyEvent event)
+            {
+                if(actionId == EditorInfo.IME_ACTION_DONE)
+                {
+                    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                    imm.toggleSoftInput(0, 0);
+
+                    m_filter = edView.getText().toString();
+                    Toast.makeText(getContext(), "Searching..." + m_filter, Toast.LENGTH_SHORT).show();
+                    updateList();
+                    return true; // consume.
+                }
+                return false; // pass on to other listeners.
+            }
+        });
+
+        m_refresh = Ui.viewById(rootView, R.id.list_refresh);
+        m_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateList();
                 m_listView.invalidateViews();
             }
         });
+
 
         return rootView;
     }
@@ -327,10 +370,18 @@ public class ProcFragment extends DevFragment {
             textView = Ui.viewById(expandView, R.id.buildValue);
             textView.setText(val);
 
-            if ((groupPosition & 1) == 1)
-                expandView.setBackgroundColor(0);
-            else
-                expandView.setBackgroundColor(0x80d0ffe0);
+            String text = key + val;
+
+            if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
+                    || text.matches(m_filter)
+                    || Utils.containsIgnoreCase(text, m_filter))  ) {
+                expandView.setBackgroundColor(0x80ffff00);
+            } else {
+                if ((groupPosition & 1) == 1)
+                    expandView.setBackgroundColor(0);
+                else
+                    expandView.setBackgroundColor(0x80d0ffe0);
+            }
 
             return expandView;
         }
@@ -391,10 +442,22 @@ public class ProcFragment extends DevFragment {
             textView = Ui.viewById(summaryView, R.id.buildValue);
             textView.setText(buildInfo.valueStr());
 
-            if ((groupPosition & 1) == 1)
-                summaryView.setBackgroundColor(0);
-            else
-                summaryView.setBackgroundColor(0x80d0ffe0);
+            String text = buildInfo.fieldStr();
+            if (buildInfo.valueStr() != null) {
+                text += buildInfo.valueStr();
+            }
+
+
+            if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
+                    || text.matches(m_filter)
+                    || Utils.containsIgnoreCase(text, m_filter))  ) {
+                summaryView.setBackgroundColor(0x80ffff00);
+            } else {
+                if ((groupPosition & 1) == 1)
+                    summaryView.setBackgroundColor(0);
+                else
+                    summaryView.setBackgroundColor(0x80d0ffe0);
+            }
 
             return summaryView;
         }
