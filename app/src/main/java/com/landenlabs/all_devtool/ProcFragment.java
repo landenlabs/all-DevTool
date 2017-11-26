@@ -85,6 +85,12 @@ public class ProcFragment extends DevFragment {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
+
 // ============================================================================================
     // Fragment methods
 
@@ -95,11 +101,11 @@ public class ProcFragment extends DevFragment {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.proc_tab, container, false);
-        Ui.<TextView>viewById(rootView, R.id.procListTitle).setText(R.string.proc_title);
+        Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.proc_title);
         m_listView = Ui.viewById(rootView, R.id.procListView);
 
-        m_titleTime = Ui.viewById(rootView, R.id.procListTime);
-        m_titleTime.setVisibility(View.VISIBLE);
+        Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
+        m_titleTime = Ui.viewById(rootView, R.id.list_time);
         m_titleTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,7 +202,10 @@ public class ProcFragment extends DevFragment {
         }
 
         m_listView.invalidate();
-        ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
+        if (m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter ) {
+            ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter())
+                    .notifyDataSetChanged();
+        }
     }
 
 

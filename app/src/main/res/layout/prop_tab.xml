@@ -11,24 +11,10 @@
       android:background="@android:color/transparent"
     -->
 
-    <TextView
-        android:id="@+id/propListTitle"
+    <include
+        layout="@layout/title_search_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:freezesText="true"
-        android:gravity="center"
-        android:text="@string/prop_title"
-        android:textSize="@dimen/title_size"
-        android:textStyle="bold" />
-    <TextView
-        android:id="@+id/propListTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/prop_title"
-        android:textSize="@dimen/title_size"
-        android:textStyle="bold"
-        android:visibility="gone" />
+        android:layout_height="wrap_content" />
 
     <com.landenlabs.all_devtool.dialogs.BounceExpandableListView
         android:id="@+id/propListView"

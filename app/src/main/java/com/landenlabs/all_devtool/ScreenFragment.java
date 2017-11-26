@@ -111,6 +111,11 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
+    public List<String> getListAsCsv() {
+        return null;
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 

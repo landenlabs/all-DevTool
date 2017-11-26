@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <item type="id" name="list_title" />
+    <item type="id" name="list_time" />
+    <item type="id" name="list_time_bar" />
+    <item type="id" name="list_search" />
+    <item type="id" name="list_refresh" />
+
     <item type="id" name="package_sort_by_appname" />
     <item type="id" name="package_sort_by_pkgname" />
     <item type="id" name="package_sort_by_size" />

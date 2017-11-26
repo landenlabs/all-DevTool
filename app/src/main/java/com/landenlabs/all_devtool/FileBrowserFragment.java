@@ -251,7 +251,13 @@ public class FileBrowserFragment extends DevFragment
     public List<Bitmap> getBitmaps(int maxHeight) {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
-    
+
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

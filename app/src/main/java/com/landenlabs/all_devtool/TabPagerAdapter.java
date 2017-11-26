@@ -424,14 +424,15 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
             DevFragment devFrag = getFragment(tabIdx);
             try {
                 if (null != devFrag) {
+                    List<String> shareCSV = devFrag.getListAsCsv();
                     List<Bitmap> shareImages = devFrag.getBitmaps(SHARE_MAX_IMAGE_HEIGHT);
-                    if (null != shareImages && shareImages.size() != 0) {
-                        Utils.shareBitmap(devFrag.getContext(), shareImages, fragName, imageName,
+                    // if (null != shareImages && shareImages.size() != 0) {
+                        Utils.shareList(devFrag.getContext(), shareImages, shareCSV, fragName, imageName,
                                 GlobalInfo.s_globalInfo.shareActionProvider);
-                    } else {
+                    /*} else {
                         Toast.makeText(devFrag.getActivity(),
                                 "Unable to share\nFailed to grab screen", Toast.LENGTH_LONG).show();
-                    }
+                    }*/
                 } else {
                     Toast.makeText(GlobalInfo.s_globalInfo.mainFragActivity,
                             "Unable to share\nSwitch screens\nand try again", Toast.LENGTH_LONG).show();

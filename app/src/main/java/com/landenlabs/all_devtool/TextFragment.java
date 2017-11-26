@@ -103,6 +103,11 @@ public class TextFragment extends DevFragment {
         // return bitmapList;
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return null;
+    }
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

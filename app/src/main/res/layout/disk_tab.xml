@@ -12,7 +12,7 @@
     -->
 
     <TextView
-        android:id="@+id/diskListTitle"
+        android:id="@+id/disklist_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:freezesText="true"
@@ -22,7 +22,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/diskListTime"
+        android:id="@+id/disklist_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"

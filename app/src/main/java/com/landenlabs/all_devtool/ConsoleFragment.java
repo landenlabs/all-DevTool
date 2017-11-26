@@ -158,6 +158,13 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
     }
 
     @Override
+    public List<String> getListAsCsv() {
+        List<String> csvList = new ArrayList<>();
+        Utils.getTextCsv(getView(), "", csvList);
+        return csvList;
+    }
+
+    @Override
     public void onSelected() {
         super.onSelected();
         updateConsole();

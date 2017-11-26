@@ -3,6 +3,7 @@ package com.landenlabs.all_devtool.util;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -14,28 +15,33 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
+import android.widget.TextView;
 
 import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.GlobalInfo;
 import com.landenlabs.all_devtool.R;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -323,6 +329,63 @@ public class Utils {
         return screenBitmap;
     }
 
+
+    /**
+     * Render all items from ListView into CSV text.
+     *
+     * @param listview  input listView to hold rows of CSV text
+     * @return List filled with CSV text.
+     */
+    public static List<String> getListViewAsCSV(ListView listview) {
+        ListAdapter adapter = listview.getAdapter();
+        int itemscount = adapter.getCount();
+        List<String> csvList = new ArrayList<>();
+
+        // Render each row into its own bitmap, compute total size.
+        for (int row = 0; row < itemscount; row++) {
+            View childView = adapter.getView(row, null, listview);
+            String rowText = getTextCsv(childView, "", csvList);
+            if (rowText != null && rowText.length() > 1) {
+                csvList.add(rowText.replaceAll("^,", ""));
+            }
+        }
+
+        return csvList;
+    }
+
+    public static String getTextCsv(View view, String rowText, List<String> csvList) {
+        Character sep = ',';
+        if (view instanceof TextView) {
+            rowText += sep + ((TextView) view).getText().toString();
+        } else if (view instanceof ImageView) {
+            ImageView imageView = (ImageView) view;
+            if (!TextUtils.isEmpty(imageView.getContentDescription())) {
+                rowText += sep + imageView.getContentDescription().toString();
+            } else {
+                rowText += sep + "Image";
+            }
+        } else if (view instanceof LinearLayout) {
+            LinearLayout linearLayout = (LinearLayout)view;
+            if (linearLayout.getOrientation() == LinearLayout.VERTICAL) {
+                csvList.add(rowText);
+                ViewGroup viewGroup = (ViewGroup)view;
+                for (int idx = 0; idx < viewGroup.getChildCount(); idx++) {
+                    rowText = "";
+                    csvList.add(getTextCsv(viewGroup.getChildAt(idx), rowText, csvList));
+                }
+                rowText = "";
+            } else {
+                getTextCsv(view, rowText, csvList);
+            }
+        } else if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup)view;
+            for (int idx = 0; idx < viewGroup.getChildCount(); idx++) {
+                rowText = getTextCsv(viewGroup.getChildAt(idx), rowText, csvList);
+            }
+        }
+
+        return rowText;
+    }
     /**
      * Render all items from ListView into bitmaps, such that no bitmap is larger than maxHeight.
      * <li> <a href="http://stackoverflow.com/questions/12742343/android-get-screenshot-of-all-listview-items">
@@ -477,22 +540,23 @@ public class Utils {
      * @param baseName Base filename used to save image, ex: "screenshot.png"
      * @return full filename path
      */
-    public static String saveBitmap(Context context, Bitmap bitmap, String baseName) {
-        // String filePath = joinPath(joinPath(Environment.getExternalStorageDirectory(),"Pictures"),
-        String filePath = joinPath(context.getExternalCacheDir(),
-                baseName);
-        File imagePath = new File(filePath);
-        FileOutputStream fileOutStrm;
+    public static Uri getUriForBitmap(Context context, Bitmap bitmap, String baseName) {
+
         try {
-            fileOutStrm = new FileOutputStream(imagePath);
-            bitmap.compress(CompressFormat.PNG, 100, fileOutStrm);
-            fileOutStrm.flush();
-            fileOutStrm.close();
-            return filePath;
-        } catch (FileNotFoundException ex) {
-            s_log.e("saveBitmap", ex);
-        } catch (IOException ex) {
-            s_log.e("saveBitmap", ex);
+            ContentValues values = new ContentValues(1);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
+            Uri uri = context.getContentResolver()
+                    .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            // context.grantUriPermission(mContext.getPackageName(), uri,
+            //         Intent.FLAG_GRANT_WRITE_URI_PERMISSION + Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            OutputStream ostream = context.getContentResolver().openOutputStream(uri);
+
+            // Jpeg format about 20x faster to export then PNG and smaller image.
+            bitmap.compress(CompressFormat.JPEG, 90, ostream);
+            ostream.close();
+            return uri;
+        } catch (Exception ex) {
+            s_log.e("Save bitmap failed " , ex.getMessage());
         }
         return null;
     }
@@ -508,7 +572,7 @@ public class Utils {
         Bitmap screenBitmap = Utils.grabScreen(activity);
         List<Bitmap> bitmapList = new ArrayList<Bitmap>();
         bitmapList.add(screenBitmap);
-        shareBitmap(activity, bitmapList, what, "screenshot.png", shareActionProvider);
+        shareList(activity, bitmapList, null, what, "screenshot.png", shareActionProvider);
         GoogleAnalyticsHelper.event(activity, "share", "screen", activity.getClass().getName());
     }
 
@@ -516,7 +580,7 @@ public class Utils {
         Bitmap screenBitmap = getBitmap(view);
         List<Bitmap> bitmapList = new ArrayList<Bitmap>();
         bitmapList.add(screenBitmap);
-        shareBitmap(view.getContext(), bitmapList, what, "screenshot.png", shareActionProvider);
+        shareList(view.getContext(), bitmapList, null, what, "screenshot.png", shareActionProvider);
     }
 
     public static String getScreenImagePath(View view, Activity activity) {
@@ -528,49 +592,66 @@ public class Utils {
         return bitmap != null && !bitmap.isRecycled() && bitmap.getHeight() * bitmap.getWidth() > 0;
     }
 
-    public static void shareBitmap(
-            Context context, List<Bitmap> shareImages, String what, String imageName, ShareActionProvider shareActionProvider) {
+    public static void shareList(
+            Context context,
+            List<Bitmap> shareImages,
+            List<String> shareCsv,
+            String what, String imageName,
+            ShareActionProvider shareActionProvider) {
 
-        int imgCnt = shareImages.size();
-        Intent shareIntent = new Intent(imgCnt == 1 ? Intent.ACTION_SEND : Intent.ACTION_SEND_MULTIPLE);
         final String IMAGE_TYPE = "image/png";
         final String TEXT_TYPE = "text/plain";
+        Intent shareIntent;
 
-        if (imgCnt > 0) {
+        if (shareImages != null && shareImages.size() > 0) {
+            int imgCnt = shareImages.size();
+            shareIntent = new Intent(imgCnt == 1 ? Intent.ACTION_SEND : Intent.ACTION_SEND_MULTIPLE);
             shareIntent.setType(IMAGE_TYPE);
             if (imgCnt == 1) {
                 Bitmap bitmap = shareImages.get(0);
                 if (!isBitmapValid(bitmap))
                     return;
 
-                // String screenImgFilename = Images.Media.insertImage(getContentResolver(), bitmap, imageName, null);
-                String screenImgFilename = Utils.saveBitmap(context, bitmap, imageName);
-                bitmap.recycle();
-                Uri uri = Uri.fromFile(new File(screenImgFilename));
+                /*
+                    // String screenImgFilename = Images.Media.insertImage(getContentResolver(), bitmap, imageName, null);
+                    String screenImgFilename = Utils.saveBitmap(context, bitmap, imageName);
+
+                    Uri uri = Uri.fromFile(new File(screenImgFilename));
+                */
+                Uri uri = Utils.getUriForBitmap(context, bitmap, imageName);
                 shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                bitmap.recycle();
             } else {
                 ArrayList<Uri> uris = new ArrayList<Uri>();
                 for (int bmIdx = 0; bmIdx != shareImages.size(); bmIdx++) {
                     Bitmap bitmap = shareImages.get(bmIdx);
                     if (isBitmapValid(bitmap)) {
+                        /*
                         String screenImgFilename = Utils.saveBitmap(context, bitmap, String.valueOf(bmIdx) + imageName);
-                        bitmap.recycle();
                         Uri uri = Uri.fromFile(new File(screenImgFilename));
+                        */
+                        Uri uri = Utils.getUriForBitmap(context, bitmap, String.valueOf(bmIdx) + imageName);
                         uris.add(uri);
+                        bitmap.recycle();
                     } else
                         s_log.e("invalid bitmap");
                 }
                 shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
             }
         } else {
+            shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType(TEXT_TYPE);
         }
 
         String shareBody = String.format("%s v%s\n%s\n%s\n",
                 GlobalInfo.s_globalInfo.appName,
                 GlobalInfo.s_globalInfo.version,
-                what,
-                context.getString(R.string.websiteLanDenLabs));
+                context.getString(R.string.websiteLanDenLabs),
+                what);
+
+        if (shareCsv != null && shareCsv.size() > 0) {
+            shareBody += TextUtils.join("\n", shareCsv);
+        }
         shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, GlobalInfo.s_globalInfo.appName + " " + what);
         shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
 

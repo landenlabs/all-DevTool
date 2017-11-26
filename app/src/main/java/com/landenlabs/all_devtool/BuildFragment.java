@@ -76,6 +76,11 @@ public class BuildFragment extends DevFragment {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
 // ============================================================================================
     // Fragment methods
 
@@ -86,7 +91,7 @@ public class BuildFragment extends DevFragment {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.build_tab, container, false);
-        Ui.<TextView>viewById(rootView, R.id.buildListTitle).setText(R.string.build_title);
+        Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.build_title);
         m_listView = Ui.viewById(rootView, R.id.buildListView);
 
         return rootView;
@@ -243,6 +248,8 @@ public class BuildFragment extends DevFragment {
             String val = buildInfo.valueListStr().get(key);
 
             TextView textView = Ui.viewById(expandView, R.id.buildField);
+
+            // textView.setSelectAllOnFocus(true);
             textView.setText(key);
             textView.setPadding(40, 0, 0, 0);
 

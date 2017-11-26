@@ -118,6 +118,11 @@ public class DiskFragment extends DevFragment {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
     // ============================================================================================
     // Fragment methods
 
@@ -128,10 +133,10 @@ public class DiskFragment extends DevFragment {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.disk_tab, container, false);
-        Ui.<TextView>viewById(rootView, R.id.diskListTitle).setText(R.string.disk_title);
+        Ui.<TextView>viewById(rootView, R.id.disklist_title).setText(R.string.disk_title);
         m_listView = Ui.viewById(rootView, R.id.diskListView);
 
-        m_titleTime = Ui.viewById(rootView, R.id.diskListTime);
+        m_titleTime = Ui.viewById(rootView, R.id.disklist_time);
         m_titleTime.setVisibility(View.VISIBLE);
         m_titleTime.setOnClickListener(new View.OnClickListener() {
             @Override

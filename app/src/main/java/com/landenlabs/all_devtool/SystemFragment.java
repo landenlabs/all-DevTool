@@ -132,15 +132,20 @@ public class SystemFragment extends DevFragment {
     }
 
     @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
         View rootView = inflater.inflate(R.layout.build_tab, container, false);
 
-        Ui.viewById(rootView, R.id.buildListTitle).setVisibility(View.GONE);
-        m_titleTime = Ui.viewById(rootView, R.id.buildListTime);
-        m_titleTime.setVisibility(View.VISIBLE);
+        Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.system_title);
+        Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
+        m_titleTime = Ui.viewById(rootView, R.id.list_time);
         m_titleTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -78,6 +78,11 @@ public abstract class NumBaseFragment extends DevFragment {
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
     // ============================================================================================
     // DevFragment(Fragment) overrides
 

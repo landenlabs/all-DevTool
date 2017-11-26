@@ -6,12 +6,18 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -36,7 +42,10 @@ public class PropFragment extends DevFragment {
 
     final ArrayList<GroupInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
-    TextView m_titleTime;
+    EditText m_titleTime;
+    ImageButton m_search;
+    View m_refresh;
+    String m_filter;
 
     Map<String, String> m_propList;
 
@@ -61,7 +70,12 @@ public class PropFragment extends DevFragment {
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        return Utils.getListViewAsBitmaps(m_listView, maxHeight);
+        return null; // Utils.getListViewAsBitmaps(m_listView, maxHeight);
+    }
+
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
     }
 
     // ============================================================================================
@@ -74,18 +88,53 @@ public class PropFragment extends DevFragment {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.prop_tab, container, false);
-        Ui.<TextView>viewById(rootView, R.id.propListTitle).setText(R.string.prop_title);
+        Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.prop_title);
+        m_search = Ui.viewById(rootView, R.id.list_search);
         m_listView = Ui.viewById(rootView, R.id.propListView);
 
-        m_titleTime = Ui.viewById(rootView, R.id.propListTime);
-        m_titleTime.setVisibility(View.VISIBLE);
-        m_titleTime.setOnClickListener(new View.OnClickListener() {
+        Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
+        m_titleTime = Ui.viewById(rootView, R.id.list_time);
+
+        m_search.setVisibility(View.VISIBLE);
+        m_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                m_titleTime.setText("");
+                m_titleTime.setHint("enter search text");
+                InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(m_titleTime, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
+        m_titleTime.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView edView, int actionId, KeyEvent event)
+            {
+                if(actionId == EditorInfo.IME_ACTION_DONE)
+                {
+                    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                    imm.toggleSoftInput(0, 0);
+
+                    Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
+                    m_filter = edView.getText().toString();
+                    updateList();
+                    return true; // consume.
+                }
+                return false; // pass on to other listeners.
+            }
+        });
+
+        m_refresh = Ui.viewById(rootView, R.id.list_refresh);
+        m_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateList();
                 m_listView.invalidateViews();
             }
         });
+
 
         return rootView;
     }
@@ -104,11 +153,14 @@ public class PropFragment extends DevFragment {
      */
     void updateList() {
 
-        // Time today = new Time(Time.getCurrentTimezone());
-        // today.setToNow();
-        // today.format(" %H:%M:%S")
-        Date dt = new Date();
-        m_titleTime.setText(m_timeFormat.format(dt));
+        if (TextUtils.isEmpty(m_filter) || m_filter.equals("*") || m_titleTime.getText().length() == 0) {
+            // Time today = new Time(Time.getCurrentTimezone());
+            // today.setToNow();
+            // today.format(" %H:%M:%S")
+            Date dt = new Date();
+            m_titleTime.setText(m_timeFormat.format(dt));
+            m_filter = "";
+        }
 
         boolean firstTime = m_list.isEmpty();
         m_list.clear();
@@ -294,10 +346,19 @@ public class PropFragment extends DevFragment {
             textView = Ui.viewById(expandView, R.id.buildValue);
             textView.setText(val);
 
-            if ((groupPosition & 1) == 1)
-                expandView.setBackgroundColor(0);
-            else
-                expandView.setBackgroundColor(0x80d0ffe0);
+            String text = key + val;
+
+            if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
+                    || text.matches(m_filter)
+                    || text.contains(m_filter))  ) {
+                expandView.setBackgroundColor(0x80ffff00);
+            } else {
+
+                if ((groupPosition & 1) == 1)
+                    expandView.setBackgroundColor(0);
+                else
+                    expandView.setBackgroundColor(0x80d0ffe0);
+            }
 
             return expandView;
         }

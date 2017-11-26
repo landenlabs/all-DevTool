@@ -343,6 +343,11 @@ public class PackageFragment extends DevFragment
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
     FileBrowseDialog m_fileOpenDialog;
     void fireIntentOn(String field, String value, int grpPos) {
         try {

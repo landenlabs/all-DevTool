@@ -251,6 +251,11 @@ public class SensorFragment extends DevFragment
     }
 
     @Override
+    public List<String> getListAsCsv() {
+        return null;
+    }
+
+    @Override
     public void onSelected() {
         GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

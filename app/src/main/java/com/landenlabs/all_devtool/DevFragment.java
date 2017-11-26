@@ -61,6 +61,8 @@ public abstract class DevFragment extends Fragment {
      */
     public abstract List<Bitmap> getBitmaps(int maxHeight);
 
+    public abstract  List<String> getListAsCsv();
+
     /**
      * Called when fragment selected (visible)
      */

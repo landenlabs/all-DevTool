@@ -32,6 +32,8 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
@@ -72,6 +74,7 @@ import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -201,6 +204,11 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
+    public List<String> getListAsCsv() {
+        return Utils.getListViewAsCSV(m_listView);
+    }
+
+    @Override
     public void onSelected() {
         GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -258,6 +266,7 @@ public class GpsFragment extends DevFragment implements
             // <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
             m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
+            // google_app_id
             m_googleApiClient = new GoogleApiClient.Builder(this.getActivity())
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
@@ -349,6 +358,7 @@ public class GpsFragment extends DevFragment implements
     @Override
     public void onStop() {
         super.onStop();
+        Log.d(TAG, "disconnect");
         m_googleApiClient.disconnect();
     }
 
@@ -703,6 +713,26 @@ public class GpsFragment extends DevFragment implements
         }
     }
 
+    /**
+     * Get address by Geocoder using play services.
+     */
+    public static Address getGeocoderAddress(Context context, double latitude, double longitude) {
+        Geocoder gc = new Geocoder(context, Locale.getDefault());
+        int failedAttempts = 0;
+        for (;;) {
+            try {
+                List<Address> res = gc.getFromLocation(latitude, longitude, 1);
+                return ((res != null) && !res.isEmpty()) ? res.get(0) : null;
+            } catch (IOException ioe) {
+                if (++failedAttempts > 3) {
+                    Log.e(TAG, "getGeocoderAddress failed ", ioe);
+                    return null;
+                }
+            }
+        }
+    }
+
+
     private int addLocToDetailRow(LocInfo locInfo) {
        
         if (m_detailList.size() > s_maxToKeep) {
@@ -717,6 +747,22 @@ public class GpsFragment extends DevFragment implements
 
         String msg = String.format("%.7f,%.7f  %.0fm %.0ft %s",
                 currLoc.getLatitude(), currLoc.getLongitude(), km * 1000, feet, currLoc.getProvider());
+
+        Address address = getGeocoderAddress(getContext(), currLoc.getLatitude(), currLoc.getLongitude());
+        if (address != null) {
+            if (address.getMaxAddressLineIndex() >= 0) {
+                for (int idx = 0; idx <= address.getMaxAddressLineIndex(); idx++) {
+                    msg += "\n   " + address.getAddressLine(idx);
+                }
+            }
+            msg += "\n  ";
+            msg += " " + address.getLocality();
+            msg += " " + address.getAdminArea();
+            msg += " " + address.getCountryName();
+        } else {
+            msg += "\n  Geocoder not available, reboot";
+        }
+
         m_log.i("GPS "+ msg);
         GpsItem item = new GpsItem(currLoc.getTime(), msg, color);
 

@@ -90,6 +90,11 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
         return bitmapList;
     }
 
+    @Override
+    public List<String> getListAsCsv() {
+        return null;
+    }
+
     // private GoogleAnalyticsHelper mAnalyticsHelper;
 
     /** Called when the activity is first created. */
