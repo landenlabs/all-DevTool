@@ -31,6 +31,8 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureInfo;
@@ -45,6 +47,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -428,6 +431,49 @@ public class SystemFragment extends DevFragment {
                 addBuild("GPS", "Off");
         } catch (Exception ex) {
             m_log.e(ex.getMessage());
+            addBuild("GPS", ex.getLocalizedMessage());
+        }
+
+        // --------------- Battery -------------
+        if (true) {
+            BatteryManager mBatteryManager = (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                Integer avgCurrent = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE);
+                Integer currentNow = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
+            //    Integer capPer = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+
+                // Battery remaining energy in nanowatt-hours, as a long integer.
+                Long nanowattHours = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER);
+
+                Map<String, String> listStr = new LinkedHashMap<>();
+                listStr.put("Current (avg)", String.format("%.4f Amps", avgCurrent/1e6));
+                listStr.put("Current (now)", String.format("%.4f Amps", currentNow/1e6));
+            //    listStr.put("Percent", String.format("%d%%", capPer.intValue()));
+                listStr.put("Remain", String.format("%.4f Hours", nanowattHours/1e9));
+
+                IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                Intent batteryStatus = getContext().registerReceiver(null, ifilter);
+
+                // Are we charging / charged?
+                int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                        status == BatteryManager.BATTERY_STATUS_FULL;
+
+                int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                String charging = isCharging ? "Yes" : "No";
+                charging = (isCharging && usbCharge) ? "USB" : charging;
+                charging = (isCharging && acCharge) ? "AC" : charging;
+                listStr.put("Charging", charging);
+
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                float batteryPct = level / (float)scale;
+                listStr.put("Percent", String.format("%.1f%%", batteryPct*100));
+
+                addBuild("Battery...", listStr);
+            }
         }
 
         // --------------- Application Info -------------
