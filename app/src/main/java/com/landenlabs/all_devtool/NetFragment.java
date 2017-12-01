@@ -77,8 +77,6 @@ import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -380,38 +378,6 @@ public class NetFragment extends DevFragment {
             m_log.e(ex.getMessage());
         }
 
-
-        // --------------- TEST - available services -------
-        if (true) {
-            Map<String, String> serviceList = new LinkedHashMap<>();
-            Field[] fields = Context.class.getDeclaredFields();
-            for (Field f : fields) {
-                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
-
-                    //  && isRightName(f.getName())
-                    String fieldType = f.getType().getName();
-                    if (fieldType.equals(String.class.getName()) && f.getName()
-                            .endsWith("_SERVICE")) {
-                        String key = f.toString();
-                        try {
-                            key = f.get(null).toString();
-                            if ("sensorhub".equals(key)) {
-                                // Galaxy crashes on this.
-                            } else {
-                                Object value = getActivity().getSystemService(key);
-                                if (value != null) {
-                                    serviceList.put(key, value.getClass().getSimpleName());
-                                }
-                            }
-                        } catch (Exception ex) {
-
-                        }
-                    }
-                }
-            }
-            addBuild("Services", serviceList);
-        }
-
         // --------------- Connection Services -------------
         try {
             checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -648,6 +614,7 @@ public class NetFragment extends DevFragment {
 
             if (mNetBroadcastReceiver == null) {
                 mNetBroadcastReceiver = new NetBroadcastReceiver(wifiMgr);
+                // getActivity().unregisterReceiver(mNetBroadcastReceiver);
                 getActivity().registerReceiver(mNetBroadcastReceiver, INTENT_FILTER_SCAN_AVAILABLE);
             }
 
@@ -886,6 +853,16 @@ public class NetFragment extends DevFragment {
             updateList();
         }
     }
+
+    @Override
+    public void onDetach() {
+        if (mNetBroadcastReceiver != null) {
+            getActivity().unregisterReceiver(mNetBroadcastReceiver);
+            mNetBroadcastReceiver = null;
+        }
+        super.onDetach();
+    }
+
 
     // ============================================================================================
     // Internal methods

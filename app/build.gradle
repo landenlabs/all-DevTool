@@ -11,15 +11,15 @@ android {
     compileSdkVersion 26
 
     // As of gradle 3.x this is no longer needed.
-    // buildToolsVersion '26.0.1'
+    // buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 17
         targetSdkVersion 26
 
-        versionCode 1927
-        versionName '1.9.27'
+        versionCode 1928
+        versionName '1.9.28'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString

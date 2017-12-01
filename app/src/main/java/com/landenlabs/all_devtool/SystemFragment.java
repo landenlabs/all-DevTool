@@ -78,6 +78,8 @@ import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -446,8 +448,10 @@ public class SystemFragment extends DevFragment {
                 Long nanowattHours = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER);
 
                 Map<String, String> listStr = new LinkedHashMap<>();
-                listStr.put("Current (avg)", String.format("%.4f Amps", avgCurrent/1e6));
-                listStr.put("Current (now)", String.format("%.4f Amps", currentNow/1e6));
+                if (avgCurrent.intValue() != 0) {
+                    listStr.put("Current (avg)", String.format("%.3f mA", avgCurrent / 1e3));
+                }
+                listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));
             //    listStr.put("Percent", String.format("%d%%", capPer.intValue()));
                 listStr.put("Remain", String.format("%.4f Hours", nanowattHours/1e9));
 
@@ -471,6 +475,9 @@ public class SystemFragment extends DevFragment {
                 int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
                 float batteryPct = level / (float)scale;
                 listStr.put("Percent", String.format("%.1f%%", batteryPct*100));
+
+                int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+                listStr.put("Voltage", String.format("%d mV", voltage));
 
                 addBuild("Battery...", listStr);
             }
@@ -539,6 +546,38 @@ public class SystemFragment extends DevFragment {
             addBuild("Sensors...", strList);
         }
 
+        // --------------- TEST - available services -------
+        if (true) {
+            Map<String, String> serviceList = new LinkedHashMap<>();
+            Field[] fields = Context.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+
+                    //  && isRightName(f.getName())
+                    String fieldType = f.getType().getName();
+                    if (fieldType.equals(String.class.getName()) && f.getName()
+                            .endsWith("_SERVICE")) {
+                        String key = f.toString();
+                        try {
+                            key = f.get(null).toString();
+                            if ("sensorhub".equals(key)) {
+                                // Galaxy crashes on this.
+                            } else {
+                                Object value = getActivity().getSystemService(key);
+                                if (value != null) {
+                                    serviceList.put(key, value.getClass().getSimpleName());
+                                }
+                            }
+                        } catch (Exception ex) {
+
+                        }
+                    }
+                }
+            }
+            addBuild("Services", serviceList);
+        }
+
+        // ----- User info -----
         try {
             if (Build.VERSION.SDK_INT >= 17) {
                 final UserManager userMgr = (UserManager) getActivity().getSystemService(Context.USER_SERVICE);

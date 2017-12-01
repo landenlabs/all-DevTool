@@ -329,6 +329,7 @@ public class GpsFragment extends DevFragment implements
         for (int idx = 0; idx != s_maxRows; idx++)
             m_listView.expandGroup(idx);
 
+        onLocationChanged(null);
         return rootView;
     }
 
@@ -517,6 +518,13 @@ public class GpsFragment extends DevFragment implements
         addMsgToDetailRow(s_colorMsg, "GPS error");
     }
 
+    private static boolean isLocDup(Location loc1, Location loc2) {
+        if (loc1 != null && loc2 != null) {
+            return loc1.distanceTo(loc2) == 0;
+        }
+        return false;
+    }
+
     // ============================================================================================
     // LocationListener,
     @Override
@@ -528,7 +536,7 @@ public class GpsFragment extends DevFragment implements
             Location gpsLoc = m_locMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (gpsLoc != null) {
                 showGPS(gpsLoc);
-                isDupLoc = isDupLoc || (location.distanceTo(gpsLoc) == 0);
+                isDupLoc = isDupLoc || isLocDup(location, gpsLoc);
             }
         } catch (Exception ex) {
             Toast.makeText(this.getActivity(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -543,7 +551,7 @@ public class GpsFragment extends DevFragment implements
                 Location netLoc = m_locMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 if (netLoc != null) {
                     showGPS(netLoc);
-                    isDupLoc = isDupLoc || (location.distanceTo(netLoc) == 0);
+                    isDupLoc = isDupLoc || isLocDup(location, netLoc);
                 }
             }
         } catch (Exception ex) {
@@ -554,7 +562,7 @@ public class GpsFragment extends DevFragment implements
             Location passiveLoc = m_locMgr.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             if (null != passiveLoc) {
                 showGPS(passiveLoc);
-                isDupLoc = isDupLoc || (location.distanceTo(passiveLoc) == 0);
+                isDupLoc = isDupLoc || isLocDup(location, passiveLoc);
             }
         } catch (Exception ex) {
             Toast.makeText(this.getActivity(), "Passive " + ex.getMessage(), Toast.LENGTH_LONG).show();

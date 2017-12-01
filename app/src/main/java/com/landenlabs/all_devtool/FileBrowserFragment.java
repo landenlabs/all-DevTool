@@ -494,7 +494,12 @@ public class FileBrowserFragment extends DevFragment
             }
 
             String path = (dir == null) ? "" : dir.getAbsolutePath();
-            int perm = OsUtils.getPermissions(dir);
+            int perm = -1;
+            try {
+                perm = OsUtils.getPermissions(dir);
+            } catch (Exception ex) {
+            }
+
             String permStr = SysUtils.getPermissionString(perm);
             dirName = dirName + "  ";
 
@@ -1003,17 +1008,21 @@ public class FileBrowserFragment extends DevFragment
     StringBuilder appendPerm(StringBuilder perm, FileUtil.FileInfo fileItem) {
         perm.append("Perm: ");
 
-        OsUtils.Stat stat = OsUtils.getStat(fileItem);
-        if (stat != null) {
-            int mode = stat.st_mode & 0777;
-            int world = mode & 0007;
-            perm.append(isBit(world, 0004) ? "R" : "-");
-            perm.append(isBit(world, 0002) ? "W" : "-");
-            perm.append(isBit(world, 0001) ? "X" : "-");
+        try {
+            OsUtils.Stat stat = OsUtils.getStat(fileItem);
+            if (stat != null) {
+                int mode = stat.st_mode & 0777;
+                int world = mode & 0007;
+                perm.append(isBit(world, 0004) ? "R" : "-");
+                perm.append(isBit(world, 0002) ? "W" : "-");
+                perm.append(isBit(world, 0001) ? "X" : "-");
 
-            perm.append(fileItem.isFile() ? "F" : "");
-            perm.append(fileItem.isDirectory() ? "D" : "");
-            return perm;
+                perm.append(fileItem.isFile() ? "F" : "");
+                perm.append(fileItem.isDirectory() ? "D" : "");
+                return perm;
+            }
+        } catch (Exception ex) {
+
         }
 
         perm.append(fileItem.canRead() ? "R" : "-");
