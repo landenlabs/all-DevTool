@@ -259,11 +259,12 @@ public class SystemFragment extends DevFragment {
         m_rowColor2 = color;
 
         ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+        String androidIDStr = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        addBuild("Android ID", androidIDStr);
+        ConfigurationInfo info = actMgr.getDeviceConfigurationInfo();
+        addBuild("OpenGL", info.getGlEsVersion());
 
         try {
-            String androidIDStr = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            addBuild("Android ID", androidIDStr);
-
             try {
                 AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(getContext());
                 final String adIdStr = adInfo.getId();
@@ -288,9 +289,6 @@ public class SystemFragment extends DevFragment {
             } catch (Exception ex) {
             }
             */
-
-            ConfigurationInfo info = actMgr.getDeviceConfigurationInfo();
-            addBuild("OpenGL", info.getGlEsVersion());
         } catch (Exception ex) {
             m_log.e(ex.getMessage());
         }

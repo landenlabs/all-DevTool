@@ -235,7 +235,8 @@ public class ProcFragment extends DevFragment {
             }
         }
 
-        if (firstTime) {
+        if (firstTime ||
+                !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
             final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
             m_listView.setAdapter(adapter);
 
@@ -244,7 +245,7 @@ public class ProcFragment extends DevFragment {
                 m_listView.expandGroup(position);
         }
 
-        m_listView.invalidate();
+        // m_listView.invalidate();
         if (m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter ) {
             ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter())
                     .notifyDataSetChanged();

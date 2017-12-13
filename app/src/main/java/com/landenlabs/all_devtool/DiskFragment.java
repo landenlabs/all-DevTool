@@ -256,14 +256,14 @@ public class DiskFragment extends DevFragment {
     }
 
     @Override
-    protected boolean checkPermissions(String needPermission) {
+    protected boolean checkPermissions(String... needPermissions) {
         boolean okay = true;
         if (Build.VERSION.SDK_INT >= 23) {
-            if (getContext().checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
+            if (getContext().checkSelfPermission(needPermissions[0]) != PackageManager.PERMISSION_GRANTED) {
                 okay = false;
                 m_writeGrantedCb.setChecked(false);
             //    m_writeGrantedCb.setText("Grant Write [Failed]");
-                requestPermissions(new String[]{ needPermission }, MY_PERMISSIONS_REQUEST);
+                requestPermissions(new String[]{ needPermissions[0] }, MY_PERMISSIONS_REQUEST);
             } else {
             //    m_writeGrantedCb.setText("Grant Write");
                 m_writeGrantedCb.setChecked(true);
@@ -295,11 +295,11 @@ public class DiskFragment extends DevFragment {
     // Internal methods
 
     /**
-     * Populate list with 'Build' parameters.
+     * Populate list with 'Disk' information.
      */
     void updateList(boolean force) {
-        if (!m_list.isEmpty() && !force)
-            return;
+        // if (!m_list.isEmpty() && !force)
+        //     return;
         
         // Time today = new Time(Time.getCurrentTimezone());
         // today.setToNow();
@@ -307,6 +307,7 @@ public class DiskFragment extends DevFragment {
         Date dt = new Date();
         m_titleTime.setText(m_timeFormat.format(dt));
 
+        boolean firstTime = m_list.isEmpty();
         m_list.clear();
         m_writeGrantedCb.setChecked(hasWritePermission());
         addString("Permission", hasWritePermission() ? "Granted Write" : "Denied Write");
@@ -424,6 +425,7 @@ public class DiskFragment extends DevFragment {
         }
 
 
+        /*
         final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
         m_listView.setAdapter(adapter);
 
@@ -432,6 +434,23 @@ public class DiskFragment extends DevFragment {
             m_listView.expandGroup(position);
 
         m_listView.invalidate();
+        */
+
+        if (firstTime ||
+                !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
+            final DiskFragment.BuildArrayAdapter adapter = new DiskFragment.BuildArrayAdapter(this.getActivity());
+            m_listView.setAdapter(adapter);
+
+            int count = adapter.getGroupCount();
+            for (int position = 0; position < count; position++)
+                m_listView.expandGroup(position);
+        }
+
+        // m_listView.invalidate();
+        if (m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter ) {
+            ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter())
+                    .notifyDataSetChanged();
+        }
     }
 
 

@@ -38,6 +38,7 @@ import android.view.WindowManager;
 import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,12 +125,19 @@ public abstract class DevFragment extends Fragment {
     // ============================================================================================
     // Permissions
     protected static final int MY_PERMISSIONS_REQUEST = 27;
-    protected boolean checkPermissions(String needPermission) {
+    protected boolean checkPermissions(String... needPermissions) {
         boolean okay = true;
         if (Build.VERSION.SDK_INT >= 23) {
-            if (getContext().checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
+            List<String> requestPermissions = new ArrayList<>();
+            for (String needPermission : needPermissions) {
+                if (getContext()
+                        .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions.add(needPermission);
+                }
+            }
+            if (! requestPermissions.isEmpty()) {
                 okay = false;
-                requestPermissions(new String[]{ needPermission }, MY_PERMISSIONS_REQUEST);
+                requestPermissions(requestPermissions.toArray(new String[0]), MY_PERMISSIONS_REQUEST);
             }
         }
 

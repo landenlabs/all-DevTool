@@ -25,7 +25,6 @@ package com.landenlabs.all_devtool;
 
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -33,7 +32,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
@@ -45,7 +43,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
@@ -337,53 +335,39 @@ public class NetFragment extends DevFragment {
         boolean firstTime = m_list.isEmpty();
         m_list.clear();
 
-        ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
 
-        try {
-            String androidIDStr = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            addBuild("Android ID", androidIDStr);
-
-            /*
-            java.lang.IllegalStateException: Calling this from your main thread can lead to deadlock
-
-            try {
-                AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(getContext());
-                final String adIdStr = adInfo.getId();
-                final boolean isLAT = adInfo.isLimitAdTrackingEnabled();
-                addBuild("Ad ID", adIdStr);
-            } catch (IOException e) {
-                // Unrecoverable error connecting to Google Play services (e.g.,
-                // the old version of the service doesn't support getting AdvertisingId).
-            } catch (GooglePlayServicesNotAvailableException e) {
-                // Google Play services is not available entirely.
-            }
-            */
-
-            /*
-            try {
-                InstanceID instanceID = InstanceID.getInstance(getContext());
-                if (instanceID != null) {
-                    // Requires a Google Developer project ID.
-                    String authorizedEntity = "<need to make this on google developer site>";
-                    instanceID.getToken(authorizedEntity, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-                    addBuild("Instance ID", instanceID.getId());
-                }
-            } catch (Exception ex) {
-            }
-            */
-
-            ConfigurationInfo info = actMgr.getDeviceConfigurationInfo();
-            addBuild("OpenGL", info.getGlEsVersion());
-        } catch (Exception ex) {
-            m_log.e(ex.getMessage());
-        }
 
         // --------------- Connection Services -------------
         try {
-            checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+            checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION
+                    , Manifest.permission.READ_PHONE_STATE);
+
             Map<String, String> cellListStr = new LinkedHashMap<String, String>();
             TelephonyManager telephonyManager =
              (TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+
+
+            cellListStr.put("IMEI", telephonyManager.getImei());
+            cellListStr.put("Device Id", telephonyManager.getDeviceId());
+            PersistableBundle carrierCfgBundle = telephonyManager.getCarrierConfig();
+            if (carrierCfgBundle != null) {
+                cellListStr.put("Carrier", carrierCfgBundle.toString());
+            }
+            cellListStr.put("Call State", String.valueOf(telephonyManager.getCallState()));
+            cellListStr.put("Soft Ver", telephonyManager.getDeviceSoftwareVersion());
+            cellListStr.put("Grp Id Level", telephonyManager.getGroupIdLevel1());
+            cellListStr.put("Line1 Num", telephonyManager.getLine1Number());
+            cellListStr.put("Meid", telephonyManager.getMeid());
+            cellListStr.put("Agent", telephonyManager.getMmsUserAgent());
+            cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
+            cellListStr.put("VoiceMail", telephonyManager.getVoiceMailNumber());
+            cellListStr.put("Data act", String.valueOf(telephonyManager.getDataActivity()));
+            cellListStr.put("Net type", String.valueOf(telephonyManager.getDataNetworkType()));
+            cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
+            cellListStr.put("PhoneType", String.valueOf(telephonyManager.getPhoneType()));
+            cellListStr.put("Net Data Typ", String.valueOf(telephonyManager.getDataNetworkType()));
+            cellListStr.put("Is World", String.valueOf(telephonyManager.isWorldPhone()));
+
 
             // Type of the network
             int phoneTypeInt = telephonyManager.getPhoneType();
@@ -604,6 +588,9 @@ public class NetFragment extends DevFragment {
 
             }
         }
+
+        // --------------- Telephony Services -------------
+
 
         // --------------- Wifi Services -------------
         // final WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);

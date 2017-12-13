@@ -219,7 +219,8 @@ public class PropFragment extends DevFragment {
 
         // -----------------------------------------------------------------------------------------
 
-        if (firstTime) {
+        if (firstTime ||
+                !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
             final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
             m_listView.setAdapter(adapter);
 
@@ -229,7 +230,8 @@ public class PropFragment extends DevFragment {
         }
 
         // m_listView.invalidate();
-        ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
+        ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter())
+                    .notifyDataSetChanged();
     }
 
     // ============================================================================================
