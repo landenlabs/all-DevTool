@@ -317,7 +317,8 @@ public class PropFragment extends DevFragment {
     /**
      * ExpandableLis UI 'data model' class
      */
-    private class BuildArrayAdapter extends BaseExpandableListAdapter {
+    private class BuildArrayAdapter extends BaseExpandableListAdapter
+            implements View.OnClickListener {
         private final LayoutInflater m_inflater;
 
         public BuildArrayAdapter(Context context) {
@@ -354,7 +355,7 @@ public class PropFragment extends DevFragment {
 
             if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
                     || text.matches(m_filter)
-                    || Utils.containsIgnoreCase(text, m_filter))  ) {
+                    || Utils.containsIgnoreCase(text, m_filter))) {
                 expandView.setBackgroundColor(0x80ffff00);
             } else {
 
@@ -364,6 +365,7 @@ public class PropFragment extends DevFragment {
                     expandView.setBackgroundColor(0x80d0ffe0);
             }
 
+            expandView.setTag(Integer.valueOf(groupPosition));
             return expandView;
         }
 
@@ -429,6 +431,8 @@ public class PropFragment extends DevFragment {
             else
                 summaryView.setBackgroundColor(0x80d0ffe0);
 
+            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setOnClickListener(this);
             return summaryView;
         }
 
@@ -436,6 +440,15 @@ public class PropFragment extends DevFragment {
         public boolean isChildSelectable(int groupPosition, int childPosition) {
             return true;
         }
-    }
 
+        @Override
+        public void onClick(View view) {
+            int grpPos = ((Integer) view.getTag()).intValue();
+
+            if (m_listView.isGroupExpanded(grpPos))
+                m_listView.collapseGroup(grpPos);
+            else
+                m_listView.expandGroup(grpPos);
+        }
+    }
 }
