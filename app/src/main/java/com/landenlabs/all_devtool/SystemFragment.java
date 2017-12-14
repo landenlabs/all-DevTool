@@ -710,10 +710,12 @@ public class SystemFragment extends DevFragment {
         }
     }
 
+    // =============================================================================================
     /**
      * ExpandableLis UI 'data model' class
      */
-    private class BuildArrayAdapter extends BaseExpandableListAdapter {
+    private class BuildArrayAdapter extends BaseExpandableListAdapter
+            implements View.OnClickListener {
         private final LayoutInflater m_inflater;
 
         public BuildArrayAdapter(Context context) {
@@ -826,6 +828,8 @@ public class SystemFragment extends DevFragment {
             else
                 summaryView.setBackgroundColor(m_rowColor2);
 
+            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setOnClickListener(this);
             return summaryView;
         }
 
@@ -834,6 +838,16 @@ public class SystemFragment extends DevFragment {
             return true;
         }
 
+
+        @Override
+        public void onClick(View view) {
+            int grpPos = ((Integer) view.getTag()).intValue();
+
+            if (m_listView.isGroupExpanded(grpPos))
+                m_listView.collapseGroup(grpPos);
+            else
+                m_listView.expandGroup(grpPos);
+        }
     }
 
 }
