@@ -90,7 +90,7 @@ public class DevToolActivity extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        m_uncaughtExceptionHandler = new UncaughtExceptionHandler();
+        // m_uncaughtExceptionHandler = new UncaughtExceptionHandler(getApplicationContext());
         boolean DEBUG = (getApplicationInfo().flags & 2) != 0;
         AppCrash.initalize(getApplication(), DEBUG);
 
@@ -213,7 +213,7 @@ public class DevToolActivity extends FragmentActivity {
     public void onStart() {
         super.onStart();
         GlobalInfo.s_globalInfo.mainFragActivity = this;
-        m_uncaughtExceptionHandler = new UncaughtExceptionHandler();
+        m_uncaughtExceptionHandler = new UncaughtExceptionHandler(this);
     }
 
     @Override

@@ -347,26 +347,40 @@ public class NetFragment extends DevFragment {
              (TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
 
 
-            cellListStr.put("IMEI", telephonyManager.getImei());
             cellListStr.put("Device Id", telephonyManager.getDeviceId());
-            PersistableBundle carrierCfgBundle = telephonyManager.getCarrierConfig();
-            if (carrierCfgBundle != null) {
-                cellListStr.put("Carrier", carrierCfgBundle.toString());
+            if (Build.VERSION.SDK_INT >= 26) {
+                cellListStr.put("IMEI", telephonyManager.getImei());    // api 26
+                PersistableBundle carrierCfgBundle = telephonyManager.getCarrierConfig();   // api 26
+                if (carrierCfgBundle != null) {
+                    cellListStr.put("Carrier", carrierCfgBundle.toString());
+                }
+                cellListStr.put("Meid", telephonyManager.getMeid());        // api 26
             }
+
             cellListStr.put("Call State", String.valueOf(telephonyManager.getCallState()));
             cellListStr.put("Soft Ver", telephonyManager.getDeviceSoftwareVersion());
-            cellListStr.put("Grp Id Level", telephonyManager.getGroupIdLevel1());
+            if (Build.VERSION.SDK_INT >= 18) {
+                cellListStr.put("Grp Id Level", telephonyManager.getGroupIdLevel1());   // api 18
+            }
             cellListStr.put("Line1 Num", telephonyManager.getLine1Number());
-            cellListStr.put("Meid", telephonyManager.getMeid());
-            cellListStr.put("Agent", telephonyManager.getMmsUserAgent());
+
+            if (Build.VERSION.SDK_INT >= 19) {
+                cellListStr.put("Agent", telephonyManager.getMmsUserAgent());       // api 19
+            }
             cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("VoiceMail", telephonyManager.getVoiceMailNumber());
             cellListStr.put("Data act", String.valueOf(telephonyManager.getDataActivity()));
             cellListStr.put("Net type", String.valueOf(telephonyManager.getDataNetworkType()));
             cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("PhoneType", String.valueOf(telephonyManager.getPhoneType()));
-            cellListStr.put("Net Data Typ", String.valueOf(telephonyManager.getDataNetworkType()));
-            cellListStr.put("Is World", String.valueOf(telephonyManager.isWorldPhone()));
+            if (Build.VERSION.SDK_INT >= 24) {
+                cellListStr.put("Net Data Typ",
+                        String.valueOf(telephonyManager.getDataNetworkType())); // api 24
+            }
+            if (Build.VERSION.SDK_INT >= 23) {
+                cellListStr.put("Is World",
+                        String.valueOf(telephonyManager.isWorldPhone()));       // api 23
+            }
 
 
             // Type of the network
