@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#444"
+        android:orientation="horizontal">
+
+
+        <ImageView
+            android:id="@+id/lightIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/dev_tool_ic" />
+
+        <!--
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignBottom="@id/alarmIcon"
+            android:layout_alignTop="@id/alarmIcon"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar" />
+        -->
+
+
+        <TextView
+            android:id="@+id/lightTitle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Light"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/lightAuxBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="10dp"
+            android:gravity="center|right"
+            android:text="abc"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginBottom="10dp"
+        android:background="@android:color/white" />
+
+
+    <TextClock
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Flash Light" />
+
+    <ToggleButton
+        android:id="@+id/lightCameraOnTb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textOff="Light is Off"
+        android:textOn="Light is ON" />
+
+    <!-- Todo  get betters seekBar look -->
+    <SeekBar
+        android:id="@+id/lightCameraSB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lightCameraOnTb"
+        android:background="#880"
+        android:max="100"
+        android:progress="50" />
+
+
+    <LinearLayout
+        android:background="@drawable/paper_dark"
+        android:id="@+id/screenSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="10dp"
+            android:background="@android:color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ToggleButton
+                android:id="@+id/screenOnTB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:textOff="Screen On Always"
+                android:textOn="Screen On Auto" />
+
+            <ToggleButton
+                android:id="@+id/screenBrightnesTB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:textOff="Brightness Manual"
+                android:textOn="Brightness Auto" />
+        </LinearLayout>
+
+        <!-- Todo  get betters seekBar look -->
+        <SeekBar
+            android:id="@+id/screenBrightnessSB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lightCameraOnTb"
+            android:background="#880"
+            android:max="100"
+            android:progress="50" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

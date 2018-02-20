@@ -18,8 +18,8 @@ android {
         minSdkVersion 17
         targetSdkVersion 26
 
-        versionCode 1930
-        versionName '1.9.30'
+        versionCode 1931
+        versionName '1.9.31'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -85,13 +85,13 @@ android {
 }
 
 ext {
-    supportLibVersion = '26.0.2'
+    supportLibVersion = '26.0.1'    // 26.1.0
     leakCanaryVersion = '1.4-beta2'
-    playServicesVersion = '10.2.1'   // '10.0.1'
+    playServicesVersion = '11.0.2' // '10.2.1'
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:26.0.2'
+    compile "com.android.support:support-v4:$supportLibVersion"
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     //  compile "com.google.android.gms:play-services:$playServicesVersion"
     //  compile "com.google.android.gms:play-services-ads:$playServicesVersion"

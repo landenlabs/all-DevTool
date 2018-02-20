@@ -451,7 +451,7 @@ public class SystemFragment extends DevFragment {
                 }
                 listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));
             //    listStr.put("Percent", String.format("%d%%", capPer.intValue()));
-                listStr.put("Remain", String.format("%.4f Hours", nanowattHours/1e9));
+            //    listStr.put("Remain", String.format("%.4f Hours", nanowattHours/1e9));
 
                 IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
                 Intent batteryStatus = getContext().registerReceiver(null, ifilter);

@@ -56,7 +56,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -106,7 +105,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     private TextView m_clockSysClkUpTm;
     private TextView m_clockSysClkReal;
 
-    private static final DateFormat s_hour24Format = new SimpleDateFormat("HH:mm:ss.SSS");
     private static SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a");
     private static SimpleDateFormat s_time12ZoneFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm:ss a zzz");
     private static SimpleDateFormat s_time12GmtFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm:ss a 'GMT'");
@@ -348,6 +346,12 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
         s_timeZoneFormat.setTimeZone(m_timeZone);
         String localTmStr = s_timeZoneFormat.format(m_date);
+    //    localTmStr += "\n  zzz=" + new SimpleDateFormat("zzz").format(m_date);
+        localTmStr += "\n   " + new SimpleDateFormat("zzzz", Locale.getDefault()).format(m_date);
+    //    localTmStr += "\n  ZZZ=" + new SimpleDateFormat("ZZZ").format(m_date);
+        localTmStr += "\n   " + new SimpleDateFormat("ZZZZ", Locale.getDefault()).format(m_date);
+     //   localTmStr += "\n Build Ver=" + Build.VERSION.SDK_INT;
+
 
         m_clockLocalTv.setText(localTmStr);
         String gmtTmStr = s_timeGmtFormat.format(m_date);

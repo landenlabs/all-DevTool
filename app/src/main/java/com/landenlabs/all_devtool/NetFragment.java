@@ -44,6 +44,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
@@ -648,6 +649,24 @@ public class NetFragment extends DevFragment {
                     } else {
                         wifiListStr.put("MAC", wifiInfo.getMacAddress());
                     }
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        wifiListStr.put("Frequency",
+                                wifiInfo.getFrequency() + WifiInfo.FREQUENCY_UNITS);
+                    }
+
+                    /*
+                    public boolean is24GHz() {
+                    public boolean is5GHz() {
+                    public long txBad;
+                    public long txRetries;
+                    public long txSuccess;
+                    public long rxSuccess;
+                    public double txBadRate;
+                    public double txRetriesRate;
+                    public double txSuccessRate;
+                    public double rxSuccessRate;
+                    */
+
                 }
 
             } catch (Exception ex) {
@@ -657,6 +676,8 @@ public class NetFragment extends DevFragment {
             if (!wifiListStr.isEmpty()) {
                 addBuild("WiFi...", wifiListStr);
             }
+
+            long bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime();
 
             try {
                 List<ScanResult> listWifi = wifiMgr.getScanResults();
@@ -675,11 +696,14 @@ public class NetFragment extends DevFragment {
                         wifiScanListStr.put("  Capabilities", scanResult.capabilities);
                         //       wifiScanListStr.put("  Center Freq", String.valueOf(scanResult.centerFreq0));
                         //       wifiScanListStr.put("  Freq width", String.valueOf(scanResult.channelWidth));
-                        wifiScanListStr.put("  Level, Freq", String.format("%d, %d", scanResult.level, scanResult.frequency));
+                        wifiScanListStr.put("  Level, Freq", String.format("%d db, %d MHz",
+                                scanResult.level, scanResult.frequency));
+                        // wifiScanListStr.put("  Width", scanResult.channelWidth);
                         if (Build.VERSION.SDK_INT >= 17) {
-                            Date wifiTime = new Date(scanResult.timestamp);
+                            Date wifiTime = new Date(scanResult.timestamp/1000 + bootTime);
                             wifiScanListStr.put("  Time", wifiTime.toLocaleString());
                         }
+
                         addBuild(String.format("WiFiScan #%d", ++idx), wifiScanListStr);
                     }
                 }

@@ -42,6 +42,14 @@
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"/>
 
+    <!-- Flash light -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
+    <uses-feature android:name="android.hardware.camera" />
+
+    <!-- Permissions : Allows access to change screen brightness settings -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+
     <application
         android:allowBackup="true"
         android:allowClearUserData="true"

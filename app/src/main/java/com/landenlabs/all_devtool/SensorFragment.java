@@ -593,6 +593,15 @@ public class SensorFragment extends DevFragment
             m_plot.setRangeLabel("Battery%");
 
             m_plot.addSeries(m_seriesBattery, makeFormatter(lineFillWidth, Color.rgb(255, 128, 0), Color.GREEN, 0, height, FILL_MODE));
+
+            /*
+            BatteryManager batteryManager = (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                Integer currentNow =
+                        batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
+            }
+            m_plot.addSeries(m_seriesBattery, makeFormatter(lineFillWidth, Color.rgb(100, 255, 100), Color.GREEN, 0, height, FILL_MODE));
+            */
         } else if (m_sensorName.equals(WIFI_STR)) {
             if (m_seriesWifi == null) {
                 m_seriesWifi = createSeries("WiFi");
