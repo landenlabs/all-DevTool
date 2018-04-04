@@ -72,7 +72,12 @@ android {
             dimension = "std"
         }
     }
+
+    // Generates build warning, but is required to use lamba Java 1.8 features.
+    // "Jack is disabled, but one of the plugins you are using supports Java 8 language features."
     compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     // Load signing config.
@@ -85,7 +90,7 @@ android {
 }
 
 ext {
-    supportLibVersion = '26.0.1'    // 26.1.0
+    supportLibVersion = '26.1.0'    // 26.1.0
     leakCanaryVersion = '1.4-beta2'
     playServicesVersion = '11.0.2' // '10.2.1'
 }

@@ -93,6 +93,7 @@ import java.util.concurrent.TimeUnit;
 public class GpsFragment extends DevFragment implements
         View.OnClickListener,
         LocationListener,
+        android.location.LocationListener,
         GpsStatus.Listener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -153,6 +154,7 @@ public class GpsFragment extends DevFragment implements
     Map<String, LocInfo> m_mapLocProviders = new HashMap<String, LocInfo>();
 
     TextView m_gpsTv;
+    CheckBox m_gpsCb;
     boolean m_gpsMonitor = false;
 
     Map<String, CheckBox> m_providersCb = new HashMap<String, CheckBox>();
@@ -315,7 +317,7 @@ public class GpsFragment extends DevFragment implements
         showProviders();
         // TODO - get available providers
         getCheckBox(rootView, R.id.gpsFuseCb, FUSED_PROVIDER);
-        getCheckBox(rootView, R.id.gpsGPSCb, LocationManager.GPS_PROVIDER);
+        m_gpsCb = getCheckBox(rootView, R.id.gpsGPSCb, LocationManager.GPS_PROVIDER);
         getCheckBox(rootView, R.id.gpsNetwkCb, LocationManager.NETWORK_PROVIDER);
         getCheckBox(rootView, R.id.gpsLowPwrCb, LocationManager.PASSIVE_PROVIDER);
         getCheckBox(rootView, R.id.gpsStatusCb, STATUS_CB);
@@ -572,6 +574,21 @@ public class GpsFragment extends DevFragment implements
             showGPS(location);
     }
 
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        addMsgToDetailRow(s_colorMsg, "Provider " + provider + " status changed " + status);
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        addMsgToDetailRow(s_colorMsg, "Provider enabled " + provider);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        addMsgToDetailRow(s_colorMsg, "Provider disabled " + provider);
+    }
+
     // ============================================================================================
     // GpsFragment
     private CheckBox getCheckBox(View rootView, int resId, String provider) {
@@ -611,7 +628,7 @@ public class GpsFragment extends DevFragment implements
                     }
                 } catch (SecurityException ex) {
                     m_log.e(ex.getLocalizedMessage());
-                    m_gpsTv.setEnabled(false);
+            //        m_gpsTv.setEnabled(false);
                     addMsgToDetailRow(s_colorMsg, "GPS not available");
                     addMsgToDetailRow(s_colorMsg, ex.getLocalizedMessage());
                 }
@@ -662,12 +679,27 @@ public class GpsFragment extends DevFragment implements
 
                 PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
                         m_googleApiClient, m_locationRequest, this);
+                if (m_gpsCb.isChecked() && m_locationRequest.getPriority() == LocationRequest.PRIORITY_HIGH_ACCURACY) {
+                    m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
+                    addMsgToDetailRow(s_colorMsg, "GPS request made");
+                }
+            } else {
+                String errMsg = "start GPS ignore, missing permissions";
+                Ui.ShowMessage(this.getActivity(), errMsg);
+                addMsgToDetailRow(s_colorMsg, errMsg);
+                // Toast.makeText(getContext(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
             }
         }
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
+        }
     }
 
     private boolean isGooglePlayServicesAvailable() {
@@ -819,12 +851,12 @@ public class GpsFragment extends DevFragment implements
         GpsInfo gpsInfo = m_list.get(s_detailRow);
         ItemList itemList = gpsInfo.getList();
         CheckBox cb = m_colorsCb.get(item.m_color);
-        // if (m_gpsMonitor && (cb == null || cb.isChecked())) {
+        if (/* m_gpsMonitor && */ (cb == null || cb.isChecked())) {
             if (!isDup) {
                 itemList.add(item);
                 listChanged();
             }
-        // }
+        }
         
         return itemList.size();
     }

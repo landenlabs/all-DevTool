@@ -30,9 +30,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.icu.text.TimeZoneNames;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -53,8 +56,6 @@ import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -346,11 +347,18 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
         s_timeZoneFormat.setTimeZone(m_timeZone);
         String localTmStr = s_timeZoneFormat.format(m_date);
-    //    localTmStr += "\n  zzz=" + new SimpleDateFormat("zzz").format(m_date);
+    //    localTmStr += "\n  zzz=" + new SimpleDateFormat("zzz", Locale.getDefault()).format(m_date);
         localTmStr += "\n   " + new SimpleDateFormat("zzzz", Locale.getDefault()).format(m_date);
     //    localTmStr += "\n  ZZZ=" + new SimpleDateFormat("ZZZ").format(m_date);
         localTmStr += "\n   " + new SimpleDateFormat("ZZZZ", Locale.getDefault()).format(m_date);
      //   localTmStr += "\n Build Ver=" + Build.VERSION.SDK_INT;
+        if (Build.VERSION.SDK_INT >= 24) {
+            String tzId = m_timeZone.getID();
+            Locale us = Locale.US;
+            TimeZoneNames tzNames = TimeZoneNames.getInstance(us);
+            String tzName = tzNames.getDisplayName(tzId, TimeZoneNames.NameType.SHORT_STANDARD, m_date.getTime());
+            Log.d("ZZ_", "tzName=" + tzName);
+        }
 
 
         m_clockLocalTv.setText(localTmStr);
@@ -381,7 +389,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
             // DateTimeZone zone2 = DateTimeZone.forID("America/New_York");
 
             DateTimeZone zone = DateTimeZone.forTimeZone(m_timeZone);
-            DateTimeFormatter format = DateTimeFormat.mediumDateTime();
+            org.joda.time.format.DateTimeFormatter format = org.joda.time.format.DateTimeFormat.mediumDateTime();
 
             long current = System.currentTimeMillis();
             for (int i=0; i < 4; i++)

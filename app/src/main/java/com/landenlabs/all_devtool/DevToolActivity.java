@@ -113,7 +113,9 @@ public class DevToolActivity extends FragmentActivity {
         }
         */
 
+        // See ClockFragment
         JodaTimeAndroid.init(this); // Load TimeZone database.
+
         GoogleAnalyticsHelper.init(this);
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
