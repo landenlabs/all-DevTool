@@ -88,6 +88,7 @@ import java.util.Map;
 
 import static com.androidplot.xy.BoundaryMode.AUTO;
 import static com.androidplot.xy.BoundaryMode.FIXED;
+import static com.androidplot.xy.BoundaryMode.GROW;
 import static com.landenlabs.all_devtool.R.id.plot;
 
 /**
@@ -152,7 +153,9 @@ public class SensorFragment extends DevFragment
     static SimpleXYSeries m_seriesChg;  // Shared by all graphs.
 
     static SimpleXYSeries m_seriesWifi;
-    static SimpleXYSeries m_seriesBattery;
+    static SimpleXYSeries m_seriesBatteryPercent;
+    static SimpleXYSeries m_seriesBatteryCharge;
+    static SimpleXYSeries m_seriesBatteryDrain;
     static SimpleXYSeries m_seriesAudio;
     static SimpleXYSeries m_seriesAudioAvg;
 
@@ -284,7 +287,9 @@ public class SensorFragment extends DevFragment
             m_seriesAudioAvg = createSeries("Avg");
             m_seriesProcCnt = createSeries("Proc");
             m_seriesFreeMem = createSeries("Mem");
-            m_seriesBattery = createSeries("Battery");
+            m_seriesBatteryPercent = createSeries("Percent");
+            m_seriesBatteryCharge = createSeries("Charge");
+            m_seriesBatteryDrain = createSeries("Drain");
             m_seriesWifi = createSeries("WiFi");
             m_seriesPressure = createSeries("Pressure");
 
@@ -516,6 +521,7 @@ public class SensorFragment extends DevFragment
 
         final boolean LINE_MODE = false;
         final boolean FILL_MODE = true;
+
         if (m_sensorName.equals(ORIENTATION_STR)) {
             m_plot.setRangeBoundaries(-180, 359, FIXED);
             m_plot.setRangeLabel("Angle (Degs)");
@@ -583,25 +589,21 @@ public class SensorFragment extends DevFragment
             m_plot.addSeries(m_seriesFreeMem, makeFormatter(lineFillWidth, Color.RED, Color.YELLOW, 0, height, FILL_MODE));
             m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.WHITE, Color.WHITE, 0, height, LINE_MODE));
         } else if (m_sensorName.equals(BATTERY_STR)) {
-            if (m_seriesBattery == null) {
-                m_seriesBattery = createSeries("Battery");
+            if (m_seriesBatteryPercent == null) {
+                m_seriesBatteryPercent = createSeries("Percent");
+                m_seriesBatteryCharge = createSeries("Charge");
+                m_seriesBatteryDrain = createSeries("Drain");
             }
 
-            m_plot.setRangeBoundaries(0, 110, FIXED);
+            m_plot.setRangeBoundaries(0, 350, GROW);
             m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 10);
             //2 m_plot.setTicksPerRangeLabel(2);
-            m_plot.setRangeLabel("Battery%");
+            m_plot.setRangeLabel("Battery % and Amps");
 
-            m_plot.addSeries(m_seriesBattery, makeFormatter(lineFillWidth, Color.rgb(255, 128, 0), Color.GREEN, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesBatteryCharge, makeFormatter(lineFillWidth, Color.argb(128, 100, 255, 100), Color.GREEN, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesBatteryDrain, makeFormatter(lineFillWidth, Color.argb(128, 255, 100, 100), Color.RED, 0, height, FILL_MODE));
+            m_plot.addSeries(m_seriesBatteryPercent, makeFormatter(lineFillWidth, Color.rgb(255, 128, 0), Color.BLUE, 0, height, LINE_MODE));
 
-            /*
-            BatteryManager batteryManager = (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                Integer currentNow =
-                        batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
-            }
-            m_plot.addSeries(m_seriesBattery, makeFormatter(lineFillWidth, Color.rgb(100, 255, 100), Color.GREEN, 0, height, FILL_MODE));
-            */
         } else if (m_sensorName.equals(WIFI_STR)) {
             if (m_seriesWifi == null) {
                 m_seriesWifi = createSeries("WiFi");
@@ -857,16 +859,51 @@ public class SensorFragment extends DevFragment
             }
         }
 
-        Intent batteryIntent = getActivity().getApplicationContext().registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        if (batteryIntent != null && m_seriesBattery != null) {
+        Intent batteryIntent = getActivity().getApplicationContext()
+                .registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (batteryIntent != null && m_seriesBatteryPercent != null) {
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
             int batteryLevel = level * 100 / scale;
-            add(m_seriesBattery, null, batteryLevel);
+            add(m_seriesBatteryPercent, null, batteryLevel);
             m_plotValues.put(BATTERY_STR, String.valueOf(batteryLevel));
             if (m_sensorName.equals(BATTERY_STR)) {
-                setChangeSeries(m_seriesBattery);
+                setChangeSeries(m_seriesBatteryPercent);
             }
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                BatteryManager batteryManager = (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
+                Integer currentNow =
+                        batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
+                if (currentNow != null) {
+                    double current = currentNow / 1e3;
+                    if (current > 0) {
+                        add(m_seriesBatteryCharge, null, current);
+                        add(m_seriesBatteryDrain, null, 0);
+                    } else {
+                        add(m_seriesBatteryCharge, null, 0);
+                        add(m_seriesBatteryDrain, null, -current);
+                    }
+                    if (Math.abs(current) > 200) {
+                        m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 50);
+                    }
+                    m_plotValues.put(BATTERY_STR, String.format("Level=%d%% Amps=%.3f", batteryLevel, current));
+                }
+            }
+            /*
+                    listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));
+
+                    // Are we charging / charged?
+
+                    int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                    int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                    float batteryPct = level / (float)scale;
+                    listStr.put("Percent", String.format("%.1f%%", batteryPct*100));
+
+                    int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+                    listStr.put("Voltage", String.format("%d mV", voltage));
+            */
+
         }
 
         ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
