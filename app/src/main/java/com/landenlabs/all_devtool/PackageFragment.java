@@ -188,51 +188,101 @@ public class PackageFragment extends DevFragment
 
                 case MSG_SORT_LIST:
                     if (m_list != null) {
-                        switch (m_sortBy) {
-                            case R.id.package_sort_by_appname:
-                                Collections.sort(m_list, new Comparator<PackingItem>() {
-                                    @Override
-                                    public int compare(PackingItem pkgItem1, PackingItem pkgItem2) {
-                                        return pkgItem1.m_appName.compareTo(pkgItem2.m_appName);
-                                    }
-                                });
-                                break;
-                            case R.id.package_sort_by_pkgname:
-                                Collections.sort(m_list, new Comparator<PackingItem>() {
-                                    @Override
-                                    public int compare(PackingItem pkgItem1, PackingItem pkgItem2) {
-                                        return pkgItem1.m_packInfo.packageName.compareTo(pkgItem2.m_packInfo.packageName);
-                                    }
-                                });
-                                break;
-                            case R.id.package_sort_by_size:
-                                Collections.sort(m_list, new Comparator<PackingItem>() {
-                                    @Override
-                                    public int compare(PackingItem pkgItem1, PackingItem pkgItem2) {
-                                        return (int) (pkgItem2.m_pkgSize - pkgItem1.m_pkgSize);
-                                    }
-                                });
-                                break;
-                            case R.id.package_sort_by_update_date:
-                                Collections.sort(m_list, new Comparator<PackingItem>() {
-                                    @Override
-                                    public int compare(PackingItem pkgItem1, PackingItem pkgItem2) {
-                                        return (int) Math.signum((pkgItem2.m_packInfo.lastUpdateTime - pkgItem1.m_packInfo.lastUpdateTime) * 1.0);
-                                    }
-                                });
-                                break;
-                            case R.id.package_sort_by_install_date:
-                                Collections.sort(m_list, new Comparator<PackingItem>() {
-                                    @Override
-                                    public int compare(PackingItem pkgItem1, PackingItem pkgItem2) {
-                                        return (int) Math.signum((pkgItem2.m_packInfo.lastUpdateTime - pkgItem1.m_packInfo.firstInstallTime) * 1.0);
-                                    }
-                                });
-                                break;
-                        }
+                        try {
+                            switch (m_sortBy) {
+                                case R.id.package_sort_by_appname:
+                                    Collections.sort(m_list, new Comparator<PackingItem>() {
+                                        @Override
+                                        public int compare(PackingItem pkgItem1,
+                                                PackingItem pkgItem2) {
+                                            if (pkgItem1 == pkgItem2)
+                                                return 0;
+                                            if (pkgItem1 == null || pkgItem2 == null) {
+                                                return pkgItem1 == null ? -1 : 1;
+                                            }
+                                            return pkgItem1.m_appName.compareTo(pkgItem2.m_appName);
+                                        }
+                                    });
+                                    break;
+                                case R.id.package_sort_by_pkgname:
+                                    Collections.sort(m_list, new Comparator<PackingItem>() {
+                                        @Override
+                                        public int compare(PackingItem pkgItem1,
+                                                PackingItem pkgItem2) {
+                                            if (pkgItem1 == pkgItem2)
+                                                return 0;
+                                            if (pkgItem1 == null || pkgItem2 == null) {
+                                                return pkgItem1 == null ? -1 : 1;
+                                            }
+                                            return pkgItem1.m_packInfo.packageName
+                                                    .compareTo(pkgItem2.m_packInfo.packageName);
+                                        }
+                                    });
+                                    break;
+                                case R.id.package_sort_by_size:
+                                    Collections.sort(m_list, new Comparator<PackingItem>() {
+                                        @Override
+                                        public int compare(PackingItem pkgItem1,
+                                                PackingItem pkgItem2) {
+                                            if (pkgItem1 == pkgItem2)
+                                                return 0;
+                                            if (pkgItem1 == null || pkgItem2 == null) {
+                                                return pkgItem1 == null ? -1 : 1;
+                                            }
+                                            return Long.compare(pkgItem1.m_pkgSize, pkgItem2.m_pkgSize);
+                                        }
+                                    });
+                                    break;
+                                case R.id.package_sort_by_update_date:
+                                    Collections.sort(m_list, new Comparator<PackingItem>() {
+                                        @Override
+                                        public int compare(PackingItem pkgItem1,
+                                                PackingItem pkgItem2) {
+                                            int result;
+                                            if (pkgItem1 == pkgItem2) {
+                                                result = 0;
+                                            } else if (pkgItem1 == null || pkgItem2 == null) {
+                                                result = pkgItem1 == null ? -1 : 1;
+                                            } else if (pkgItem1.m_packInfo == null || pkgItem2.m_packInfo == null) {
+                                                result = pkgItem1.m_packInfo == null ? -1 : 1;
+                                            } else {
+                                                result = Long.compare(pkgItem1.m_packInfo.lastUpdateTime,
+                                                        pkgItem2.m_packInfo.lastUpdateTime);
+                                            }
+                                            return result;
+                                        }
+                                    });
+                                    break;
+                                case R.id.package_sort_by_install_date:
+                                    Collections.sort(m_list, new Comparator<PackingItem>() {
+                                        @Override
+                                        public int compare(PackingItem pkgItem1,
+                                                PackingItem pkgItem2) {
+                                            int result;
+                                            if (pkgItem1 == pkgItem2) {
+                                                result = 0;
+                                            } else if (pkgItem1 == null || pkgItem2 == null) {
+                                                result = pkgItem1 == null ? -1 : 1;
+                                            }
+                                            else if (pkgItem1.m_packInfo == null || pkgItem2.m_packInfo == null) {
+                                                result =  pkgItem1.m_packInfo == null ? -1 : 1;
+                                            }
+                                            else {
+                                                result = Long.compare(
+                                                        pkgItem1.m_packInfo.firstInstallTime,
+                                                        pkgItem2.m_packInfo.lastUpdateTime);
+                                            }
+                                            return result;
+                                        }
+                                    });
+                                    break;
+                            }
 
-                        // ((BaseAdapter) m_listView.getAdapter()).notifyDataSetChanged();
-                        ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
+                            // ((BaseAdapter) m_listView.getAdapter()).notifyDataSetChanged();
+                            ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
+                        } catch (Exception ex) {
+                            m_log.e(ex.getMessage());
+                        }
                     }
                     break;
             }
@@ -514,6 +564,12 @@ public class PackageFragment extends DevFragment
         LocalBroadcastManager.getInstance(this.getContext()).registerReceiver(mMessageReceiver,
                 new IntentFilter(UninstallIntentReceiver.MSG_PACKAGE_UNINSTALLED));
 
+        getContext().registerReceiver(mMessageReceiver,
+                new IntentFilter(Intent.ACTION_UNINSTALL_PACKAGE));
+        getContext().registerReceiver(mMessageReceiver,
+                new IntentFilter(Intent.ACTION_PACKAGE_FULLY_REMOVED));
+        getContext().registerReceiver(mMessageReceiver,
+                new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
 
         return m_rootView;
     }

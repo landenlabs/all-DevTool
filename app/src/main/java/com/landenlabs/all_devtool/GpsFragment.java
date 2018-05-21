@@ -683,6 +683,10 @@ public class GpsFragment extends DevFragment implements
                     m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                             m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
                     addMsgToDetailRow(s_colorMsg, "GPS request made");
+                } else {
+                    // Disable GPS provider
+                    m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            Long.MAX_VALUE, Long.MAX_VALUE, this);
                 }
             } else {
                 String errMsg = "start GPS ignore, missing permissions";

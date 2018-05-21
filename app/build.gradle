@@ -18,8 +18,8 @@ android {
         minSdkVersion 17
         targetSdkVersion 26
 
-        versionCode 1931
-        versionName '1.9.31'
+        versionCode 1932
+        versionName '1.9.32'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString

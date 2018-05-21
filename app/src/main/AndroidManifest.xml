@@ -47,9 +47,6 @@
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <uses-feature android:name="android.hardware.camera" />
 
-    <!-- Permissions : Allows access to change screen brightness settings -->
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
-
     <application
         android:allowBackup="true"
         android:allowClearUserData="true"
@@ -62,7 +59,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.landenlabs.all_devtool.DevToolActivity"
+            android:name=".DevToolActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
@@ -72,23 +69,24 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.landenlabs.all_devtool.receivers.UninstallIntentReceiver">
-            <intent-filter>
+        <receiver android:name=".receivers.UninstallIntentReceiver">
+            <intent-filter android:priority="999">
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED"  />
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name="com.landenlabs.all_devtool.receivers.AlarmService"
+            android:name=".receivers.AlarmService"
             android:enabled="true" />
-        <receiver android:name="com.landenlabs.all_devtool.receivers.AlarmReceiver" />
+        <receiver android:name=".receivers.AlarmReceiver" />
 
 
         <activity
             android:icon="@drawable/shortcut_fb"
             android:label="ShortcutActivity"
-            android:name="com.landenlabs.all_devtool.shortcuts.ShortcutFileBrowser">
+            android:name=".shortcuts.ShortcutFileBrowser">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -98,7 +96,7 @@
         <activity
             android:icon="@drawable/shortcut_gps"
             android:label="ShortcutActivity"
-            android:name="com.landenlabs.all_devtool.shortcuts.ShortcutGPS">
+            android:name=".shortcuts.ShortcutGPS">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -108,7 +106,7 @@
         <activity
             android:icon="@drawable/shortcut_pkg"
             android:label="ShortcutActivity"
-            android:name="com.landenlabs.all_devtool.shortcuts.ShortcutPackage">
+            android:name=".shortcuts.ShortcutPackage">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -118,7 +116,7 @@
         <activity
             android:icon="@drawable/shortcut_scn"
             android:label="ShortcutActivity"
-            android:name="com.landenlabs.all_devtool.shortcuts.ShortcutScreen">
+            android:name=".shortcuts.ShortcutScreen">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
                 <category android:name="android.intent.category.DEFAULT" />
