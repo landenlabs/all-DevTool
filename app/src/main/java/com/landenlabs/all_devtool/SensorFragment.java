@@ -864,6 +864,13 @@ public class SensorFragment extends DevFragment
         if (batteryIntent != null && m_seriesBatteryPercent != null) {
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+
+            // Bundle[{misc_event=0, technology=Li-ion, icon-small=17303838, max_charging_voltage=0,
+            // health=2, max_charging_current=0, online=4, status=2, plugged=2, present=true,
+            // pogo_plugged=0, capacity=280000, seq=19, charge_counter=2552000, level=83,
+            // scale=100, temperature=264, current_now=593, voltage=4196, charge_type=1,
+            // self_discharging=false, hv_charger=false, power_sharing=false, invalid_charger=0}]
+
             int batteryLevel = level * 100 / scale;
             add(m_seriesBatteryPercent, null, batteryLevel);
             m_plotValues.put(BATTERY_STR, String.valueOf(batteryLevel));
@@ -871,24 +878,34 @@ public class SensorFragment extends DevFragment
                 setChangeSeries(m_seriesBatteryPercent);
             }
 
+            final int NO_VALUE = 0;
+            double currentAmps = batteryIntent.getIntExtra("current_now", NO_VALUE);
+            int voltage = batteryIntent.getIntExtra("voltage", NO_VALUE);
+            int chargeCounter = batteryIntent.getIntExtra("charge_counter", -1);
+
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                BatteryManager batteryManager = (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
+                BatteryManager batteryManager =
+                        (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
                 Integer currentNow =
                         batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
-                if (currentNow != null) {
-                    double current = currentNow / 1e3;
-                    if (current > 0) {
-                        add(m_seriesBatteryCharge, null, current);
-                        add(m_seriesBatteryDrain, null, 0);
-                    } else {
-                        add(m_seriesBatteryCharge, null, 0);
-                        add(m_seriesBatteryDrain, null, -current);
-                    }
-                    if (Math.abs(current) > 200) {
-                        m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 50);
-                    }
-                    m_plotValues.put(BATTERY_STR, String.format("Level=%d%% Amps=%.3f", batteryLevel, current));
+
+                if (currentAmps == NO_VALUE && currentNow != null) {
+                    currentAmps = currentNow / 1e3;
                 }
+            }
+
+            if (currentAmps != NO_VALUE) {
+                if (currentAmps > 0) {
+                    add(m_seriesBatteryCharge, null, currentAmps);
+                    add(m_seriesBatteryDrain, null, 0);
+                } else {
+                    add(m_seriesBatteryCharge, null, 0);
+                    add(m_seriesBatteryDrain, null, -currentAmps);
+                }
+                if (Math.abs(currentAmps) > 200) {
+                    m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 50);
+                }
+                m_plotValues.put(BATTERY_STR, String.format("Level=%d%% Amps=%.1f", batteryLevel, currentAmps));
             }
             /*
                     listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));

@@ -355,14 +355,18 @@ public class GpsFragment extends DevFragment implements
     @Override
     public void onStart() {
         super.onStart();
-        m_googleApiClient.connect();
+        if (isGooglePlayServicesAvailable()) {
+            m_googleApiClient.connect();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "disconnect");
-        m_googleApiClient.disconnect();
+        if (isGooglePlayServicesAvailable()) {
+            m_googleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -669,7 +673,8 @@ public class GpsFragment extends DevFragment implements
     }
 
     private void startLocationUpdates() {
-        if (m_googleApiClient.isConnected()) {
+
+        if (isGooglePlayServicesAvailable() && m_googleApiClient.isConnected()) {
             stopLocationUpdates();
 
             if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -698,7 +703,9 @@ public class GpsFragment extends DevFragment implements
     }
 
     protected void stopLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+        if (isGooglePlayServicesAvailable()
+            && m_googleApiClient != null
+            && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
