@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -81,8 +82,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     TimeZone m_timeZone = TimeZone.getDefault();
 
 
-    private View m_rootView;
-
     // ---- Alaram ----
     AlarmManager m_alarmManager;
     private PendingIntent m_pendingIntent;
@@ -95,8 +94,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     private TextView m_timePartsTv;
     private TextView m_dayLight;
     private TextView m_localeTv;
-    private LinearLayout m_timeTopList;
-    private LinearLayout m_timeBotList;
 
     // Timezone Daylight savings
     enum DaylightFilter { NoDS, HasDS, InDS}
@@ -123,7 +120,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     }
 
     // ---- Timer ----
-    private boolean m_timerOn = false;
     private static final int REFRESH_MSEC = 1000;
     private Handler m_handler = new Handler();
     private Runnable m_updateElapsedTimeTask = new Runnable() {
@@ -137,6 +133,10 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         return new ClockFragment();
     }
 
+    AlarmManager getAlarmMgr() {
+        return (AlarmManager)getActivitySafe().getSystemService(Context.ALARM_SERVICE);
+    }
+
     // ============================================================================================
     // DevFragment methods
 
@@ -147,8 +147,8 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        bitmapList.add(Utils.grabScreen(this.getActivity()));
+        List<Bitmap> bitmapList = new ArrayList<>();
+        bitmapList.add(Utils.grabScreen(getActivitySafe()));
         return bitmapList;
     }
 
@@ -168,8 +168,8 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     @SuppressWarnings("deprecation")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -177,14 +177,14 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
         setHasOptionsMenu(true);
 
-        m_rootView = inflater.inflate(R.layout.clock_tab, container, false);
+        View m_rootView = inflater.inflate(R.layout.clock_tab, container, false);
 
         m_alarmTimePicker =  Ui.viewById(m_rootView, R.id.alarmTimePicker);
         m_alarmTextView = Ui.viewById(m_rootView, R.id.alarmText);
         m_clockLocalTv = Ui.viewById(m_rootView, R.id.clockLocal);
         m_clockGmtTv = Ui.viewById(m_rootView, R.id.clockGmt);
         m_timePartsTv = Ui.viewById(m_rootView, R.id.timeParts);
-        m_timeTopList = Ui.viewById(m_rootView, R.id.timeTopList);
+        LinearLayout m_timeTopList = Ui.viewById(m_rootView, R.id.timeTopList);
 
         Ui.viewById(m_rootView, R.id.timezone_hasds).setOnClickListener(this);
         Ui.viewById(m_rootView, R.id.timezone_inds).setOnClickListener(this);
@@ -199,7 +199,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         m_localeTv = new TextView(m_timeTopList.getContext());
         m_timeTopList.addView(m_localeTv);
 
-        m_timeBotList = Ui.viewById(m_rootView, R.id.timeBotList);
+        LinearLayout m_timeBotList = Ui.viewById(m_rootView, R.id.timeBotList);
         m_dayLight = new TextView(m_timeBotList.getContext());
         m_timeBotList.addView(m_dayLight);
 
@@ -208,7 +208,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         alarmToggle.setOnClickListener(this);
 
         m_alarmTimePicker.setVisibility(alarmToggle.isChecked() ? View.VISIBLE : View.GONE);
-        m_alarmManager = (AlarmManager)this.getActivity().getSystemService(Context.ALARM_SERVICE);
+        m_alarmManager = getAlarmMgr();
 
         return m_rootView;
     }
@@ -238,7 +238,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
         int id = item.getItemId();
         switch (id){
             case R.id.clock_12:
@@ -458,8 +457,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     /**
      * Format time interval
-     * @param elapsedMillis
-     * @return
      */
     private static String formatInterval(final long elapsedMillis)
     {
@@ -473,7 +470,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     /**
      * Toogle alarm setting UI on/off and start/stop pending intent.
-     * @param isOn
      */
     private void toggleAlarm(boolean isOn) {
         if (m_pendingIntent == null) {

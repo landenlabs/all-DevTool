@@ -16,6 +16,7 @@ import java.io.Writer;
 /**
  * Created by Dennis Lang on 5/1/16.
  */
+@SuppressWarnings("Convert2Lambda")
 public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     private final Context context;
@@ -88,7 +89,7 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
     /**
      * Show crash trace in Alert dialog, pause main app from running.
      */
-    public void showCrashDialog(final String msg) {
+    private void showCrashDialog(final String msg) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         // new Thread() {
         //    @Override

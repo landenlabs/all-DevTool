@@ -54,14 +54,15 @@ import java.util.List;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings({"unused", "UnnecessaryLocalVariable"})
 public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.TabListener {
 
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    static final int SHARE_MAX_IMAGE_HEIGHT = 3000;
-    ViewPager m_viewPager;
-    ActionBar m_actionBar;
+    private static final int SHARE_MAX_IMAGE_HEIGHT = 3000;
+    private ViewPager m_viewPager;
+    private ActionBar m_actionBar;
 
     public interface Creator {
         DevFragment creator();
@@ -282,7 +283,7 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
             },
     };
 
-    public TabPagerAdapter(FragmentManager fm, ViewPager viewPager, ActionBar actionBar) {
+    TabPagerAdapter(FragmentManager fm, ViewPager viewPager, ActionBar actionBar) {
         super(fm);
 
         m_viewPager = viewPager;
@@ -379,23 +380,22 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
     // ========================================================================
     // Implement TabsPagerAdapter
 
-    public DevFragment getFragment(int index) {
+    private DevFragment getFragment(int index) {
         return (DevFragment) getItem(index);
     }
 
-    public String getTabName(int tabIdx) {
+    private String getTabName(int tabIdx) {
         String name = m_tabList[tabIdx].name();
         return name;
     }
 
-    public String getFragName(int tabIdx) {
+    private String getFragName(int tabIdx) {
         return getTabName(tabIdx);
     }
 
     /***
      * Find tab index for matching page by name.
      *
-     * @param fragName
      * @param defIdx  - default to return on no match.
      *
      * @return tab index to matching fragName, else defIdx.

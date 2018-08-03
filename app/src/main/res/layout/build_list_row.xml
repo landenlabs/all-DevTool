@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:contentDescription="package details"
     tools:background="#ccc"
     android:orientation="horizontal" >
 
@@ -15,6 +16,10 @@
         tools:text="buildField"
         android:textStyle="bold" />
 
+    <!-- Have to disable focusable on all elements used inside ExpandableList
+    to allow ExpandableList to handle default expand/collapse actions
+    and honor attached click listeners such as setOnChildClickListener
+    -->
     <TextView
         android:id="@+id/buildValue"
         android:layout_width="wrap_content"
@@ -29,6 +34,7 @@
         android:layout_toRightOf="@id/buildField"
         android:gravity="right"
         android:textIsSelectable="true"
+        android:focusable="false"
         tools:text="buildValue"/>
 
 </RelativeLayout>

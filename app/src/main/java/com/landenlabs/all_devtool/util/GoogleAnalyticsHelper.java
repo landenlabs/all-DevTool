@@ -2,6 +2,7 @@ package com.landenlabs.all_devtool.util;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -17,6 +18,7 @@ import com.landenlabs.all_devtool.GlobalInfo;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings("Convert2Lambda")
 public class GoogleAnalyticsHelper {
 
     static String GOOGLE_ANALYTICS_KEY = "none";
@@ -51,7 +53,7 @@ public class GoogleAnalyticsHelper {
                     }
                 })
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    public void onConnectionFailed(ConnectionResult result) {
+                    public void onConnectionFailed(@NonNull ConnectionResult result) {
                         // This callback is important for handling errors that
                         // may occur while attempting to connect with Google.
                         //

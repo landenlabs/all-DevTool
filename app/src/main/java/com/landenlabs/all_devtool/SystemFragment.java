@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -83,7 +84,6 @@ import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -97,6 +97,7 @@ import java.util.TreeMap;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings({"ConstantConditions", "ConstantIfStatement", "Convert2Lambda"})
 public class SystemFragment extends DevFragment {
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
     private static final int MB = 1 << 20;
@@ -104,7 +105,7 @@ public class SystemFragment extends DevFragment {
     private static int m_rowColor1 = 0;
     private static int m_rowColor2 = 0x80d0ffe0;
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
-    final ArrayList<BuildInfo> m_list = new ArrayList<BuildInfo>();
+    final ArrayList<BuildInfo> m_list = new ArrayList<>();
 
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
@@ -150,7 +151,8 @@ public class SystemFragment extends DevFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
@@ -167,19 +169,18 @@ public class SystemFragment extends DevFragment {
             public void onClick(View v) {
                 m_titleTime.setText("");
                 m_titleTime.setHint("enter search text");
-                InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(m_titleTime, InputMethodManager.SHOW_IMPLICIT);
             }
         });
 
-        m_titleTime.setOnEditorActionListener(new TextView.OnEditorActionListener()
-        {
+        m_titleTime.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onEditorAction(TextView edView, int actionId, KeyEvent event)
-            {
-                if(actionId == EditorInfo.IME_ACTION_DONE)
-                {
-                    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            public boolean onEditorAction(TextView edView, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    InputMethodManager imm = (InputMethodManager) getContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
                     // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
                     imm.toggleSoftInput(0, 0);
 
@@ -220,7 +221,6 @@ public class SystemFragment extends DevFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
         int id = item.getItemId();
         switch (id) {
 
@@ -258,17 +258,20 @@ public class SystemFragment extends DevFragment {
         m_rowColor1 = m_rowColor2;
         m_rowColor2 = color;
 
-        ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
-        String androidIDStr = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        ActivityManager actMgr =
+                (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+        String androidIDStr = Settings.Secure
+                .getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         addBuild("Android ID", androidIDStr);
         ConfigurationInfo info = actMgr.getDeviceConfigurationInfo();
         addBuild("OpenGL", info.getGlEsVersion());
 
         try {
             try {
-                AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(getContext());
+                AdvertisingIdClient.Info adInfo =
+                        AdvertisingIdClient.getAdvertisingIdInfo(getContext());
                 final String adIdStr = adInfo.getId();
-                final boolean isLAT = adInfo.isLimitAdTrackingEnabled();
+                // final boolean isLAT = adInfo.isLimitAdTrackingEnabled();
                 addBuild("Ad ID", adIdStr);
             } catch (IOException e) {
                 // Unrecoverable error connecting to Google Play services (e.g.,
@@ -305,12 +308,12 @@ public class SystemFragment extends DevFragment {
             actMgr.getMemoryInfo(memInfo);
 
             final String sFmtMB = "%.2f MB";
-            Map<String, String> listStr = new TreeMap<String, String>();
-            listStr.put("Mem Available (now)", String.format(sFmtMB, (double) memInfo.availMem / MB));
-            listStr.put("Mem LowWhenOnlyAvail", String.format(sFmtMB, (double) memInfo.threshold / MB));
-            if (Build.VERSION.SDK_INT >= 16) {
-                listStr.put("Mem Installed", String.format(sFmtMB, (double) memInfo.totalMem / MB));
-            }
+            Map<String, String> listStr = new TreeMap<>();
+            listStr.put("Mem Available (now)",
+                    String.format(sFmtMB, (double) memInfo.availMem / MB));
+            listStr.put("Mem LowWhenOnlyAvail",
+                    String.format(sFmtMB, (double) memInfo.threshold / MB));
+            listStr.put("Mem Installed", String.format(sFmtMB, (double) memInfo.totalMem / MB));
             listStr.put("Heap (this app)", String.format(sFmtMB, (double) heapSize / MB));
             listStr.put("HeapMax (default)", String.format(sFmtMB, (double) heapMb));
             listStr.put("HeapMax (large)", String.format(sFmtMB, (double) largHeapMb));
@@ -322,13 +325,12 @@ public class SystemFragment extends DevFragment {
         try {
             List<ProcessErrorStateInfo> procErrList = actMgr.getProcessesInErrorState();
             int errCnt = (procErrList == null ? 0 : procErrList.size());
-            procErrList = null;
 
             // List<RunningAppProcessInfo> procList = actMgr.getRunningAppProcesses();
             int procCnt = actMgr.getRunningAppProcesses().size();
             int srvCnt = actMgr.getRunningServices(100).size();
 
-            Map<String, String> listStr = new TreeMap<String, String>();
+            Map<String, String> listStr = new TreeMap<>();
             listStr.put("#Processes", String.valueOf(procCnt));
             listStr.put("#Proc With Err", String.valueOf(errCnt));
             listStr.put("#Services", String.valueOf(srvCnt));
@@ -341,10 +343,11 @@ public class SystemFragment extends DevFragment {
         }
 
         try {
-            Map<String, String> listStr = new LinkedHashMap<String, String>();
+            Map<String, String> listStr = new LinkedHashMap<>();
             listStr.put("LargeIconDensity", String.valueOf(actMgr.getLauncherLargeIconDensity()));
             listStr.put("LargeIconSize", String.valueOf(actMgr.getLauncherLargeIconSize()));
-            putIf(listStr, "isRunningInTestHarness", "Yes", ActivityManager.isRunningInTestHarness());
+            putIf(listStr, "isRunningInTestHarness", "Yes",
+                    ActivityManager.isRunningInTestHarness());
             putIf(listStr, "isUserAMonkey", "Yes", ActivityManager.isUserAMonkey());
             addBuild("Misc...", listStr);
         } catch (Exception ex) {
@@ -357,7 +360,7 @@ public class SystemFragment extends DevFragment {
             Date m_date = new Date();
             TimeZone tz = TimeZone.getDefault();
 
-            Map<String, String> localeListStr = new LinkedHashMap<String, String>();
+            Map<String, String> localeListStr = new LinkedHashMap<>();
 
             localeListStr.put("Locale Name", ourLocale.getDisplayName());
             localeListStr.put(" Variant", ourLocale.getVariant());
@@ -380,45 +383,45 @@ public class SystemFragment extends DevFragment {
 
         // --------------- Location Services -------------
         try {
-            Map<String, String> listStr = new LinkedHashMap<String, String>();
+            Map<String, String> listStr = new LinkedHashMap<>();
 
-            final LocationManager locMgr = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-            GpsStatus gpsStatus = locMgr.getGpsStatus(null);
-            if (gpsStatus != null) {
-                listStr.put("Sec ToGetGPS", String.valueOf(gpsStatus.getTimeToFirstFix()));
-
-                Iterable<GpsSatellite> satellites = gpsStatus.getSatellites();
-                Iterator<GpsSatellite> sat = satellites.iterator();
-                while (sat.hasNext()) {
-                    GpsSatellite satellite = sat.next();
-
-                    putIf(listStr,
-                            String.format("Azm:%.0f, Elev:%.0f", satellite.getAzimuth(), satellite.getElevation()),
-                            String.format("%.2f Snr", satellite.getSnr()),
-                            satellite.usedInFix());
-                }
-            }
-
-            Location location = null;
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            final LocationManager locMgr = getServiceSafe(Context.LOCATION_SERVICE);
+            if (ActivityCompat.checkSelfPermission(getContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
                     || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
-                location = locMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                GpsStatus gpsStatus = locMgr.getGpsStatus(null);
+
+                if (gpsStatus != null) {
+                    listStr.put("Sec ToGetGPS", String.valueOf(gpsStatus.getTimeToFirstFix()));
+
+                    Iterable<GpsSatellite> satellites = gpsStatus.getSatellites();
+                    for (GpsSatellite satellite : satellites) {
+                        putIf(listStr,
+                                String.format("Azm:%.0f, Elev:%.0f", satellite.getAzimuth(),
+                                        satellite.getElevation()),
+                                String.format("%.2f Snr", satellite.getSnr()),
+                                satellite.usedInFix());
+                    }
+                }
+
+                Location location = locMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if (null == location)
                     location = locMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 if (null == location)
                     location = locMgr.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+
+                if (null != location) {
+                    listStr.put(location.getProvider() + " lat,lng",
+                            String.format("%.3f, %.3f", location.getLatitude(),
+                                    location.getLongitude()));
+                }
             }
 
-            if (null != location) {
-                listStr.put(location.getProvider() + " lat,lng", String.format("%.3f, %.3f", location.getLatitude(), location.getLongitude()));
-            }
             if (listStr.size() != 0) {
                 List<String> gpsProviders = locMgr.getAllProviders();
-                int idx = 1;
                 for (String providerName : gpsProviders) {
                     LocationProvider provider = locMgr.getProvider(providerName);
                     if (null != provider) {
@@ -435,18 +438,18 @@ public class SystemFragment extends DevFragment {
         }
 
         // --------------- Battery -------------
-        if (true) {
-            BatteryManager mBatteryManager = (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
+        if (Build.VERSION.SDK_INT >= 21) {
+            BatteryManager mBatteryManager = getServiceSafe(Context.BATTERY_SERVICE);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 Integer avgCurrent = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE);
                 Integer currentNow = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
             //    Integer capPer = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
                 // Battery remaining energy in nanowatt-hours, as a long integer.
-                Long nanowattHours = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER);
+                // Long nanowattHours = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER);
 
                 Map<String, String> listStr = new LinkedHashMap<>();
-                if (avgCurrent.intValue() != 0) {
+                if (avgCurrent != 0) {
                     listStr.put("Current (avg)", String.format("%.3f mA", avgCurrent / 1e3));
                 }
                 listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));
@@ -484,7 +487,7 @@ public class SystemFragment extends DevFragment {
         // --------------- Application Info -------------
         ApplicationInfo appInfo = getActivity().getApplicationInfo();
         if (null != appInfo) {
-            Map<String, String> appList = new LinkedHashMap<String, String>();
+            Map<String, String> appList = new LinkedHashMap<>();
             try {
                 appList.put("ProcName", appInfo.processName);
                 appList.put("PkgName", appInfo.packageName);
@@ -497,7 +500,7 @@ public class SystemFragment extends DevFragment {
                     appList.put("DataBase", dbList[0]);
                 // getActivity().getComponentName().
 
-            } catch (Exception ex) {
+            } catch (Exception ignore) {
             }
             addBuild("AppInfo...", appList);
         }
@@ -505,7 +508,7 @@ public class SystemFragment extends DevFragment {
         // --------------- Account Services -------------
         final AccountManager accMgr = (AccountManager) getActivity().getSystemService(Context.ACCOUNT_SERVICE);
         if (null != accMgr) {
-            Map<String, String> strList = new LinkedHashMap<String, String>();
+            Map<String, String> strList = new LinkedHashMap<>();
             try {
                 for (Account account : accMgr.getAccounts()) {
                     strList.put(account.name, account.type);
@@ -520,7 +523,7 @@ public class SystemFragment extends DevFragment {
         PackageManager pm = getActivity().getPackageManager();
         FeatureInfo[] features = pm.getSystemAvailableFeatures();
         if (features != null) {
-            Map<String, String> strList = new LinkedHashMap<String, String>();
+            Map<String, String> strList = new LinkedHashMap<>();
             for (FeatureInfo featureInfo : features) {
                 strList.put(featureInfo.name, "");
             }
@@ -530,7 +533,7 @@ public class SystemFragment extends DevFragment {
         // --------------- Sensor Services -------------
         final SensorManager senMgr = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         if (null != senMgr) {
-            Map<String, String> strList = new LinkedHashMap<String, String>();
+            Map<String, String> strList = new LinkedHashMap<>();
             // Sensor accelerometer = senMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             // senMgr.registerListener(foo, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             List<Sensor> listSensor = senMgr.getSensorList(Sensor.TYPE_ALL);
@@ -548,26 +551,24 @@ public class SystemFragment extends DevFragment {
         if (true) {
             Map<String, String> serviceList = new LinkedHashMap<>();
             Field[] fields = Context.class.getDeclaredFields();
-            for (Field f : fields) {
-                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+            for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
 
                     //  && isRightName(f.getName())
-                    String fieldType = f.getType().getName();
-                    if (fieldType.equals(String.class.getName()) && f.getName()
+                    String fieldType = field.getType().getName();
+                    if (fieldType.equals(String.class.getName()) && field.getName()
                             .endsWith("_SERVICE")) {
-                        String key = f.toString();
+                        @SuppressWarnings("UnusedAssignment")
+                        String key = field.toString();
                         try {
-                            key = f.get(null).toString();
-                            if ("sensorhub".equals(key)) {
-                                // Galaxy crashes on this.
-                            } else {
+                            key = field.get(null).toString();
+                            if (!"sensorhub".equals(key)) { // Galaxy crashes on sensorhub
                                 Object value = getActivity().getSystemService(key);
                                 if (value != null) {
                                     serviceList.put(key, value.getClass().getSimpleName());
                                 }
                             }
-                        } catch (Exception ex) {
-
+                        } catch (Exception ignore) {
                         }
                     }
                 }
@@ -587,11 +588,11 @@ public class SystemFragment extends DevFragment {
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (Exception ignore) {
         }
 
         try {
-            Map<String, String> strList = new LinkedHashMap<String, String>();
+            Map<String, String> strList = new LinkedHashMap<>();
             int screenTimeout = Settings.System.getInt(getActivity().getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT);
             strList.put("ScreenTimeOut", String.valueOf(screenTimeout / 1000));
             int rotate = Settings.System.getInt(getActivity().getContentResolver(), Settings.System.ACCELEROMETER_ROTATION);
@@ -602,7 +603,7 @@ public class SystemFragment extends DevFragment {
                 strList.put("AdbEnabled", String.valueOf(adb));
             }
             addBuild("Settings...", strList);
-        } catch (Exception ex) {
+        } catch (Exception ignore) {
         }
 
         if (expandAll) {
@@ -635,6 +636,7 @@ public class SystemFragment extends DevFragment {
     // ============================================================================================
     // Internal methods
 
+    @SuppressWarnings("unused")
     private void clean_networks() {
         StringBuilder sb = new StringBuilder();
         final WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -652,8 +654,7 @@ public class SystemFragment extends DevFragment {
                         }
                     }
                 }
-            } catch (Exception ex) {
-
+            } catch (Exception ignore) {
             }
         }
 
@@ -672,10 +673,6 @@ public class SystemFragment extends DevFragment {
         final String m_valueStr;
         final Map<String, String> m_valueList;
 
-        BuildInfo() {
-            m_fieldStr = m_valueStr = null;
-            m_valueList = null;
-        }
 
         BuildInfo(String str1, String str2) {
             m_fieldStr = str1;
@@ -718,7 +715,7 @@ public class SystemFragment extends DevFragment {
             implements View.OnClickListener {
         private final LayoutInflater m_inflater;
 
-        public BuildArrayAdapter(Context context) {
+        BuildArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -828,7 +825,7 @@ public class SystemFragment extends DevFragment {
             else
                 summaryView.setBackgroundColor(m_rowColor2);
 
-            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setTag(groupPosition);
             summaryView.setOnClickListener(this);
             return summaryView;
         }
@@ -841,7 +838,7 @@ public class SystemFragment extends DevFragment {
 
         @Override
         public void onClick(View view) {
-            int grpPos = ((Integer) view.getTag()).intValue();
+            int grpPos = (Integer) view.getTag();
 
             if (m_listView.isGroupExpanded(grpPos))
                 m_listView.collapseGroup(grpPos);

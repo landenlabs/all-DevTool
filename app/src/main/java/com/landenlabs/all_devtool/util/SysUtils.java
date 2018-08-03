@@ -15,6 +15,7 @@ import static android.system.OsConstants._SC_CLK_TCK;
  * Created by Dennis Lang on 2/23/17.
  */
 
+@SuppressWarnings({"unused", "OctalInteger"})
 public class SysUtils {
 
 
@@ -70,7 +71,6 @@ public class SysUtils {
     /**
      * Extract Start Time from /proc/[pid]/stat file
      *
-     * @param pid
      * @return  Array of Proc Stat structure.
      *
      */
@@ -336,7 +336,7 @@ public class SysUtils {
         } finally {
             try {
                 reader.close();
-            } catch (IOException ioex) {
+            } catch (IOException ignore) {
             }
         }
 
@@ -352,7 +352,7 @@ public class SysUtils {
     // =============================================================================================
 
     public static ArrayList<String> runShellCmd(String[] shellCmd) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         try {
             Process process = new ProcessBuilder()
                     .command(shellCmd)
@@ -363,7 +363,7 @@ public class SysUtils {
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()));
 
-            String line = "";
+            String line;
             while ((line = bufferedReader.readLine()) != null) {
                 list.add(line);
             }
@@ -375,7 +375,7 @@ public class SysUtils {
         return list;
     }
 
-    static boolean isBit(int val, int mask) {
+    private static boolean isBit(int val, int mask) {
         return (val & mask) != 0;
     }
 
@@ -386,7 +386,7 @@ public class SysUtils {
 
         if (mode != -1) {
             int owner = mode & 0700;
-            int group = mode & 0070;
+            // int group = mode & 0070;
             int world = mode & 0007;
 
             r = isBit(owner, 0400) ? 'r' : '-';

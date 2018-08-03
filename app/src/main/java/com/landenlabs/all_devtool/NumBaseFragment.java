@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -53,11 +54,12 @@ import java.util.List;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings("Convert2Lambda")
 public abstract class NumBaseFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    final ArrayList<NumInfo> m_list = new ArrayList<NumInfo>();
+    final ArrayList<NumInfo> m_list = new ArrayList<>();
     ListView m_listView;
     FragmentActivity m_context;
     int m_backgroundColor = -1;
@@ -87,8 +89,8 @@ public abstract class NumBaseFragment extends DevFragment {
     // DevFragment(Fragment) overrides
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.num_tab, container, false);
@@ -134,13 +136,12 @@ public abstract class NumBaseFragment extends DevFragment {
     protected void addNum(String name, int attrId, String numType) {
         int[] attrs = {attrId};
         TypedArray typedArray = m_context.getTheme().obtainStyledAttributes(attrs);
-        String str = "";
+        String str;
 
         if (typedArray != null) {
             TypedValue typedValue = new TypedValue();
 
             try {
-                str = "???";
                 int cnt = typedArray.getIndexCount();
                 for (int idx = 0; idx != cnt; idx++) {
                     int attrIdx = typedArray.getIndex(idx);
@@ -207,13 +208,14 @@ public abstract class NumBaseFragment extends DevFragment {
 
     private class NumArrayAdapter extends ArrayAdapter<NumInfo> {
 
-        public NumArrayAdapter(Context context, int rowLayoutId,
+        NumArrayAdapter(Context context, int rowLayoutId,
                                int textViewResourceId, List<NumInfo> objects) {
             super(context, rowLayoutId, textViewResourceId, objects);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
             NumInfo numInfo = getItem(position);
 

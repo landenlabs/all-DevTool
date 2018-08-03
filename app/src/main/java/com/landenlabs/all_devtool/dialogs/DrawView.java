@@ -115,7 +115,7 @@ public class DrawView extends View {
             }
         }
     }
-    ArrayList<PointfTime> m_pathPoints = new ArrayList<PointfTime>();
+    ArrayList<PointfTime> m_pathPoints = new ArrayList<>();
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -153,7 +153,7 @@ public class DrawView extends View {
         }
         m_drawPath.reset();
         if (m_pathPoints.size() > 1) {
-            PointF lpf = new PointF(0, 0);
+            // PointF lpf = new PointF(0, 0);
             for (PointF pf : m_pathPoints) {
                 if (m_drawPath.isEmpty())
                     m_drawPath.moveTo(pf.x, pf.y);
@@ -161,7 +161,7 @@ public class DrawView extends View {
                     m_drawPath.lineTo(pf.x, pf.y);
                     // m_drawPath.quadTo(pf.x, pf.y, (lpf.x + pf.x) / 2, (lpf.y + pf.y) / 2);
                 }
-                lpf = pf;
+                // lpf = pf;
             }
             invalidate();
         }

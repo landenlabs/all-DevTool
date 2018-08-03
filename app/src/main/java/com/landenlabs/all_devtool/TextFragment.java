@@ -28,6 +28,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -57,12 +58,13 @@ import java.util.List;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings("Convert2Lambda")
 public class TextFragment extends DevFragment {
 
     public static final String s_name = "Text";
     FragmentActivity m_context;
     TableLayout m_tableLayout;
-    final ArrayList<TextInfo> m_textInfoList = new ArrayList<TextInfo>();
+    final ArrayList<TextInfo> m_textInfoList = new ArrayList<>();
 
     public static final int s_MSG_SHARE_PATH_KEY = 1;
     public static final String s_MSG_SHARE_PATH = "path";
@@ -108,8 +110,8 @@ public class TextFragment extends DevFragment {
         return null;
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.text_tab, container, false);
@@ -156,7 +158,7 @@ public class TextFragment extends DevFragment {
                 tableRow = new TableRow(m_context);
                 tableRow.setBackgroundColor(colors[tfIdx]);
 
-                tableRow.setTag(Integer.valueOf(m_textInfoList.size()));
+                tableRow.setTag(m_textInfoList.size());
                 m_textInfoList.add(new TextInfo(sizeSP, tfIdx));
 
                 tableRow.setClickable(true);

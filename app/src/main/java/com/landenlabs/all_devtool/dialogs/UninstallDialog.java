@@ -29,8 +29,8 @@ import java.util.ArrayList;
  * Show Packages to uninstall.
  *
  * @author Dennis Lang
- *
  */
+@SuppressWarnings({"Convert2Lambda", "BooleanMethodIsAlwaysInverted"})
 public class UninstallDialog extends DialogFragment {
     private final LLog mLog = LLog.DBG;
 
@@ -71,7 +71,7 @@ public class UninstallDialog extends DialogFragment {
 
     public static void showDialog(DevFragment devFragment, final ArrayList<PackageInfo> pkgInfoList, final int idx) {
         DialogFragment newFragment =  UninstallDialog.create(devFragment, pkgInfoList, idx);
-        newFragment.show(devFragment.getActivity().getFragmentManager(), "dialog");
+        newFragment.show(devFragment.getActivitySafe().getFragmentManager(), "dialog");
     }
 
     /**
@@ -192,7 +192,7 @@ public class UninstallDialog extends DialogFragment {
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         // params.gravity= Gravity.RIGHT;
 
-        m_checkBoxes = new ArrayList<CheckBox>();
+        m_checkBoxes = new ArrayList<>();
         if (m_pkgInfoList != null && m_pkgInfoList.size() > 0) {
             m_installGroup.removeAllViews();
             for (int idx = 0; idx < m_pkgInfoList.size(); idx++) {

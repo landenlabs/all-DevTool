@@ -1,14 +1,12 @@
 apply plugin: 'com.android.application'
 
 File javaDocDstDir = file('../javadoc')
-File zipDstDir = file('../zip')
-
 
 android {
     signingConfigs {
         release
     }
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     // As of gradle 3.x this is no longer needed.
     // buildToolsVersion '26.0.2'
@@ -16,17 +14,17 @@ android {
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 17
-        targetSdkVersion 26
+        targetSdkVersion 27
 
-        versionCode 1932
-        versionName '1.9.32'
+        versionCode 1940
+        versionName '1.9.40'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
         resValue "string", "compileSdkVersion", compileSdkVersion
         resValue "string", "buildToolsVersion", buildToolsVersion
         resValue "string", "javaVersion", org.gradle.internal.jvm.Jvm.current().javaVersion.toString()
-        resValue "string", "gradleVersion", GradleVersion.current().getVersion()
+        // resValue "string", "gradleVersion", GradleVersion.current().getVersion()
 
         // Disable creation of png for vector drawables.
         vectorDrawables.useSupportLibrary = true
@@ -40,9 +38,11 @@ android {
             debuggable false
             jniDebuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            /*
             applicationVariants.all { variant ->
                 appendVersionNameVersionCode(variant, defaultConfig)
             }
+            */
 
             signingConfig signingConfigs.release
         }
@@ -58,7 +58,8 @@ android {
         disable 'DefaultLocale', 'SimpleDateFormat', 'InflateParams', 'SpUsage',
                 'UseCompoundDrawables', 'HandlerLeak', 'ViewConstructor', 'SetTextI18n',
                 'RtlSymmetry', 'RtlHardcoded', 'ContentDescription',
-                'MissingTranslation', 'ValidFragment', 'UnusedAttribute'
+                'MissingTranslation', 'ValidFragment', 'UnusedAttribute',
+                "Convert2Lambda", "Anonymous2MethodRef"
     }
 
     // New value required with Gradle 3.x
@@ -90,38 +91,41 @@ android {
 }
 
 ext {
-    supportLibVersion = '26.1.0'    // 26.1.0
-    leakCanaryVersion = '1.4-beta2'
-    playServicesVersion = '11.0.2' // '10.2.1'
+    supportLibVersion = '27.1.1'    // 26.1.0
+    leakCanaryVersion = '1.5.1'
+    playServicesVersion = '15.0.1' // '11.0.2'
 }
 
 dependencies {
-    compile "com.android.support:support-v4:$supportLibVersion"
-    compile "com.android.support:appcompat-v7:$supportLibVersion"
-    //  compile "com.google.android.gms:play-services:$playServicesVersion"
-    //  compile "com.google.android.gms:play-services-ads:$playServicesVersion"
-    //  compile "com.google.android.gms:play-services-maps:$playServicesVersion"
-    compile "com.google.android.gms:play-services-identity:$playServicesVersion"
-    compile "com.google.android.gms:play-services-gcm:$playServicesVersion"
-    compile "com.google.android.gms:play-services-auth:$playServicesVersion"
-    compile "com.google.android.gms:play-services-analytics:$playServicesVersion"
-    compile "com.google.android.gms:play-services-location:$playServicesVersion"
-    compile "com.google.android.gms:play-services-drive:$playServicesVersion"
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    //  implementation "com.google.android.gms:play-services:$playServicesVersion"
+    //  implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
+    //  implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-identity:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-gcm:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-auth:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-location:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-drive:$playServicesVersion"
+
     // Firebase
-    compile "com.google.firebase:firebase-core:$playServicesVersion"
+    implementation "com.google.firebase:firebase-core:$playServicesVersion"
+
     // HockeyApp crash reporting
-    compile 'net.hockeyapp.android:HockeySDK:4.1.1'
+    implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
+
     // 3rdparty libraries
     // Memory leaks tool - see main activity to see LeakCanary.install(this.getApplication());
-    // debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
-    // releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
-    compile 'com.androidplot:androidplot-core:1.4.1'
-    compile 'net.danlew:android.joda:2.9.2'
+    debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
+    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+
+    implementation 'com.androidplot:androidplot-core:1.4.1'
+    implementation 'net.danlew:android.joda:2.9.9.2'
 }
 
-
+/*
 def appendVersionNameVersionCode(variant, defaultConfig) {
-    /*
     variant.outputs.each { output ->
         def file = output.packageApplication.outputFile
         def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
@@ -129,7 +133,16 @@ def appendVersionNameVersionCode(variant, defaultConfig) {
         fileName = fileName.replace("app-", "$ourname-")
         output.packageApplication.outputFile = new File(file.parent, fileName)
     }
-    */
+}
+*/
+
+// Rename app
+android.applicationVariants.all { variant ->
+    variant.outputs.all {
+        def ourname = project.parent.name
+        outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
+        println "out name= $outputFileName"
+    }
 }
 
 // Generate Java doc files
@@ -139,10 +152,11 @@ task genJavadocs(type: Javadoc) {
     source = project.android.sourceSets.main.java.srcDirs
     destinationDir = javaDocDstDir
 
-    println "----------Generate JavaDocs-------------"
-    println "  Src= " + source.join(",")
-    println "  Dst= " + destinationDir.path
-    println "----------------------------------------"
+    // todo - only print when generating javadocs
+    // println "----------Generate JavaDocs-------------"
+    // println "  Src= " + source.join(",")
+    // println "  Dst= " + destinationDir.path
+    // println "----------------------------------------"
 
     options.linkSource true
     options.addBooleanOption('Xdoclint:none', true)

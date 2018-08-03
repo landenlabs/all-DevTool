@@ -40,6 +40,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -62,10 +63,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -90,6 +89,7 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings({"Convert2Lambda", "UnnecessaryLocalVariable"})
 public class GpsFragment extends DevFragment implements
         View.OnClickListener,
         LocationListener,
@@ -109,7 +109,7 @@ public class GpsFragment extends DevFragment implements
     static final int s_detailRow = 2;
     static final int s_maxRows = 3;
 
-    private final ArrayList<GpsInfo> m_list = new ArrayList<GpsInfo>(s_maxRows);
+    private final ArrayList<GpsInfo> m_list = new ArrayList<>(s_maxRows);
     private final ItemList m_detailList = new ItemList();
     private ExpandableListView m_listView;
     private ImageView m_statusIcon;
@@ -118,8 +118,8 @@ public class GpsFragment extends DevFragment implements
     private static final Locale s_locale = Locale.getDefault();
     private static final SimpleDateFormat s_hour12Format = new SimpleDateFormat("hh:mm:ss a", s_locale);
     private static final SimpleDateFormat s_hour24Format = new SimpleDateFormat("HH:mm:ss.S", s_locale);
-    private static final SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a", s_locale);
-    private static final SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm", s_locale);
+    // private static final SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a", s_locale);
+    // private static final SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm", s_locale);
 
     private static SimpleDateFormat s_hourFormat = s_hour24Format;
 
@@ -133,12 +133,12 @@ public class GpsFragment extends DevFragment implements
     // https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest
     private static final String TAG = "LocationActivity";
     // 1hr = power blame once per hour
-    private static final long GPS_INTERVAL = 1000 * 60 * 60;
+    private static final long GPS_INTERVAL = TimeUnit.HOURS.toMillis(1);
 
     // Update no faster then GPS_FASTEST_INTERVAL if GPS updates for other reasons or hits
     // the GPS_INTERVAL interval
-    private static final long GPS_FASTEST_INTERVAL = 1000 * 1;      // 1 sec
-    private static final long GPS_SLOW_INTERVAL = 1000 * 60 * 5;    // 5 min
+    private static final long GPS_FASTEST_INTERVAL = TimeUnit.SECONDS.toMillis(1);
+    private static final long GPS_SLOW_INTERVAL = TimeUnit.MINUTES.toMillis(5);
 
     LocationManager m_locMgr;
     LocationRequest m_locationRequest;
@@ -151,15 +151,15 @@ public class GpsFragment extends DevFragment implements
 
     static final String STATUS_CB = "Status";
     static final String FUSED_PROVIDER = "fused";
-    Map<String, LocInfo> m_mapLocProviders = new HashMap<String, LocInfo>();
+    Map<String, LocInfo> m_mapLocProviders = new HashMap<>();
 
     TextView m_gpsTv;
     CheckBox m_gpsCb;
     boolean m_gpsMonitor = false;
 
-    Map<String, CheckBox> m_providersCb = new HashMap<String, CheckBox>();
-    SparseArray<CheckBox> m_colorsCb = new SparseArray<CheckBox>();
-    Map<String, GpsItem> m_lastUpdates = new HashMap<String, GpsItem>();
+    Map<String, CheckBox> m_providersCb = new HashMap<>();
+    SparseArray<CheckBox> m_colorsCb = new SparseArray<>();
+    Map<String, GpsItem> m_lastUpdates = new HashMap<>();
 
     boolean m_isGpsFixed = false;
     boolean m_isGpsEnabled = false;
@@ -176,10 +176,10 @@ public class GpsFragment extends DevFragment implements
     private void updateGps(Intent paramIntent) {
         String str = paramIntent.getAction();
         boolean isEnabled = paramIntent.getBooleanExtra("enabled", false);
-        if ((str.equals("android.location.GPS_FIX_CHANGE"))) {
+        if ("android.location.GPS_FIX_CHANGE".equals(str)) {
             m_isGpsFixed = isEnabled;
             addMsgToDetailRow(s_colorGps, "Gps " + (m_isGpsFixed ? "fixed" : "unfixed"));
-        } else if ((str.equals("android.location.GPS_ENABLED_CHANGE"))) {
+        } else if ("android.location.GPS_ENABLED_CHANGE".equals(str)) {
             m_isGpsEnabled = isEnabled;
             addMsgToDetailRow(s_colorGps, "Gps " + (m_isGpsEnabled ? "enabled" : "disabled"));
         }
@@ -200,7 +200,7 @@ public class GpsFragment extends DevFragment implements
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
         // List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        // bitmapList.add(Utils.grabScreen(this.getActivity()));
+        // bitmapList.add(Utils.grabScreen(this.getActivitySafe()));
         // return bitmapList;
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
@@ -221,7 +221,7 @@ public class GpsFragment extends DevFragment implements
     @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
@@ -250,11 +250,11 @@ public class GpsFragment extends DevFragment implements
         m_list.set(s_detailRow, new GpsInfo(new GpsItem("Detail History")));
 
         m_listView = Ui.viewById(rootView, R.id.gpsListView);
-        final GpsArrayAdapter adapter = new GpsArrayAdapter(this.getActivity());
+        final GpsArrayAdapter adapter = new GpsArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
 
         // ---- Setup GPS ----
-        m_locMgr = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        m_locMgr = getServiceSafe(Context.LOCATION_SERVICE);
 
         m_gpsTv = Ui.viewById(rootView, R.id.gps);
         if (isGooglePlayServicesAvailable()) {
@@ -269,7 +269,7 @@ public class GpsFragment extends DevFragment implements
             m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
             // google_app_id
-            m_googleApiClient = new GoogleApiClient.Builder(this.getActivity())
+            m_googleApiClient = new GoogleApiClient.Builder(this.getActivitySafe())
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
@@ -290,7 +290,7 @@ public class GpsFragment extends DevFragment implements
             m_gpsTv.setText("Need Google Play Service");
         }
 
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             m_locMgr.addGpsStatusListener(this);
         }
@@ -339,7 +339,7 @@ public class GpsFragment extends DevFragment implements
     public void onResume() {
         super.onResume();
         startLocationUpdates();
-        LocalBroadcastManager.getInstance(this.getActivity()).registerReceiver(
+        LocalBroadcastManager.getInstance(this.getActivitySafe()).registerReceiver(
                 m_gpsReceiver, m_intentFilter);
         showProviders();
     }
@@ -348,7 +348,7 @@ public class GpsFragment extends DevFragment implements
     public void onPause() {
         super.onPause();
         stopLocationUpdates();
-        LocalBroadcastManager.getInstance(this.getActivity()).unregisterReceiver(
+        LocalBroadcastManager.getInstance(this.getActivitySafe()).unregisterReceiver(
                 m_gpsReceiver);
     }
 
@@ -371,7 +371,6 @@ public class GpsFragment extends DevFragment implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
         int id = item.getItemId();
         switch (id) {
             case R.id.clock_12:
@@ -469,39 +468,37 @@ public class GpsFragment extends DevFragment implements
     //  GpsStatus.Listener
     @Override
     public void onGpsStatusChanged(int event) {
-        if (getActivity() != null) {
-            final LocationManager locMgr = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        final LocationManager locMgr = getServiceSafe(Context.LOCATION_SERVICE);
 
-            try {
-                gpsStatus = locMgr.getGpsStatus(gpsStatus);
-                String msg = "";
-                switch (event) {
-                    case GpsStatus.GPS_EVENT_STARTED:
-                        msg = "GPS event started";
-                        break;
-                    case GpsStatus.GPS_EVENT_STOPPED:
-                        msg = "GPS event stopped";
-                        break;
-                    case GpsStatus.GPS_EVENT_FIRST_FIX:
-                        msg = "GPS first fix";
-                        break;
-                    case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                        msg = "GPS sat status";
-                        break;
-                }
-
-                if (TextUtils.isEmpty(msg)) {
-                    addMsgToDetailRow(s_colorGps, msg);
-                    GpsItem gpsItem = m_lastUpdates.get(STATUS_CB);
-                    if (gpsItem != null) {
-                        gpsItem.set(System.currentTimeMillis(), msg);
-                        listChanged();
-                    }
-                }
-                showProviders();
-            } catch (SecurityException ex) {
-                Log.e(TAG, ex.getMessage());
+        try {
+            gpsStatus = locMgr.getGpsStatus(gpsStatus);
+            String msg = "";
+            switch (event) {
+                case GpsStatus.GPS_EVENT_STARTED:
+                    msg = "GPS event started";
+                    break;
+                case GpsStatus.GPS_EVENT_STOPPED:
+                    msg = "GPS event stopped";
+                    break;
+                case GpsStatus.GPS_EVENT_FIRST_FIX:
+                    msg = "GPS first fix";
+                    break;
+                case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                    msg = "GPS sat status";
+                    break;
             }
+
+            if (TextUtils.isEmpty(msg)) {
+                addMsgToDetailRow(s_colorGps, msg);
+                GpsItem gpsItem = m_lastUpdates.get(STATUS_CB);
+                if (gpsItem != null) {
+                    gpsItem.set(System.currentTimeMillis(), msg);
+                    listChanged();
+                }
+            }
+            showProviders();
+        } catch (SecurityException ex) {
+            Log.e(TAG, ex.getMessage());
         }
     }
 
@@ -519,16 +516,13 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Ui.ToastBig(this.getActivity(), "GPS error\n" + connectionResult.describeContents());
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Ui.ToastBig(this.getActivitySafe(), "GPS error\n" + connectionResult.describeContents());
         addMsgToDetailRow(s_colorMsg, "GPS error");
     }
 
     private static boolean isLocDup(Location loc1, Location loc2) {
-        if (loc1 != null && loc2 != null) {
-            return loc1.distanceTo(loc2) == 0;
-        }
-        return false;
+        return loc1 != null && loc2 != null && loc1.distanceTo(loc2) == 0;
     }
 
     // ============================================================================================
@@ -545,13 +539,13 @@ public class GpsFragment extends DevFragment implements
                 isDupLoc = isDupLoc || isLocDup(location, gpsLoc);
             }
         } catch (Exception ex) {
-            Toast.makeText(this.getActivity(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getActivitySafe(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         try {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
                 Location netLoc = m_locMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -561,7 +555,7 @@ public class GpsFragment extends DevFragment implements
                 }
             }
         } catch (Exception ex) {
-            Toast.makeText(this.getActivity(), "GPS needs location permission\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getActivitySafe(), "GPS needs location permission\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         try {
@@ -571,7 +565,7 @@ public class GpsFragment extends DevFragment implements
                 isDupLoc = isDupLoc || isLocDup(location, passiveLoc);
             }
         } catch (Exception ex) {
-            Toast.makeText(this.getActivity(), "Passive " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getActivitySafe(), "Passive " + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         if (!isDupLoc)
@@ -614,11 +608,10 @@ public class GpsFragment extends DevFragment implements
         itemList.clear();
 
         List<String> gpsProviders = m_locMgr.getAllProviders();
-        int idx = 1;
         for (String providerName : gpsProviders) {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 try {
                     LocationProvider provider = m_locMgr.getProvider(providerName);
@@ -666,10 +659,12 @@ public class GpsFragment extends DevFragment implements
             }
         }
 
+        /*
         for (String provider : m_providersCb.keySet()) {
             boolean vis = m_providersCb.get(provider).isChecked();
-            // m_lastUpdates.get(provider).setVisibility(vis ? View.VISIBLE : View.eE);
+            m_lastUpdates.get(provider).setVisibility(vis ? View.VISIBLE : View.eE);
         }
+        */
     }
 
     private void startLocationUpdates() {
@@ -677,13 +672,13 @@ public class GpsFragment extends DevFragment implements
         if (isGooglePlayServicesAvailable() && m_googleApiClient.isConnected()) {
             stopLocationUpdates();
 
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
-                PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
-                        m_googleApiClient, m_locationRequest, this);
+                // PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
+                //        m_googleApiClient, m_locationRequest, this);
                 if (m_gpsCb.isChecked() && m_locationRequest.getPriority() == LocationRequest.PRIORITY_HIGH_ACCURACY) {
                     m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                             m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
@@ -695,9 +690,9 @@ public class GpsFragment extends DevFragment implements
                 }
             } else {
                 String errMsg = "start GPS ignore, missing permissions";
-                Ui.ShowMessage(this.getActivity(), errMsg);
+                Ui.ShowMessage(this.getActivitySafe(), errMsg);
                 addMsgToDetailRow(s_colorMsg, errMsg);
-                // Toast.makeText(getContext(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
+                // Toast.makeText(getContextSafe(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -705,22 +700,25 @@ public class GpsFragment extends DevFragment implements
     protected void stopLocationUpdates() {
         if (isGooglePlayServicesAvailable()
             && m_googleApiClient != null
-            && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
         }
     }
 
     private boolean isGooglePlayServicesAvailable() {
-        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity());
+        // int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivitySafe());
+        int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContextSafe());
+
         if (ConnectionResult.SUCCESS == status) {
             addMsgToDetailRow(s_colorMsg, "GooglePlay Available");
             return true;
         } else {
-            String errMsg = GooglePlayServicesUtil.getErrorString(status);
-            Ui.ShowMessage(this.getActivity(), errMsg);
+            // String errMsg = GooglePlayServicesUtil.getErrorString(status);
+            String errMsg = GoogleApiAvailability.getInstance().getErrorString(status);
+            Ui.ShowMessage(this.getActivitySafe(), errMsg);
             addMsgToDetailRow(s_colorMsg, "GooglePlay Unavailable");
             return false;
         }
@@ -746,21 +744,17 @@ public class GpsFragment extends DevFragment implements
         locInfo.m_prevLocation = locInfo.m_currLocation;
         locInfo.m_currLocation = location;
 
-        if (null != location) {
-            addLocToDetailRow(locInfo);
+        addLocToDetailRow(locInfo);
 
-            String msg = String.format("%8.6f,%9.6f %5.0fm %s",
-                    location.getLatitude(), location.getLongitude(),
-                    location.getAccuracy(), location.getProvider());
-            GpsItem gpsItem = m_lastUpdates.get(provider);
-            if (gpsItem != null) {
-                gpsItem.set(location.getTime(), msg);
-                listChanged();
-            }  else
-                Ui.ShowMessage(this.getActivity(), "null text for " + provider);    // DEBUG
-
-        } else {
-            m_gpsTv.setText("No location");
+        String msg = String.format("%8.6f,%9.6f %5.0fm %s",
+                location.getLatitude(), location.getLongitude(),
+                location.getAccuracy(), location.getProvider());
+        GpsItem gpsItem = m_lastUpdates.get(provider);
+        if (gpsItem != null) {
+            gpsItem.set(location.getTime(), msg);
+            listChanged();
+        }  else {
+            Ui.ShowMessage(this.getActivitySafe(), "null text for " + provider);    // DEBUG
         }
     }
 
@@ -784,6 +778,7 @@ public class GpsFragment extends DevFragment implements
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     private int addLocToDetailRow(LocInfo locInfo) {
        
         if (m_detailList.size() > s_maxToKeep) {
@@ -796,30 +791,32 @@ public class GpsFragment extends DevFragment implements
         double feet = km * 3280.84;
         int color = m_providersCb.get(currLoc.getProvider()).getCurrentTextColor();
 
-        String msg = String.format("%.7f,%.7f  %.0fm %.0ft %s",
-                currLoc.getLatitude(), currLoc.getLongitude(), km * 1000, feet, currLoc.getProvider());
+        StringBuilder msg = new StringBuilder(String.format("%.7f,%.7f  %.0fm %.0ft %s",
+                currLoc.getLatitude(), currLoc.getLongitude(), km * 1000, feet,
+                currLoc.getProvider()));
 
-        Address address = getGeocoderAddress(getContext(), currLoc.getLatitude(), currLoc.getLongitude());
+        Address address = getGeocoderAddress(getContextSafe(), currLoc.getLatitude(), currLoc.getLongitude());
         if (address != null) {
             if (address.getMaxAddressLineIndex() >= 0) {
                 for (int idx = 0; idx <= address.getMaxAddressLineIndex(); idx++) {
-                    msg += "\n   " + address.getAddressLine(idx);
+                    msg.append("\n   ").append(address.getAddressLine(idx));
                 }
             }
-            msg += "\n  ";
-            msg += " " + address.getLocality();
-            msg += " " + address.getAdminArea();
-            msg += " " + address.getCountryName();
+            msg.append("\n  ");
+            msg.append(" ").append(address.getLocality());
+            msg.append(" ").append(address.getAdminArea());
+            msg.append(" ").append(address.getCountryName());
         } else {
-            msg += "\n  Geocoder not available, reboot";
+            msg.append("\n  Geocoder not available, reboot");
         }
 
         m_log.i("GPS "+ msg);
-        GpsItem item = new GpsItem(currLoc.getTime(), msg, color);
+        GpsItem item = new GpsItem(currLoc.getTime(), msg.toString(), color);
 
         return updateDetailRow(item);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private int addMsgToDetailRow(int textColor, String msg) {
 
         if (textColor == s_colorMsg) {
@@ -841,8 +838,6 @@ public class GpsFragment extends DevFragment implements
 
     /**
      * Add filtered item to detail row.
-     * @param item
-     * @return
      */
     private int updateDetailRow(GpsItem item) {
         boolean isDup = false;
@@ -874,8 +869,8 @@ public class GpsFragment extends DevFragment implements
 
     /**
      * Refill detail row with filtered items.
-     * @return
      */
+    @SuppressWarnings("UnusedReturnValue")
     private int updateDetailRows() {
         GpsInfo gpsInfo = m_list.get(s_detailRow);
         ItemList itemList = gpsInfo.getList();
@@ -896,10 +891,8 @@ public class GpsFragment extends DevFragment implements
 
     /**
      * Format time interval
-     *
-     * @param elapsedMillis
-     * @return
      */
+    /*
     private static String formatInterval(final long elapsedMillis) {
         final long day = TimeUnit.MICROSECONDS.toHours(elapsedMillis) / 24;
         final long hr = TimeUnit.MILLISECONDS.toHours(elapsedMillis) % 24;
@@ -908,6 +901,7 @@ public class GpsFragment extends DevFragment implements
         final long ms = TimeUnit.MILLISECONDS.toMillis(elapsedMillis) % 1000;
         return String.format("%s %02d:%02d:%02d.%03d", (day == 0 ? "" : String.valueOf(day)), hr, min, sec, ms);
     }
+    */
 
     // ============================================================================================
     // Expanded List Adapter
@@ -922,23 +916,14 @@ public class GpsFragment extends DevFragment implements
         String m_msg;
         int m_color;
 
-        public GpsItem() {
+
+        GpsItem(String msg) {
             m_time = s_noTime;
-            m_msg = null;
+            m_msg = msg;
             m_color = s_white;
         }
 
-        public GpsItem(String msg) {
-            m_time = s_noTime;
-            m_msg = msg;
-            m_color = s_white;
-        }
-        public GpsItem(String msg, int color) {
-            m_time = s_noTime;
-            m_msg = msg;
-            m_color = color;
-        }
-        public GpsItem(long time, String msg, int color) {
+        GpsItem(long time, String msg, int color) {
             m_time = time;
             m_msg = msg;
             m_color = color;
@@ -950,17 +935,12 @@ public class GpsFragment extends DevFragment implements
         }
     }
 
-    class ItemList extends ArrayList<GpsItem> {
+    private class ItemList extends ArrayList<GpsItem> {
     }
 
     class GpsInfo {
         GpsItem m_item;
         ItemList m_itemList;
-
-        GpsInfo() {
-            m_item = null;
-            m_itemList = null;
-        }
 
         GpsInfo(GpsItem item) {
             m_item = item;
@@ -992,7 +972,7 @@ public class GpsFragment extends DevFragment implements
     private class GpsArrayAdapter extends BaseExpandableListAdapter {
         private final LayoutInflater m_inflater;
 
-        public GpsArrayAdapter(Context context) {
+        GpsArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -1011,7 +991,7 @@ public class GpsFragment extends DevFragment implements
             GpsInfo gpsInfoParent = m_list.get(groupPosition);
             GpsItem gpsInfoChild = gpsInfoParent.getList().get(childPosition);
 
-            RelativeLayout expandView = (RelativeLayout)convertView;
+            RelativeLayout expandView; //  = (RelativeLayout)convertView;
             // if (null == expandView) {
             expandView = (RelativeLayout)m_inflater.inflate(EXPANDED_LAYOUT, parent, false);
             // }
@@ -1024,8 +1004,9 @@ public class GpsFragment extends DevFragment implements
             textView.setText(msg);
             textView.setTextColor(gpsInfoChild.m_color);
 
-            CheckBox cb = m_colorsCb.get(gpsInfoChild.m_color);
 /*
+            CheckBox cb = m_colorsCb.get(gpsInfoChild.m_color);
+
             if (cb != null && !cb.isChecked()) {
                 ViewGroup.LayoutParams lp = expandView.getLayoutParams();
                 lp.height = 0;

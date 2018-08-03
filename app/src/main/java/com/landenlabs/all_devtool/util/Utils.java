@@ -47,6 +47,7 @@ import java.util.List;
 
 // import com.google.android.gms.maps.model.LatLng;
 
+@SuppressWarnings("unused")
 public class Utils {
     static class LatLng {
         double latitude;
@@ -170,11 +171,11 @@ public class Utils {
                         } else if (file.isDirectory()) {
                             dirSizeCount = dirSizeCount.add(getDirectorySize(file));
                         }
-                    } catch (Exception ex) {
+                    } catch (Exception ignore) {
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (Exception ignore) {
         }
 
         return dirSizeCount;
@@ -182,13 +183,10 @@ public class Utils {
 
     /**
      * Delete all files in directory tree.
-     *
-     * @param dirFile
-     * @return
      */
     public static List<String> deleteFiles(File dirFile) {
         File[] files = dirFile.listFiles();
-        List<String> deletedFiles = new ArrayList<String>();
+        List<String> deletedFiles = new ArrayList<>();
 
         if (files != null) {
             for (File file : files) {
@@ -204,7 +202,7 @@ public class Utils {
                     } else if (file.isDirectory()) {
                         deletedFiles.addAll(deleteFiles(file));
                     }
-                } catch (Exception ex) {
+                } catch (Exception ignore) {
                 }
             }
         }
@@ -246,7 +244,7 @@ public class Utils {
     // =============================================================================================
     // Math - earth
 
-    public static final float EARTH_RADIUS_KM = 6371.009f; // kilometers
+    private static final float EARTH_RADIUS_KM = 6371.009f; // kilometers
     /**
      * Spherical trigonometry laws allow calculating distance between 2 points on a sphere. The
      * shortest distance between points A and B on Earth surface (assumed its has spherical form) is
@@ -328,9 +326,6 @@ public class Utils {
 
     /**
      * Helper to get screen shot of View object.
-     *
-     * @param view
-     * @return bitmap.
      */
     private static Bitmap getBitmap(View view) {
         Bitmap screenBitmap =
@@ -421,7 +416,7 @@ public class Utils {
         ListAdapter adapter = listview.getAdapter();
         int itemscount = adapter.getCount();
         int allitemsheight = 0;
-        List<Bitmap> itemBms = new ArrayList<Bitmap>();
+        List<Bitmap> itemBms = new ArrayList<>();
 
         // Render each row into its own bitmap, compute total size.
         for (int row = 0; row < itemscount; row++) {
@@ -438,7 +433,7 @@ public class Utils {
             }
         }
 
-        List<Bitmap> outBigBms = new ArrayList<Bitmap>();
+        List<Bitmap> outBigBms = new ArrayList<>();
         int outHeight = Math.min(maxHeight, allitemsheight);
         Bitmap bigBitmap = null;
         Canvas bigcanvas = null;
@@ -470,7 +465,6 @@ public class Utils {
             iHeight += bmp.getHeight();
 
             bmp.recycle();
-            bmp = null;
         }
 
         return outBigBms;
@@ -480,15 +474,13 @@ public class Utils {
      * Render table rows into bitmaps, group multiple rows into single image until maxHeight is
      * exceeded.
      *
-     * @param tableLayout
-     * @param maxHeight
      * @return List of bitmaps.
      */
     public static List<Bitmap> getTableLayoutAsBitmaps(TableLayout tableLayout, int maxHeight) {
 
         int itemscount = tableLayout.getChildCount();
         int allitemsheight = 0;
-        List<Bitmap> itemBms = new ArrayList<Bitmap>();
+        List<Bitmap> itemBms = new ArrayList<>();
 
         // Render each row into its own bitmap, compute total size.
         for (int row = 0; row < itemscount; row++) {
@@ -512,7 +504,7 @@ public class Utils {
         if (allitemsheight / maxHeight == 2)
             maxHeight = (int) (allitemsheight * 0.6);
 
-        List<Bitmap> outBigBms = new ArrayList<Bitmap>();
+        List<Bitmap> outBigBms = new ArrayList<>();
         int outHeight = Math.min(maxHeight, allitemsheight);
         Bitmap bigBitmap = null;
         Canvas bigcanvas = null;
@@ -543,7 +535,6 @@ public class Utils {
             iHeight += bmp.getHeight();
 
             bmp.recycle();
-            bmp = null;
         }
 
         if (bigBitmap != null)
@@ -561,7 +552,7 @@ public class Utils {
      * @param baseName Base filename used to save image, ex: "screenshot.png"
      * @return full filename path
      */
-    public static Uri getUriForBitmap(Context context, Bitmap bitmap, String baseName) {
+    private static Uri getUriForBitmap(Context context, Bitmap bitmap, String baseName) {
 
         try {
             ContentValues values = new ContentValues(1);
@@ -585,9 +576,6 @@ public class Utils {
 
     /**
      * Share screen capture
-     *
-     * @param activity
-     * @param shareActionProvider
      */
     public static void shareScreen(FragmentActivity activity, String what, ShareActionProvider shareActionProvider) {
         Bitmap screenBitmap = Utils.grabScreen(activity);
@@ -609,7 +597,7 @@ public class Utils {
         return Images.Media.insertImage(activity.getContentResolver(), viewBitmap, "view.png", null);
     }
 
-    public static boolean isBitmapValid(Bitmap bitmap) {
+    private static boolean isBitmapValid(Bitmap bitmap) {
         return bitmap != null && !bitmap.isRecycled() && bitmap.getHeight() * bitmap.getWidth() > 0;
     }
 
@@ -643,7 +631,7 @@ public class Utils {
                 shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
                 bitmap.recycle();
             } else {
-                ArrayList<Uri> uris = new ArrayList<Uri>();
+                ArrayList<Uri> uris = new ArrayList<>();
                 for (int bmIdx = 0; bmIdx != shareImages.size(); bmIdx++) {
                     Bitmap bitmap = shareImages.get(bmIdx);
                     if (isBitmapValid(bitmap)) {
@@ -762,10 +750,11 @@ public class Utils {
 
             int size = stream.available();
             byte[] buffer = new byte[size];
+            //noinspection ResultOfMethodCallIgnored
             stream.read(buffer);
             stream.close();
             tContents = new String(buffer);
-        } catch (IOException e) {
+        } catch (IOException ignore) {
             // Handle exceptions here
         }
 

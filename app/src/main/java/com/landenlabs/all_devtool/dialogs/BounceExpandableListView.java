@@ -15,16 +15,17 @@ import android.widget.ExpandableListView;
  * ListView with a bounce animation when you overscroll.
  * <p/>
  * Found on net:
+ * <ul>
+ * <li> www.phonesdevelopers.com/1714656/
+ * <li> stackoverflow.com/questions/7201907/android-listviews-bounce-to-scrollview
+ * </ul>
+ * Also code found to scroll background image with scrolling listview.
+ * <ul>
+ * <li>stackoverflow.com/questions/14155881/how-to-get-a-background-image}
+ * -scrollable-with-androids-listview
+ * </ul>
  *
  * @author internet
- * {@link http://www.phonesdevelopers.com/1714656/}
- * {@link http://stackoverflow.com/questions/7201907/android-listviews-bounce-to-
- * scrollview}
- * <p/>
- * Also code found to scroll background image with scrolling listview.
- * {@link http
- * ://stackoverflow.com/questions/14155881/how-to-get-a-background-image}
- * -scrollable-with-androids-listview
  */
 public class BounceExpandableListView extends ExpandableListView {
     private static final int MAX_Y_OVERSCROLL_DISTANCE = 100;

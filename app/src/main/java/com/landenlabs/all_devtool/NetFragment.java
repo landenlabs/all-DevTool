@@ -25,9 +25,9 @@ package com.landenlabs.all_devtool;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,7 +54,6 @@ import android.telephony.CellInfoWcdma;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -76,6 +75,7 @@ import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -111,11 +111,12 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings({"StatementWithEmptyBody", "Convert2Lambda"})
 public class NetFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    final ArrayList<BuildInfo> m_list = new ArrayList<BuildInfo>();
+    final ArrayList<BuildInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
     ImageButton m_search;
@@ -126,7 +127,6 @@ public class NetFragment extends DevFragment {
     SubMenu m_menu;
 
     public static String s_name = "Network";
-    private static final int MB = 1 << 20;
     private static final int m_rowColor1 = 0;
     private static final int m_rowColor2 = 0x80d0ffe0;
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
@@ -134,6 +134,7 @@ public class NetFragment extends DevFragment {
     private WifiManager wifiMgr;
 
     // =============================================================================================
+    @SuppressWarnings("Convert2Lambda")
     class NetBroadcastReceiver extends BroadcastReceiver {
         final WifiManager mWifiMgr;
 
@@ -146,11 +147,14 @@ public class NetFragment extends DevFragment {
             m_listView.post(new Runnable() {
                 @Override
                 public void run() {
-                    List<ScanResult> listWifi = mWifiMgr.getScanResults();
-                    Log.d("Net", "Wifi size=" + listWifi.size());
-                    if (listWifi != null &&  !listWifi.isEmpty()) {
+                    try {
+                        List<ScanResult> listWifi = mWifiMgr.getScanResults();
+                        Log.d("Net", "Wifi size=" + listWifi.size());
+                        if (!listWifi.isEmpty()) {
+                        }
+                        updateList();
+                    } catch (Exception ignore) {
                     }
-                    updateList();
                 }
             });
         }
@@ -226,7 +230,7 @@ public class NetFragment extends DevFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -244,7 +248,7 @@ public class NetFragment extends DevFragment {
             public void onClick(View v) {
                 m_titleTime.setText("");
                 m_titleTime.setHint("enter search text");
-                InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = getServiceSafe(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(m_titleTime, InputMethodManager.SHOW_IMPLICIT);
             }
         });
@@ -256,7 +260,7 @@ public class NetFragment extends DevFragment {
             {
                 if(actionId == EditorInfo.IME_ACTION_DONE)
                 {
-                    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = getServiceSafe(Context.INPUT_METHOD_SERVICE);
                     // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
                     imm.toggleSoftInput(0, 0);
 
@@ -279,10 +283,10 @@ public class NetFragment extends DevFragment {
         });
 
         m_listView = Ui.viewById(rootView, R.id.buildListView);
-        m_adapter = new BuildArrayAdapter(this.getActivity());
+        m_adapter = new BuildArrayAdapter(getActivitySafe());
         m_listView.setAdapter(m_adapter);
 
-        wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiMgr = getServiceSafe(Context.WIFI_SERVICE);
 
         return rootView;
     }
@@ -298,7 +302,6 @@ public class NetFragment extends DevFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
         int id = item.getItemId();
         switch (id) {
             case R.id.net_clean_networks:
@@ -326,6 +329,7 @@ public class NetFragment extends DevFragment {
         // m_menu.findItem(m_sortBy).setChecked(true);
     }
 
+    @SuppressLint("MissingPermission")
     public void updateList() {
         // Time today = new Time(Time.getCurrentTimezone());
         // today.setToNow();
@@ -343,10 +347,8 @@ public class NetFragment extends DevFragment {
             checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION
                     , Manifest.permission.READ_PHONE_STATE);
 
-            Map<String, String> cellListStr = new LinkedHashMap<String, String>();
-            TelephonyManager telephonyManager =
-             (TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
-
+            Map<String, String> cellListStr = new LinkedHashMap<>();
+            TelephonyManager telephonyManager = getServiceSafe(Context.TELEPHONY_SERVICE);
 
             cellListStr.put("Device Id", telephonyManager.getDeviceId());
             if (Build.VERSION.SDK_INT >= 26) {
@@ -371,7 +373,9 @@ public class NetFragment extends DevFragment {
             cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("VoiceMail", telephonyManager.getVoiceMailNumber());
             cellListStr.put("Data act", String.valueOf(telephonyManager.getDataActivity()));
-            cellListStr.put("Net type", String.valueOf(telephonyManager.getDataNetworkType()));
+            if (Build.VERSION.SDK_INT >= 24) {
+                cellListStr.put("Net type", String.valueOf(telephonyManager.getDataNetworkType()));
+            }
             cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("PhoneType", String.valueOf(telephonyManager.getPhoneType()));
             if (Build.VERSION.SDK_INT >= 24) {
@@ -441,34 +445,31 @@ public class NetFragment extends DevFragment {
                             cellitem.getCellIdentity().getNetworkId(),
                             cellitem.getCellIdentity().getSystemId());
                     cellListStr.put(id, msg);
-                } else if (cellinfo instanceof  CellInfoWcdma) {
-                    if (Build.VERSION.SDK_INT >= 18) {
-                        CellInfoWcdma cellitem = (CellInfoWcdma) cellinfo;
+                } else if (Build.VERSION.SDK_INT >= 18 && cellinfo instanceof CellInfoWcdma) {
+                    CellInfoWcdma cellitem = (CellInfoWcdma) cellinfo;
 
-                        int dbm = cellitem.getCellSignalStrength().getDbm();
-                        int asu = cellitem.getCellSignalStrength().getAsuLevel();
-                        int level = cellitem.getCellSignalStrength().getLevel();
+                    int dbm = cellitem.getCellSignalStrength().getDbm();
+                    int asu = cellitem.getCellSignalStrength().getAsuLevel();
+                    int level = cellitem.getCellSignalStrength().getLevel();
 
-                        String msg = String.format("Db=%d, Asu=%d Level(0..4)=%d", dbm, asu, level);
-                        String id = String.format("Wcdma Cid=%d Lac=%d",
-                                cellitem.getCellIdentity().getCid(),
-                                        cellitem.getCellIdentity().getLac());
-                        cellListStr.put(id, msg);
-                    }
+                    String msg = String.format("Db=%d, Asu=%d Level(0..4)=%d", dbm, asu, level);
+                    String id = String.format("Wcdma Cid=%d Lac=%d",
+                            cellitem.getCellIdentity().getCid(),
+                                    cellitem.getCellIdentity().getLac());
+                    cellListStr.put(id, msg);
                 }
             }
 
             addBuild("Cell...", cellListStr);
-        } catch (Exception ex) {
-
+        } catch (Exception ignore) {
         }
 
         // --------------- Connection Services -------------
         try {
-            ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager connMgr = getServiceSafe(Context.CONNECTIVITY_SERVICE);
             final NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
             if (netInfo != null) {
-                Map<String, String> netListStr = new LinkedHashMap<String, String>();
+                Map<String, String> netListStr = new LinkedHashMap<>();
 
                 putIf(netListStr, "Available", "Yes", netInfo.isAvailable());
                 putIf(netListStr, "Connected", "Yes", netInfo.isConnected());
@@ -476,9 +477,7 @@ public class NetFragment extends DevFragment {
                 putIf(netListStr, "Roaming", "Yes", netInfo.isRoaming());
                 putIf(netListStr, "Extra", netInfo.getExtraInfo(), !TextUtils.isEmpty(netInfo.getExtraInfo()));
                 putIf(netListStr, "WhyFailed", netInfo.getReason(), !TextUtils.isEmpty(netInfo.getReason()));
-                if (Build.VERSION.SDK_INT >= 16) {
-                    putIf(netListStr, "Metered", "Avoid heavy use", connMgr.isActiveNetworkMetered());
-                }
+                putIf(netListStr, "Metered", "Avoid heavy use", connMgr.isActiveNetworkMetered());
 
                 netListStr.put("NetworkType", netInfo.getTypeName());
                 if (connMgr.getAllNetworkInfo().length > 1) {
@@ -493,6 +492,30 @@ public class NetFragment extends DevFragment {
 
                             netListStr.put("  " + netI.getTypeName(), state);
                         }
+                    }
+                }
+
+                if (connMgr.isActiveNetworkMetered()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        String howMetered = "";
+                        switch (connMgr.getRestrictBackgroundStatus()) {
+                            case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED:
+                                // Background data usage is blocked for this app. Wherever possible,
+                                // the app should also use less data in the foreground.
+                                howMetered = "Restrict background";
+                                break;
+                            case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+                                // The app is whitelisted. Wherever possible,
+                                // the app should use less data in the foreground and background.
+                                howMetered = "Restrict bg, whitelist";
+                                break;
+                            case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED:
+                                // Data Saver is disabled. Since the device is connected to a
+                                // metered network, the app should use less data wherever possible.
+                                howMetered = "Data Saver disabled";
+                                break;
+                        }
+                        netListStr.put("Metered", howMetered);
                     }
                 }
 
@@ -524,50 +547,45 @@ public class NetFragment extends DevFragment {
         }
 
         // --------------- Telephony Services -------------
-        TelephonyManager telephonyManager =
-                (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE);
-        if (telephonyManager != null) {
-            Map<String, String> cellListStr = new LinkedHashMap<String, String>();
-            try {
-                cellListStr.put("Version", telephonyManager.getDeviceSoftwareVersion());
-                cellListStr.put("Number", telephonyManager.getLine1Number());
-                cellListStr.put("Service", telephonyManager.getNetworkOperatorName());
-                cellListStr.put("Roaming", telephonyManager.isNetworkRoaming() ? "Yes" : "No");
-                cellListStr.put("Type", getNetworkTypeName(telephonyManager.getNetworkType()));
+        TelephonyManager telephonyManager = getServiceSafe(Context.TELEPHONY_SERVICE);
+        Map<String, String> cellListStr = new LinkedHashMap<>();
+        try {
+            cellListStr.put("Version", telephonyManager.getDeviceSoftwareVersion());
+            cellListStr.put("Number", telephonyManager.getLine1Number());
+            cellListStr.put("Service", telephonyManager.getNetworkOperatorName());
+            cellListStr.put("Roaming", telephonyManager.isNetworkRoaming() ? "Yes" : "No");
+            cellListStr.put("Type", getNetworkTypeName(telephonyManager.getNetworkType()));
 
-                if (Build.VERSION.SDK_INT >= 17) {
-                    if (telephonyManager.getAllCellInfo() != null) {
-                        for (CellInfo cellInfo : telephonyManager.getAllCellInfo()) {
-                            String cellName = cellInfo.getClass().getSimpleName();
-                            int level = 0;
-                            if (cellInfo instanceof CellInfoCdma) {
-                                level = ((CellInfoCdma) cellInfo).getCellSignalStrength().getLevel();
-                            } else if (cellInfo instanceof CellInfoGsm) {
-                                level = ((CellInfoGsm) cellInfo).getCellSignalStrength().getLevel();
-                            } else if (cellInfo instanceof CellInfoLte) {
-                                level = ((CellInfoLte) cellInfo).getCellSignalStrength().getLevel();
-                            } else if (cellInfo instanceof CellInfoWcdma) {
-                                if (Build.VERSION.SDK_INT >= 18) {
-                                    level = ((CellInfoWcdma) cellInfo).getCellSignalStrength().getLevel();
-                                }
-                            }
-                            cellListStr.put(cellName, "Level% " + String.valueOf(100 * level / 4));
+            if (Build.VERSION.SDK_INT >= 17) {
+                if (telephonyManager.getAllCellInfo() != null) {
+                    for (CellInfo cellInfo : telephonyManager.getAllCellInfo()) {
+                        String cellName = cellInfo.getClass().getSimpleName();
+                        int level = 0;
+                        if (cellInfo instanceof CellInfoCdma) {
+                            level = ((CellInfoCdma) cellInfo).getCellSignalStrength().getLevel();
+                        } else if (cellInfo instanceof CellInfoGsm) {
+                            level = ((CellInfoGsm) cellInfo).getCellSignalStrength().getLevel();
+                        } else if (cellInfo instanceof CellInfoLte) {
+                            level = ((CellInfoLte) cellInfo).getCellSignalStrength().getLevel();
+                        } else if (Build.VERSION.SDK_INT >= 18 && cellInfo instanceof CellInfoWcdma) {
+                            level = ((CellInfoWcdma) cellInfo).getCellSignalStrength().getLevel();
                         }
+                        cellListStr.put(cellName, "Level% " + String.valueOf(100 * level / 4));
                     }
                 }
-
-                for (NeighboringCellInfo cellInfo : telephonyManager.getNeighboringCellInfo()) {
-                    int level = cellInfo.getRssi();
-                    cellListStr.put("Cell level%", String.valueOf(100 * level / 31));
-                }
-
-            } catch (Exception ex) {
-                m_log.e("Cell %s", ex.getMessage());
             }
 
-            if (!cellListStr.isEmpty()) {
-                addBuild("Cell...", cellListStr);
+            for (NeighboringCellInfo cellInfo : telephonyManager.getNeighboringCellInfo()) {
+                int level = cellInfo.getRssi();
+                cellListStr.put("Cell level%", String.valueOf(100 * level / 31));
             }
+
+        } catch (Exception ex) {
+            m_log.e("Cell %s", ex.getMessage());
+        }
+
+        if (!cellListStr.isEmpty()) {
+            addBuild("Cell...", cellListStr);
         }
 
         // --------------- Bluetooth Services (API18) -------------
@@ -576,7 +594,7 @@ public class NetFragment extends DevFragment {
                 BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                 if (bluetoothAdapter != null) {
 
-                    Map<String, String> btListStr = new LinkedHashMap<String, String>();
+                    Map<String, String> btListStr = new LinkedHashMap<>();
 
                     btListStr.put("Enabled", bluetoothAdapter.isEnabled() ? "yes" : "no");
                     btListStr.put("Name", bluetoothAdapter.getName());
@@ -592,15 +610,12 @@ public class NetFragment extends DevFragment {
                         }
                     }
 
-                    BluetoothManager btMgr = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
-                    if (btMgr != null) {
-                        // btMgr.getAdapter().
-                    }
+                    // BluetoothManager btMgr = getServiceSafe(Context.BLUETOOTH_SERVICE);
+                    // btMgr.getAdapter().
                     addBuild("Bluetooth", btListStr);
                 }
 
-            } catch (Exception ex) {
-
+            } catch (Exception ignore) {
             }
         }
 
@@ -611,13 +626,13 @@ public class NetFragment extends DevFragment {
         // final WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if (wifiMgr != null) {
-            boolean wifiEnabled = wifiMgr.isWifiEnabled();
-            boolean dhcpiEnabled = wifiMgr.getDhcpInfo() != null;
+            // boolean wifiEnabled = wifiMgr.isWifiEnabled();
+            // boolean dhcpiEnabled = wifiMgr.getDhcpInfo() != null;
 
             if (mNetBroadcastReceiver == null) {
                 mNetBroadcastReceiver = new NetBroadcastReceiver(wifiMgr);
-                // getActivity().unregisterReceiver(mNetBroadcastReceiver);
-                getActivity().registerReceiver(mNetBroadcastReceiver, INTENT_FILTER_SCAN_AVAILABLE);
+                // getActivitySafe().unregisterReceiver(mNetBroadcastReceiver);
+                getActivitySafe().registerReceiver(mNetBroadcastReceiver, INTENT_FILTER_SCAN_AVAILABLE);
             }
 
             if (wifiMgr.getScanResults() == null || wifiMgr.getScanResults().isEmpty() ) {
@@ -626,16 +641,17 @@ public class NetFragment extends DevFragment {
                 wifiMgr.startScan();
             }
 
-            Map<String, String> wifiListStr = new LinkedHashMap<String, String>();
+            Map<String, String> wifiListStr = new LinkedHashMap<>();
             try {
                 DhcpInfo dhcpInfo = wifiMgr.getDhcpInfo();
 
-                wifiListStr.put("DNS1", Formatter.formatIpAddress(dhcpInfo.dns1));
-                wifiListStr.put("DNS2", Formatter.formatIpAddress(dhcpInfo.dns2));
-                wifiListStr.put("Default Gateway", Formatter.formatIpAddress(dhcpInfo.gateway));
-                wifiListStr.put("IP Address", Formatter.formatIpAddress(dhcpInfo.ipAddress));
-                wifiListStr.put("Subnet Mask", Formatter.formatIpAddress(dhcpInfo.netmask));
-                wifiListStr.put("Server IP", Formatter.formatIpAddress(dhcpInfo.serverAddress));
+                // java.net.InetAddress.
+                wifiListStr.put("DNS1", formatIp(dhcpInfo.dns1));
+                wifiListStr.put("DNS2", formatIp(dhcpInfo.dns2));
+                wifiListStr.put("Default Gateway", formatIp(dhcpInfo.gateway));
+                wifiListStr.put("IP Address", formatIp(dhcpInfo.ipAddress));
+                wifiListStr.put("Subnet Mask", formatIp(dhcpInfo.netmask));
+                wifiListStr.put("Server IP", formatIp(dhcpInfo.serverAddress));
                 wifiListStr.put("Lease Time(sec)", String.valueOf(dhcpInfo.leaseDuration));
 
                 WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
@@ -685,7 +701,7 @@ public class NetFragment extends DevFragment {
                     int idx = 0;
 
                     for (ScanResult scanResult : listWifi) {
-                        Map<String, String> wifiScanListStr = new LinkedHashMap<String, String>();
+                        Map<String, String> wifiScanListStr = new LinkedHashMap<>();
                         wifiScanListStr.put("SSID", scanResult.SSID);
                         if (Build.VERSION.SDK_INT >= 23) {
                             wifiScanListStr.put("  Name", scanResult.operatorFriendlyName.toString());
@@ -701,7 +717,9 @@ public class NetFragment extends DevFragment {
                         // wifiScanListStr.put("  Width", scanResult.channelWidth);
                         if (Build.VERSION.SDK_INT >= 17) {
                             Date wifiTime = new Date(scanResult.timestamp/1000 + bootTime);
-                            wifiScanListStr.put("  Time", wifiTime.toLocaleString());
+                            SimpleDateFormat fmt = new SimpleDateFormat("M/d/yy h:mm a");
+                            wifiScanListStr.put("  Time", fmt.format(wifiTime));
+                            // wifiScanListStr.put("  Time", wifiTime.toLocaleString());
                         }
 
                         addBuild(String.format("WiFiScan #%d", ++idx), wifiScanListStr);
@@ -725,7 +743,27 @@ public class NetFragment extends DevFragment {
         m_adapter.notifyDataSetChanged();
     }
 
+    @NonNull
+    private String formatIp(int ipAddrss) {
+        byte[] myIPAddress = BigInteger.valueOf(ipAddrss).toByteArray();
+        // you must reverse the byte array before conversion. Use Apache's commons library
+        invertUsingFor(myIPAddress);
+        try {
+            InetAddress myInetIP = InetAddress.getByAddress(myIPAddress);
+            return myInetIP.getHostAddress();
+        } catch (Exception ex) {
+            return "<unknownIP>";
+        }
+    }
 
+    void invertUsingFor(byte[] array) {
+        for (int i = 0; i < array.length / 2; i++) {
+            byte temp = array[i];
+            array[i] = array[array.length - 1 - i];
+            array[array.length - 1 - i] = temp;
+        }
+    }
+    
     /**
      *
      */
@@ -735,7 +773,7 @@ public class NetFragment extends DevFragment {
             List<WifiConfiguration> listWifiCfg = wifiMgr.getConfiguredNetworks();
 
             for (WifiConfiguration wifiCfg : listWifiCfg) {
-                Map<String, String> wifiCfgListStr = new LinkedHashMap<String, String>();
+                Map<String, String> wifiCfgListStr = new LinkedHashMap<>();
                 if (Build.VERSION.SDK_INT >= 23) {
                     wifiCfgListStr.put("Name", wifiCfg.providerFriendlyName);
                 }
@@ -783,15 +821,6 @@ public class NetFragment extends DevFragment {
         }
     }
 
-    void addBuildIf(String name, String value, boolean ifValue) {
-        if (ifValue)
-            m_list.add(new BuildInfo(name, value));
-    }
-
-    void addBuild(String name, String value) {
-        addBuildIf(name, value, !TextUtils.isEmpty(value));
-    }
-
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
             m_list.add(new BuildInfo(name, value));
@@ -799,8 +828,8 @@ public class NetFragment extends DevFragment {
 
     private void clean_networks() {
         StringBuilder sb = new StringBuilder();
-        final WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if (wifiMgr != null && checkPermissions(Manifest.permission.CHANGE_WIFI_STATE)) { // && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null) {
+        final WifiManager wifiMgr = getServiceSafe(Context.WIFI_SERVICE);
+        if (checkPermissions(Manifest.permission.CHANGE_WIFI_STATE)) { // && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null) {
 
             try {
                 List<WifiConfiguration> listWifiCfg = wifiMgr.getConfiguredNetworks();
@@ -855,7 +884,7 @@ public class NetFragment extends DevFragment {
                 }
                 return res1.toString();
             }
-        } catch (Exception ex) {
+        } catch (Exception ignore) {
         }
         return "02:00:00:00:00:00";
     }
@@ -866,7 +895,7 @@ public class NetFragment extends DevFragment {
     @Override
     public void onStop() {
         if (mNetBroadcastReceiver != null) {
-            getActivity().unregisterReceiver(mNetBroadcastReceiver);
+            getActivitySafe().unregisterReceiver(mNetBroadcastReceiver);
             mNetBroadcastReceiver = null;
         }
         super.onStop();
@@ -874,7 +903,7 @@ public class NetFragment extends DevFragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             updateList();
         }
     }
@@ -882,7 +911,7 @@ public class NetFragment extends DevFragment {
     @Override
     public void onDetach() {
         if (mNetBroadcastReceiver != null) {
-            getActivity().unregisterReceiver(mNetBroadcastReceiver);
+            getActivitySafe().unregisterReceiver(mNetBroadcastReceiver);
             mNetBroadcastReceiver = null;
         }
         super.onDetach();
@@ -899,15 +928,12 @@ public class NetFragment extends DevFragment {
         }
     }
 
+    // =============================================================================================
+    @SuppressWarnings("unused")
     class BuildInfo {
         final String m_fieldStr;
         final String m_valueStr;
         final Map<String, String> m_valueList;
-
-        BuildInfo() {
-            m_fieldStr = m_valueStr = null;
-            m_valueList = null;
-        }
 
         BuildInfo(String str1, String str2) {
             m_fieldStr = str1;
@@ -942,7 +968,9 @@ public class NetFragment extends DevFragment {
         }
     }
 
-    final static int EXPANDED_LAYOUT = R.layout.build_list_row;
+    // =============================================================================================
+
+    // final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
     /**
@@ -952,7 +980,7 @@ public class NetFragment extends DevFragment {
             implements View.OnClickListener {
         private final LayoutInflater m_inflater;
 
-        public BuildArrayAdapter(Context context) {
+        BuildArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -1062,7 +1090,7 @@ public class NetFragment extends DevFragment {
             else
                 summaryView.setBackgroundColor(m_rowColor2);
 
-            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setTag(groupPosition);
             summaryView.setOnClickListener(this);
             return summaryView;
         }
@@ -1074,7 +1102,7 @@ public class NetFragment extends DevFragment {
 
         @Override
         public void onClick(View view) {
-            int grpPos = ((Integer) view.getTag()).intValue();
+            int grpPos = (Integer) view.getTag();
 
             if (m_listView.isGroupExpanded(grpPos))
                 m_listView.collapseGroup(grpPos);

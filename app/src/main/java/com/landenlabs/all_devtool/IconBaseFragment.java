@@ -35,6 +35,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -72,9 +73,10 @@ import java.util.Set;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings("Convert2Lambda")
 public abstract class IconBaseFragment extends DevFragment {
 
-    final ArrayList<IconInfo> m_list = new ArrayList<IconInfo>();
+    final ArrayList<IconInfo> m_list = new ArrayList<>();
     ListView m_listView;
     FragmentActivity m_context;
     int m_backgroundColor = -1;
@@ -105,8 +107,8 @@ public abstract class IconBaseFragment extends DevFragment {
     // Override Fragment
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.icon_tab, container, false);
@@ -197,7 +199,7 @@ public abstract class IconBaseFragment extends DevFragment {
             return m_fieldStr;
         }
 
-        public boolean hasValue() {
+        boolean hasValue() {
             return m_value != -1;
         }
 
@@ -207,7 +209,7 @@ public abstract class IconBaseFragment extends DevFragment {
 
         public Drawable getDrawable() {
             if (Build.VERSION.SDK_INT >= 21) {
-                return hasValue() ? getResources().getDrawable(getValue(), getContext().getTheme()) : m_drawable;
+                return hasValue() ? getResources().getDrawable(getValue(), getContextSafe().getTheme()) : m_drawable;
             } else {
                 return hasValue() ? getResources().getDrawable(getValue()) : m_drawable;
             }
@@ -216,13 +218,14 @@ public abstract class IconBaseFragment extends DevFragment {
 
     private class IconArrayAdapter extends ArrayAdapter<IconInfo> {
 
-        public IconArrayAdapter(Context context, int rowLayoutId,
+        IconArrayAdapter(Context context, int rowLayoutId,
                                 int textViewResourceId, List<IconInfo> objects) {
             super(context, rowLayoutId, textViewResourceId, objects);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
 
             TextView imageInfo = Ui.viewById(view, R.id.iconInfo);
@@ -262,21 +265,13 @@ public abstract class IconBaseFragment extends DevFragment {
 
     /**
      * Show a 'StateListDrawable' information
-     *
-     * @param imageView
-     * @param row1
-     * @param row2
-     * @param stateListDrawable
-     * @param state
-     * @param desc
-     * @param stateIcons
      */
     private void showStateIcon(final ImageView imageView, TableRow row1, TableRow row2,
                StateListDrawable stateListDrawable, int state, String desc, Set<Drawable> stateIcons) {
 
         stateListDrawable.setState(new int[]{state});
         Drawable stateD = stateListDrawable.getCurrent();
-        if (stateD != null && !stateIcons.contains(stateD)) {
+        if (!stateIcons.contains(stateD)) {
             stateIcons.add(stateD);
             ImageButton stateImageView = new ImageButton(imageView.getContext());
             Drawable[] drawables = new Drawable[]{stateD, getResources().getDrawable(R.drawable.button_border_sel)};
@@ -306,12 +301,6 @@ public abstract class IconBaseFragment extends DevFragment {
 
     /**
      * Show a 'LayerDrawable'  information.
-     *
-     * @param imageView
-     * @param row1
-     * @param row2
-     * @param iconD
-     * @param layerIdx
      */
     private void showLayerIcon(final ImageView imageView, TableRow row1, TableRow row2,
                Drawable iconD, int layerIdx) {
@@ -343,11 +332,6 @@ public abstract class IconBaseFragment extends DevFragment {
 
     /**
      * Show 'AnimationDrawable'  information
-     *
-     * @param imageView
-     * @param animationDrawable
-     * @param row1
-     * @param row2
      */
     private void showAnimationBtns(final ImageView imageView,
                final AnimationDrawable animationDrawable, TableRow row1, TableRow row2) {
@@ -370,7 +354,7 @@ public abstract class IconBaseFragment extends DevFragment {
         for (int idx = 0; idx < imageResIds.length; idx++) {
 
             btnImage = new ImageButton(imageView.getContext());
-            btnImage.setTag(Integer.valueOf(idx));
+            btnImage.setTag(idx);
 
             btnImage.setImageResource(imageResIds[idx]);
             btnImage.setPadding(10, 10, 10, 10);
@@ -412,8 +396,6 @@ public abstract class IconBaseFragment extends DevFragment {
 
     /**
      * Display icon (drawable) information
-     *
-     * @param iconInfo
      */
     private void showIconDialog(IconInfo iconInfo) {
         Drawable iconD = iconInfo.getDrawable();
@@ -461,14 +443,14 @@ public abstract class IconBaseFragment extends DevFragment {
             showRows = true;
 
             StateListDrawable stateListDrawable = (StateListDrawable) iconD;
-            Set<Drawable> stateIcons = new HashSet<Drawable>();
+            Set<Drawable> stateIcons = new HashSet<>();
             showStateIcon(imageView, row1, row2, stateListDrawable, android.R.attr.state_enabled, "Enabled", stateIcons);
             showStateIcon(imageView, row1, row2, stateListDrawable, android.R.attr.state_pressed, "Pressed", stateIcons);
             showStateIcon(imageView, row1, row2, stateListDrawable, android.R.attr.state_checked, "Checked", stateIcons);
             showStateIcon(imageView, row1, row2, stateListDrawable, android.R.attr.state_selected, "Selected", stateIcons);
         }
 
-        if (iconType.equals(LayerDrawable.class.getSimpleName())) {
+        if (iconD instanceof LayerDrawable) {
             showRows = true;
             LayerDrawable layerDrawable = (LayerDrawable) iconD;
             int layerCnt = layerDrawable.getNumberOfLayers();
@@ -476,7 +458,7 @@ public abstract class IconBaseFragment extends DevFragment {
             for (int layerIdx = 0; layerIdx < Math.min(layerCnt, 3); layerIdx++) {
                 showLayerIcon(imageView, row1, row2, layerDrawable.getDrawable(layerIdx), layerIdx);
             }
-        } else if (iconType.equals(AnimationDrawable.class.getSimpleName())) {
+        } else if (iconD instanceof AnimationDrawable) {
             final AnimationDrawable animationDrawable = (AnimationDrawable) iconD;
             extraInfo = String.format(Locale.getDefault(), "Frames:%d", animationDrawable.getNumberOfFrames());
             showRows = true;

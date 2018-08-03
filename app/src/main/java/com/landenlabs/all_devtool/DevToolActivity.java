@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -82,7 +83,11 @@ public class DevToolActivity extends FragmentActivity {
 
     private MenuItem m_shareMenuItem;
     protected String m_startFrag;
+
+
+    @SuppressWarnings("FieldCanBeLocal")
     private UncaughtExceptionHandler m_uncaughtExceptionHandler;
+    @SuppressWarnings("FieldCanBeLocal")
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @SuppressLint("DefaultLocale")
@@ -185,7 +190,7 @@ public class DevToolActivity extends FragmentActivity {
             case R.id.menu_lock_orientation:
                 item.setChecked(!item.isChecked());
                 GlobalInfo.s_globalInfo.isLockedOrientation = item.isChecked();
-                GlobalInfo.s_globalInfo.lockedOrientation = getResources().getConfiguration().orientation;;
+                GlobalInfo.s_globalInfo.lockedOrientation = getResources().getConfiguration().orientation;
                 return true;
         }
 
@@ -253,12 +258,12 @@ public class DevToolActivity extends FragmentActivity {
     /**
      * @return PackageInfo
      */
+    @NonNull
     private PackageInfo getPackageInfo() {
         try {
             return getPackageManager().getPackageInfo(getPackageName(), 0);
         } catch (NameNotFoundException e) {
-            // TODO Auto-generated catch block
-            return null;
+            return new PackageInfo();
         }
     }
 

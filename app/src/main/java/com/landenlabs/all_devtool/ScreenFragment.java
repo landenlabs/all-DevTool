@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
@@ -58,6 +59,7 @@ import java.util.Locale;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings("Convert2Lambda")
 public class ScreenFragment extends DevFragment {
 
     public static final String s_name = "Screen";
@@ -105,8 +107,8 @@ public class ScreenFragment extends DevFragment {
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        bitmapList.add(Utils.grabScreen(this.getActivity()));
+        List<Bitmap> bitmapList = new ArrayList<>();
+        bitmapList.add(Utils.grabScreen(getActivitySafe()));
         return bitmapList;
     }
 
@@ -134,8 +136,8 @@ public class ScreenFragment extends DevFragment {
     // Override DevFragment(Fragment)
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         
@@ -149,7 +151,7 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         // super.onViewCreated(view, savedInstanceState);
         cacheFragment();
         if (GlobalInfo.s_globalInfo.haveActionBarOverlay) {
@@ -186,7 +188,6 @@ public class ScreenFragment extends DevFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
         int id = item.getItemId();
         switch (id) {
             case R.id.screen_clear_menu:
@@ -272,7 +273,7 @@ public class ScreenFragment extends DevFragment {
         /*
          * Dynamically get theme - always returns 'AppTheme' which is set in style
             try {
-                PackageInfo packageInfo = getActivity().getPackageManager().getPackageInfo(GlobalInfo.s_globalInfo.pkgName, 0);
+                PackageInfo packageInfo = getPackageMgr().getPackageInfo(GlobalInfo.s_globalInfo.pkgName, 0);
                  int themeResId = packageInfo.applicationInfo.theme;
                  String themeName = getResources().getResourceEntryName(themeResId);
                  themeTv.setText(themeName);

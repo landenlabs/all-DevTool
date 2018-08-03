@@ -24,6 +24,7 @@ package com.landenlabs.all_devtool;
  */
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -72,9 +73,10 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings("Convert2Lambda")
 public class DiskFragment extends DevFragment {
 
-    final ArrayList<GroupInfo> m_list = new ArrayList<GroupInfo>();
+    final ArrayList<GroupInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
     CheckBox m_writeGrantedCb;
@@ -91,7 +93,7 @@ public class DiskFragment extends DevFragment {
     Map<String, String> m_duSdcardList;
     Map<String, String> m_dfList;
 
-    Map<String, String> m_diskDumpStats;
+    // Map<String, String> m_diskDumpStats;
     ArrayList<String> m_diskProcStats;
     
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
@@ -128,8 +130,8 @@ public class DiskFragment extends DevFragment {
 
     @SuppressWarnings("deprecation")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.disk_tab, container, false);
@@ -155,7 +157,7 @@ public class DiskFragment extends DevFragment {
                     updateList(true);
                 } else {
                     Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
+                    intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
                     startActivity(intent);
                 }
             }
@@ -197,7 +199,7 @@ public class DiskFragment extends DevFragment {
                 final TextView field = Ui.viewById(view, R.id.buildField);
                 final TextView value = Ui.viewById(view, R.id.buildValue);
                 if (field != null && value != null) {
-                    Button btn = Ui.ShowMessage(DiskFragment.this.getActivity(), field.getText() + "\n" + value.getText()).getButton(
+                    Button btn = Ui.ShowMessage(DiskFragment.this.getActivitySafe(), field.getText() + "\n" + value.getText()).getButton(
                             AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
                         btn.setOnClickListener(new View.OnClickListener() {
@@ -245,10 +247,8 @@ public class DiskFragment extends DevFragment {
     // Permission
 
     private boolean hasWritePermission() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            return getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        }
-        return true;
+        return Build.VERSION.SDK_INT < 23 || getContextSafe().checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
     private void grantWritePermission() {
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -259,7 +259,7 @@ public class DiskFragment extends DevFragment {
     protected boolean checkPermissions(String... needPermissions) {
         boolean okay = true;
         if (Build.VERSION.SDK_INT >= 23) {
-            if (getContext().checkSelfPermission(needPermissions[0]) != PackageManager.PERMISSION_GRANTED) {
+            if (getContextSafe().checkSelfPermission(needPermissions[0]) != PackageManager.PERMISSION_GRANTED) {
                 okay = false;
                 m_writeGrantedCb.setChecked(false);
             //    m_writeGrantedCb.setText("Grant Write [Failed]");
@@ -276,7 +276,6 @@ public class DiskFragment extends DevFragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null)
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -297,6 +296,8 @@ public class DiskFragment extends DevFragment {
     /**
      * Populate list with 'Disk' information.
      */
+    @SuppressLint("WorldReadableFiles")
+    @SuppressWarnings({"ConstantConditions", "ConstantIfStatement", "unused"})
     void updateList(boolean force) {
         // if (!m_list.isEmpty() && !force)
         //     return;
@@ -316,20 +317,20 @@ public class DiskFragment extends DevFragment {
             m_javaDirList = new LinkedHashMap<>();
             try {
                 if (Build.VERSION.SDK_INT >= 24) {
-                    addFile("getFilesDir", getActivity().getApplicationContext().getDataDir());
+                    addFile("getFilesDir", getActivitySafe().getApplicationContext().getDataDir());
                 }
                 try {
-                    addFile("getDir(null)", getContext().getDir(null, Context.MODE_WORLD_READABLE));
-                } catch (Exception ex) {
+                    addFile("getDir(null)", getContextSafe().getDir(null, Context.MODE_WORLD_READABLE));
+                } catch (Exception ignored) {
                 }
                 try {
-                    addFile("getFilesDir", getActivity().getFilesDir());
-                } catch (Exception ex) {
+                    addFile("getFilesDir", getActivitySafe().getFilesDir());
+                } catch (Exception ignored) {
                 }
 
                 try {
-                    addFile("getCacheDir", getActivity().getCacheDir());
-                } catch (Exception ex) {
+                    addFile("getCacheDir", getActivitySafe().getCacheDir());
+                } catch (Exception ignored) {
                 }
 
                 if (false) {
@@ -337,25 +338,25 @@ public class DiskFragment extends DevFragment {
                         String FILENAME = "test.txt";
                         String string = "hello world!";
 
-                        FileOutputStream fos = getContext().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+                        FileOutputStream fos = getContextSafe().openFileOutput(FILENAME, Context.MODE_PRIVATE);
                         fos.write(string.getBytes());
                         addString("openFileOutput", fos.toString());
                         fos.close();
-                    } catch (Exception ex) {
+                    } catch (Exception ignored) {
                     }
                 }
 
                 addString("External State", Environment.getExternalStorageState());
                 
                 try {
-                    addFile("getExternalCacheDir", getActivity().getExternalCacheDir());
-                } catch (Exception ex) {
+                    addFile("getExternalCacheDir", getActivitySafe().getExternalCacheDir());
+                } catch (Exception ignored) {
                 }
 
                 try {
                     // getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-                    addFile("getExternalCacheDir", getActivity().getExternalFilesDir(null));
-                } catch (Exception ex) {
+                    addFile("getExternalCacheDir", getActivitySafe().getExternalFilesDir(null));
+                } catch (Exception ignored) {
                 }
 
                 addFile("getExternalStorageDirectory", Environment.getExternalStorageDirectory());
@@ -383,7 +384,6 @@ public class DiskFragment extends DevFragment {
                 addString("du -ks /", m_duList);
             }
 
-
             if (m_fileSystemCb.isChecked()) {
                 m_dfList = getShellCmd(new String[] { "df" });
                 addString("df", m_dfList);
@@ -399,6 +399,7 @@ public class DiskFragment extends DevFragment {
                 m_duMntList = getShellCmd(new String[]{"du", "-chHLd", "1", "/mnt/"});
                 addString("du -chHLs /mnt", m_duMntList);
 
+                // String sdCard = Environment.getExternalStorageDirectory().getPath();
                 m_duSdcardList = getShellCmd(new String[] { "du", "-chHL", "/sdcard/" });
                 addString("du -chHL /sdcard", m_duSdcardList);
             }
@@ -426,7 +427,7 @@ public class DiskFragment extends DevFragment {
 
 
         /*
-        final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
+        final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivitySafe());
         m_listView.setAdapter(adapter);
 
         int count = adapter.getGroupCount();
@@ -438,7 +439,7 @@ public class DiskFragment extends DevFragment {
 
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
-            final DiskFragment.BuildArrayAdapter adapter = new DiskFragment.BuildArrayAdapter(this.getActivity());
+            final DiskFragment.BuildArrayAdapter adapter = new DiskFragment.BuildArrayAdapter(this.getActivitySafe());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -454,6 +455,8 @@ public class DiskFragment extends DevFragment {
     }
 
 
+    @SuppressWarnings("OctalInteger")
+    @SuppressLint({"SetWorldReadable", "SetWorldWritable"})
     void addFile(String name, File file) {
         if (file != null) {
             char r = file.canRead() ? 'r' : '-';
@@ -467,7 +470,7 @@ public class DiskFragment extends DevFragment {
                 int mode = OsUtils.getPermissions(file);
                 if (mode != -1) {
                     int owner = mode & 0700;
-                    int group = mode & 0070;
+                    // int group = mode & 0070;
                     int world = mode & 0007;
 
                     r = isBit(owner, 0400) ? 'r' : '-';
@@ -512,6 +515,7 @@ public class DiskFragment extends DevFragment {
         return mapList;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private Map<String, String> getFileList(String[] shellCmd, String regStr, String repStr, String excPat) {
         Map<String, String> mapList = new LinkedHashMap<>();
         ArrayList<String> responseList = runShellCmd(shellCmd);
@@ -538,11 +542,10 @@ public class DiskFragment extends DevFragment {
      * @param diskFileName example /proc/cpuinfo
      * @param splitPat Ex  " " or ": "
      * @param splitMinCnt   Ex 1
-     *
-     * @return
      */
+    @SuppressWarnings("SameParameterValue")
     private static ArrayList<String> readFile(String diskFileName, String splitPat, int splitMinCnt) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         try {
             Scanner scan = new Scanner(new File(diskFileName));
             while (scan.hasNextLine()) {
@@ -561,6 +564,7 @@ public class DiskFragment extends DevFragment {
     // =============================================================================================
 
 
+    @SuppressWarnings("unused")
     class GroupInfo {
         final String m_fieldStr;
         final String m_valueStr;
@@ -607,7 +611,6 @@ public class DiskFragment extends DevFragment {
 
     // =============================================================================================
 
-    final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
     /**
@@ -616,7 +619,7 @@ public class DiskFragment extends DevFragment {
     private class BuildArrayAdapter extends BaseExpandableListAdapter {
         private final LayoutInflater m_inflater;
 
-        public BuildArrayAdapter(Context context) {
+        BuildArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -631,7 +634,7 @@ public class DiskFragment extends DevFragment {
 
             GroupInfo buildInfo = m_list.get(groupPosition);
 
-            View expandView = convertView;
+            View expandView; // = convertView;
             // if (null == expandView) {
             expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             // }
@@ -751,17 +754,17 @@ public class DiskFragment extends DevFragment {
                 // startActivity(Intent.createChooser(intent, "Open folder"));
 
                 */
-                m_fileOpenDialog = new FileBrowseDialog(this.getActivity(), "Browse",
-                        this.getActivity().getWindow().getDecorView().getHeight(),null);
+                m_fileOpenDialog = new FileBrowseDialog(this.getActivitySafe(), "Browse",
+                        this.getActivitySafe().getWindow().getDecorView().getHeight(),null);
 
                 m_fileOpenDialog.DefaultFileName = root.getPath();
                 m_fileOpenDialog.choose(root.getPath());
             } else {
                 ArrayList<String> responseList = runShellCmd(new String[]{"ls", "-l", value });
-                Toast.makeText(getActivity(), TextUtils.join("\n", responseList), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivitySafe(), TextUtils.join("\n", responseList), Toast.LENGTH_LONG).show();
             }
         } catch (Exception ex) {
-            Toast.makeText(getActivity(), ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivitySafe(), ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

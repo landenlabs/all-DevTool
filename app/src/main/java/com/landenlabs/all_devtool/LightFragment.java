@@ -32,9 +32,9 @@ import java.util.List;
  *     o Add color wheel and brightness for screen color
  *     o Add strobe patterns to LED torch light and screen
  *     o Add screen alt color flash and kaloscope pattern, half screen blocks alternating. 
- *
  */
 
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class LightFragment extends DevFragment
         implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
 
@@ -44,7 +44,6 @@ public class LightFragment extends DevFragment
 
 
     private ToggleButton m_cameraLightTb;
-    private SeekBar m_cameraBrightnessSB;
 
     // SDK < 23
     private Camera m_camera;
@@ -53,7 +52,6 @@ public class LightFragment extends DevFragment
     private String mCameraId;
     CameraManager mCameraManager;
 
-    private SeekBar m_screenBrightnessSB;
     private ToggleButton m_screenBrightnessTB;
 
     public LightFragment() {
@@ -87,7 +85,7 @@ public class LightFragment extends DevFragment
 
     @SuppressWarnings("deprecation")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -99,7 +97,7 @@ public class LightFragment extends DevFragment
         m_rootView = inflater.inflate(R.layout.light_tab, container, false);
 
         m_cameraLightTb =  Ui.viewById(m_rootView, R.id.lightCameraOnTb);
-        if (!getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+        if (!getContextSafe().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             m_cameraLightTb.setVisibility(View.GONE);
         }
         m_cameraLightTb.setOnClickListener(this);
@@ -110,7 +108,7 @@ public class LightFragment extends DevFragment
         m_screenBrightnessTB = Ui.viewById(m_rootView, R.id.screenBrightnesTB);
         m_screenBrightnessTB.setOnClickListener(this);
 
-        m_screenBrightnessSB = Ui.viewById(m_rootView, R.id.lightCameraSB);
+        SeekBar m_screenBrightnessSB = Ui.viewById(m_rootView, R.id.lightCameraSB);
         m_screenBrightnessSB.setOnSeekBarChangeListener(this);
 
         return m_rootView;
@@ -118,7 +116,7 @@ public class LightFragment extends DevFragment
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             try {
                 // checkPermissions(Manifest.permission.CAMERA);
                 m_camera = Camera.open();
@@ -140,7 +138,7 @@ public class LightFragment extends DevFragment
                 if (!checkSystemWritePermission()) {
                     requestSystemWritePermission();
                 }
-                mCameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+                mCameraManager = getServiceSafe(Context.CAMERA_SERVICE);
                 String[] cameraIds = mCameraManager.getCameraIdList();
                 mCameraId = cameraIds[0];
             }
@@ -255,9 +253,9 @@ public class LightFragment extends DevFragment
 
     private void setScreenOnAuto(boolean onAuto) {
         if (onAuto) {
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else {
-            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 
@@ -265,7 +263,7 @@ public class LightFragment extends DevFragment
         if (checkSystemWritePermission()) {
             // setScreenBrightnessAuto(false);
             m_screenBrightnessTB.setChecked(false);
-            Window window = getActivity().getWindow();
+            Window window = getWindow();
             WindowManager.LayoutParams layoutParams = window.getAttributes();
             layoutParams.screenBrightness = brightnessPercent;  // 0 .. 1
             window.setAttributes(layoutParams);
@@ -274,7 +272,7 @@ public class LightFragment extends DevFragment
 
     private void setScreenBrightnessAuto(boolean onAuto) {
         if (checkSystemWritePermission()) {
-            Settings.System.putInt(getActivity().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE,
+            Settings.System.putInt(getActivitySafe().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE,
                     onAuto ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                             :  Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         }
@@ -283,7 +281,7 @@ public class LightFragment extends DevFragment
     private boolean checkSystemWritePermission() {
         boolean retVal = true;
         if (Build.VERSION.SDK_INT >= 23) {
-            retVal = Settings.System.canWrite(getActivity());
+            retVal = Settings.System.canWrite(getActivitySafe());
         }
         return retVal;
     }
@@ -291,8 +289,8 @@ public class LightFragment extends DevFragment
     private void requestSystemWritePermission() {
         if (Build.VERSION.SDK_INT >= 23) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-            intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
-            getActivity().startActivity(intent);
+            intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
+            getActivitySafe().startActivity(intent);
         }
     }
 

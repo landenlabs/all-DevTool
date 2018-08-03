@@ -28,6 +28,7 @@ import java.util.ArrayList;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings("Convert2Lambda")
 public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDialog
 
     Context m_context;
@@ -57,7 +58,7 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
 
     public static DeleteDialog showDialog(DevFragment devFragment, final ArrayList<String> fileList, final int idx) {
         DeleteDialog dialog =  DeleteDialog.create(devFragment, fileList, idx);
-        dialog.show(devFragment.getActivity().getFragmentManager(), "dialog");
+        dialog.show(devFragment.getActivitySafe().getFragmentManager(), "dialog");
         return dialog;
     }
 
@@ -118,7 +119,7 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        m_checkBoxes = new ArrayList<CheckBox>();
+        m_checkBoxes = new ArrayList<>();
         if (m_fileList != null && m_fileList.size() > 0) {
             m_fileGroup.removeAllViews();
             for (int idx = 0; idx < m_fileList.size(); idx++) {
@@ -147,7 +148,6 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
 
     /**
      * Delete list of files.
-     * @return
      */
     private void deleteFiles() {
         int idx = 0;
@@ -164,12 +164,13 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
         }
 
         while (m_fileList != null && m_fileList.size() != 0) {
-            String fileName = m_fileList.get(0);
+            // String fileName = m_fileList.get(0);
             if (m_checkBoxes != null && m_checkBoxes.size() != 0) {
                 m_checkBoxes.get(0).setVisibility(View.GONE);
                 m_checkBoxes.remove(0);
             }
 
+            //noinspection StatementWithEmptyBody
             if (!deleteFile(m_fileList.get(0), true)) {
                 // delete failed.
             }
@@ -190,8 +191,9 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
     private boolean deleteFile(String fileName, boolean recurse)
     {
         File fileInfo = new File(fileName);
-        if (fileInfo != null && fileInfo.exists()) {
+        if (fileInfo.exists()) {
             try  {
+                //noinspection ResultOfMethodCallIgnored
                 fileInfo.delete();
             }
             catch (Exception e)  {

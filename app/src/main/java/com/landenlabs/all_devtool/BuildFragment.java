@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,7 +52,7 @@ import java.util.Map;
  */
 public class BuildFragment extends DevFragment {
 
-    final ArrayList<BuildInfo> m_list = new ArrayList<BuildInfo>();
+    final ArrayList<BuildInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
 
     public static String s_name = "Build";
@@ -86,8 +87,8 @@ public class BuildFragment extends DevFragment {
 
     @SuppressWarnings("deprecation")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.build_tab, container, false);
@@ -143,16 +144,17 @@ public class BuildFragment extends DevFragment {
             addBuild("TYPE", Build.TYPE);
             addBuild("UNKNOWN", Build.UNKNOWN);
             addBuild("USER", Build.USER);
-            Map<String, String> listStr = new HashMap<String, String>();
+            Map<String, String> listStr = new HashMap<>();
             // listStr.put("BASE", Build.VERSION.BASE_OS);
             listStr.put("CODENAME", Build.VERSION.CODENAME);
             listStr.put("INCREMENTAL", Build.VERSION.INCREMENTAL);
             listStr.put("RELEASE", Build.VERSION.RELEASE);
+            //noinspection deprecation
             listStr.put("SDK", Build.VERSION.SDK);
 
             addBuild("VERSION...", listStr);
         }
-        final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
+        final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
 
         int count = adapter.getGroupCount();
@@ -167,11 +169,13 @@ public class BuildFragment extends DevFragment {
             m_list.add(new BuildInfo(name, value.trim()));
     }
 
+    @SuppressWarnings("SameParameterValue")
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
             m_list.add(new BuildInfo(name, value));
     }
 
+    @SuppressWarnings("unused")
     class BuildInfo {
         final String m_fieldStr;
         final String m_valueStr;
@@ -215,7 +219,6 @@ public class BuildFragment extends DevFragment {
         }
     }
 
-    final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
     /**
@@ -225,7 +228,7 @@ public class BuildFragment extends DevFragment {
             implements View.OnClickListener {
         private final LayoutInflater m_inflater;
 
-        public BuildArrayAdapter(Context context) {
+        BuildArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -240,7 +243,7 @@ public class BuildFragment extends DevFragment {
 
             BuildInfo buildInfo = m_list.get(groupPosition);
 
-            View expandView = convertView;
+            View expandView; // = convertView;
             // if (null == expandView) {
                 expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             // }
@@ -262,7 +265,7 @@ public class BuildFragment extends DevFragment {
             else
                 expandView.setBackgroundColor(0x80d0ffe0);
 
-            expandView.setTag(Integer.valueOf(groupPosition));
+            expandView.setTag(groupPosition);
             return expandView;
         }
 
@@ -327,7 +330,7 @@ public class BuildFragment extends DevFragment {
             else
                 summaryView.setBackgroundColor(0x80d0ffe0);
 
-            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setTag(groupPosition);
             summaryView.setOnClickListener(this);
             return summaryView;
         }
@@ -339,7 +342,7 @@ public class BuildFragment extends DevFragment {
 
         @Override
         public void onClick(View view) {
-            int grpPos = ((Integer)view.getTag()).intValue();
+            int grpPos = (Integer)view.getTag();
 
             if (m_listView.isGroupExpanded(grpPos))
                 m_listView.collapseGroup(grpPos);

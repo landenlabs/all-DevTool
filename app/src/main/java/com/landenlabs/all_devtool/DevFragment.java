@@ -24,6 +24,8 @@ package com.landenlabs.all_devtool;
  */
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -34,6 +36,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 
 import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
@@ -43,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Base class for all DevTool fragments.
@@ -51,7 +55,7 @@ import java.util.Map;
  */
 public abstract class DevFragment extends Fragment {
 
-    static Map<String, WeakReference<DevFragment>> s_devFragmentCache = new HashMap<String, WeakReference<DevFragment>>();
+    static Map<String, WeakReference<DevFragment>> s_devFragmentCache = new HashMap<>();
 
     /**
      * @return name of fragment.
@@ -78,11 +82,11 @@ public abstract class DevFragment extends Fragment {
     // Fragment methods
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         if (GlobalInfo.s_globalInfo.isLockedOrientation) {
-            getActivity().setRequestedOrientation(GlobalInfo.s_globalInfo.lockedOrientation);
+            getActivitySafe().setRequestedOrientation(GlobalInfo.s_globalInfo.lockedOrientation);
         }
 
         cacheFragment();
@@ -99,12 +103,12 @@ public abstract class DevFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (this.isVisible())
-            GoogleAnalyticsHelper.event(getActivity(), getClass().getName(), "onResume", "");
+            GoogleAnalyticsHelper.event(getActivitySafe(), getClass().getName(), "onResume", "");
     }
 
     @Override
     public void onStop() {
-        GoogleAnalyticsHelper.event(this.getActivity(), "", "stop", this.getClass().getName());
+        GoogleAnalyticsHelper.event(this.getActivitySafe(), "", "stop", this.getClass().getName());
         super.onStop();
     }
 
@@ -115,12 +119,31 @@ public abstract class DevFragment extends Fragment {
     protected void cacheFragment() {
         // m_log.i(String.format("set %s %08x", getName(), System.identityHashCode(this)));
         if (this.getActivity() != null)
-            s_devFragmentCache.put(getName(), new WeakReference<DevFragment>(this));
+            s_devFragmentCache.put(getName(), new WeakReference<>(this));
     }
 
     public static DevFragment getFragmentByName(String fragName) {
         WeakReference<DevFragment> devFragWeakRef = s_devFragmentCache.get(fragName);
         return devFragWeakRef != null ? devFragWeakRef.get() : null;
+    }
+
+    @NonNull
+    protected Context getContextSafe() {
+        return Objects.requireNonNull(this.getContext());
+    }
+    @NonNull
+    public Activity getActivitySafe() {
+        return Objects.requireNonNull(getActivity());
+    }
+    @NonNull
+    public <T> T getServiceSafe(String service) {
+        //noinspection unchecked
+        return (T)Objects.requireNonNull(getActivitySafe().getSystemService(service));
+    }
+
+    @NonNull
+    Window getWindow() {
+        return Objects.requireNonNull(getActivitySafe().getWindow());
     }
 
     // ============================================================================================
@@ -131,7 +154,7 @@ public abstract class DevFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= 23) {
             List<String> requestPermissions = new ArrayList<>();
             for (String needPermission : needPermissions) {
-                if (getContext()
+                if (getContextSafe()
                         .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions.add(needPermission);
                 }
@@ -148,6 +171,5 @@ public abstract class DevFragment extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         Log.d("DevFragment", " requestPermissionResult for " + requestCode);
-
     }
 }

@@ -24,7 +24,6 @@ package com.landenlabs.all_devtool;
  */
 
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
@@ -45,10 +44,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.text.format.DateUtils;
-import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +60,8 @@ import com.landenlabs.all_devtool.util.Utils;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,10 +74,10 @@ import java.util.Map;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings("Convert2Lambda")
 public class ConsoleFragment extends DevFragment implements View.OnClickListener {
     private final LLog m_log = LLog.DBG;
 
-    TextView m_titleTime;
     CheckBox m_refreshCb;
 
     public static String s_name = "Console";
@@ -116,10 +116,9 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
     private static int sNextId = 100;
 
     // WSIAppConsoleSettings mConsoleSettings;
-    View mlayoutView;
-    Map<String, List<TextView>> mMemoryViews = new HashMap<String, List<TextView>>();
-    Map<String, List<TextView>> mSystemViews = new HashMap<String, List<TextView>>();
-    Map<String, List<TextView>> mNetworkViews = new HashMap<String, List<TextView>>();
+    Map<String, List<TextView>> mMemoryViews = new HashMap<>();
+    Map<String, List<TextView>> mSystemViews = new HashMap<>();
+    Map<String, List<TextView>> mNetworkViews = new HashMap<>();
 
     ConsoleState consoleState = ConsoleState.s_consoleState;
 
@@ -152,8 +151,8 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        bitmapList.add(Utils.grabScreen(this.getActivity()));
+        List<Bitmap> bitmapList = new ArrayList<>();
+        bitmapList.add(Utils.grabScreen(getActivitySafe()));
         return bitmapList;
     }
 
@@ -174,8 +173,8 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
     // Fragment methods
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.console_tab, container, false);
@@ -217,7 +216,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         consoleState.saveInstanceState(outState);
     }
@@ -262,7 +261,6 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
     private TextView addTextView(RelativeLayout relLayout,
                  int belowId, int rightId, int widthDp, int heightDp, int padLeft) {
-        float scale = Resources.getSystem().getDisplayMetrics().density;
 
         int widthParam = (widthDp != 0) ? dpToPx(widthDp): RelativeLayout.LayoutParams.WRAP_CONTENT;
         int heightParam = (heightDp != 0) ? dpToPx(heightDp) : RelativeLayout.LayoutParams.WRAP_CONTENT;
@@ -299,7 +297,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
     private List<TextView> addViews(RelativeLayout relLayout, Map<String, List<TextView>> listView,
                 String name, int numCol, List<TextView> colViews) {
-        List<TextView> rowView = new ArrayList<TextView>();
+        List<TextView> rowView = new ArrayList<>();
         for (int col = 0; col != numCol; col++) {
             rowView.add(addTextView(relLayout, colViews.get(col).getId(), colViews.get(col).getId(), 0, 0, 0));
         }
@@ -317,7 +315,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
         int[] actualWidthsDp = new int[widthsDp.length];
         int padLeftDp = 10;
 
-        List<TextView> colViews = new ArrayList<TextView>();
+        List<TextView> colViews = new ArrayList<>();
         colViews.add(addTextView(systemLayout, belowId, 0, widthsDp[0], dashHeight, padLeftDp));
         actualWidthsDp[0] = widthsDp[0];
         widthDp -=  widthsDp[0] + padLeftDp;
@@ -335,8 +333,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
         for (int row = 0; row != names.length; row++) {
             String name = names[row];
-            List<TextView> nextRowView = addViews(systemLayout, listView, name, numCol, colViews);
-            colViews = nextRowView;
+            colViews = addViews(systemLayout, listView, name, numCol, colViews);
             for (int col=0; col != numCol; col++) {
                 colViews.get(col).setMaxWidth(dpToPx(actualWidthsDp[col]) );
             }
@@ -351,69 +348,56 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
         try {
             // ----- System -----
-            int threadCount = Thread.activeCount();
-            ApplicationInfo appInfo = getActivity().getApplicationInfo();
+            ApplicationInfo appInfo = getActivitySafe().getApplicationInfo();
 
             mSystemViews.get(SYSTEM_PACKAGE).get(1).setText(appInfo.packageName);
             mSystemViews.get(SYSTEM_MODEL).get(1).setText(Build.MODEL);
             mSystemViews.get(SYSTEM_ANDROID).get(1).setText(Build.VERSION.RELEASE);
 
-
-            if (Build.VERSION.SDK_INT >= 16) {
-                int lines = 0;
-                final StringBuilder permSb = new StringBuilder();
-                try {
-                    PackageInfo pi = getContext().getPackageManager().getPackageInfo(
-                            getContext().getPackageName(), PackageManager.GET_PERMISSIONS);
-                    for (int i = 0; i < pi.requestedPermissions.length; i++) {
-                        if ((pi.requestedPermissionsFlags[i] & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0) {
-                            permSb.append(pi.requestedPermissions[i]).append("\n");
-                            lines++;
-                        }
+            int lines = 0;
+            final StringBuilder permSb = new StringBuilder();
+            try {
+                PackageInfo pi = getContextSafe().getPackageManager().getPackageInfo(
+                        getContextSafe().getPackageName(), PackageManager.GET_PERMISSIONS);
+                for (int i = 0; i < pi.requestedPermissions.length; i++) {
+                    if ((pi.requestedPermissionsFlags[i] & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0) {
+                        permSb.append(pi.requestedPermissions[i]).append("\n");
+                        lines++;
                     }
-                } catch (Exception e) {
                 }
-                final int lineCnt = lines;
-                mSystemViews.get(SYSTEM_PERM).get(1).setText(String.format("%d perms [press]", lines));
-                mSystemViews.get(SYSTEM_PERM).get(1).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (v.getTag() == null) {
-                                String permStr = permSb.toString()
-                                        .replaceAll("android.permission.", "")
-                                        .replaceAll("\n[^\n]*permission", "");
-                                mSystemViews.get(SYSTEM_PERM).get(1).setText(permStr);
-                                mSystemViews.get(SYSTEM_PERM).get(0).setLines(lineCnt);
-                                mSystemViews.get(SYSTEM_PERM).get(1).setLines(lineCnt);
-                                mSystemViews.get(SYSTEM_PERM).get(1).setTag(lineCnt);
-                            } else {
-                                mSystemViews.get(SYSTEM_PERM).get(1).setText(String.format("%d perms", lineCnt));
-                                mSystemViews.get(SYSTEM_PERM).get(0).setLines(1);
-                                mSystemViews.get(SYSTEM_PERM).get(1).setLines(1);
-                                mSystemViews.get(SYSTEM_PERM).get(1).setTag(null);
-                            }
+            } catch (Exception ex) {
+                m_log.e(ex.getMessage());
+            }
+            final int lineCnt = lines;
+            mSystemViews.get(SYSTEM_PERM).get(1).setText(String.format("%d perms [press]", lines));
+            mSystemViews.get(SYSTEM_PERM).get(1).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (v.getTag() == null) {
+                            String permStr = permSb.toString()
+                                    .replaceAll("android.permission.", "")
+                                    .replaceAll("\n[^\n]*permission", "");
+                            mSystemViews.get(SYSTEM_PERM).get(1).setText(permStr);
+                            mSystemViews.get(SYSTEM_PERM).get(0).setLines(lineCnt);
+                            mSystemViews.get(SYSTEM_PERM).get(1).setLines(lineCnt);
+                            mSystemViews.get(SYSTEM_PERM).get(1).setTag(lineCnt);
+                        } else {
+                            mSystemViews.get(SYSTEM_PERM).get(1).setText(String.format("%d perms", lineCnt));
+                            mSystemViews.get(SYSTEM_PERM).get(0).setLines(1);
+                            mSystemViews.get(SYSTEM_PERM).get(1).setLines(1);
+                            mSystemViews.get(SYSTEM_PERM).get(1).setTag(null);
                         }
                     }
-                );
-
-            } else {
-                String permStr = "";
-                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED)
-                    permStr += (" Find Loc");
-                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED)
-                    permStr += (" Coarse Loc");
-                mSystemViews.get(SYSTEM_PERM).get(1).setText(permStr);
-            }
+                }
+            );
 
 
-            ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager actMgr = getServiceSafe(Context.ACTIVITY_SERVICE);
             int processCnt = actMgr.getRunningAppProcesses().size();
             mSystemViews.get(SYSTEM_PROCESSES).get(1).setText(String.format("%d", consoleState.processCnt));
             mSystemViews.get(SYSTEM_PROCESSES).get(2).setText(String.format("%d", processCnt));
             // mSystemViews.get(SYSTEM_BATTERY).get(1).setText(String.format("%d%%", consoleState.batteryLevel));
-            mSystemViews.get(SYSTEM_BATTERY).get(2).setText(String.format("%%%d", calculateBatteryLevel(getActivity())));
+            mSystemViews.get(SYSTEM_BATTERY).get(2).setText(String.format("%%%d", calculateBatteryLevel(getActivitySafe())));
             // long cpuNano = Debug.threadCpuTimeNanos();
             // mSystemViews.get(SYSTEM_CPU).get(2).setText(String.format("%d%%", cpuNano));
 
@@ -424,10 +408,15 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
         try {
             // ----- Network WiFi-----
 
-            WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            if (wifiMgr != null && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null) {
+            WifiManager wifiMgr = getServiceSafe(Context.WIFI_SERVICE);
+            if (wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null) {
                 DhcpInfo dhcpInfo = wifiMgr.getDhcpInfo();
-                mNetworkViews.get(NETWORK_WIFI_IP).get(1).setText(Formatter.formatIpAddress(dhcpInfo.ipAddress));
+
+
+                byte[] myIPAddress = BigInteger.valueOf(dhcpInfo.ipAddress).toByteArray();
+                InetAddress myInetIP = InetAddress.getByAddress(myIPAddress);
+
+                mNetworkViews.get(NETWORK_WIFI_IP).get(1).setText(myInetIP.getHostAddress());
                 WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
                 mNetworkViews.get(NETWORK_WIFI_SPEED).get(1).setText(String.valueOf(wifiInfo.getLinkSpeed()));
                 int numberOfLevels = 10;
@@ -462,14 +451,12 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
         // ----- Memory -----
         try {
             MemoryInfo mi = new  MemoryInfo();
-            ActivityManager activityManager = (ActivityManager)
-                   getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager activityManager = getServiceSafe(Context.ACTIVITY_SERVICE);
             activityManager.getMemoryInfo(mi);
 
             long heapUsing = Debug.getNativeHeapSize();
 
             Date now = new Date();
-            long deltaMsec = now.getTime() - consoleState.lastFreeze.getTime();
 
             List<TextView> timeViews = mMemoryViews.get(MEMORY_TIME);
             timeViews.get(1).setText(TIMEFORMAT.format(consoleState.lastFreeze));
@@ -489,15 +476,10 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             freeViews.get(3).setText(String.format("%d", mi.availMem - consoleState.freeMemory));
 
             List<TextView> totalViews = mMemoryViews.get(MEMORY_TOTAL);
-            if (Build.VERSION.SDK_INT >= 16) {
-                totalViews.get(1).setText(String.format("%d", consoleState.totalMemory));
-                totalViews.get(2).setText(String.format("%d", mi.totalMem));
-                totalViews.get(3).setText(String.format("%d", mi.totalMem - consoleState.totalMemory));
-            } else {
-                totalViews.get(0).setVisibility(View.GONE);
-                totalViews.get(1).setVisibility(View.GONE);
-                totalViews.get(2).setVisibility(View.GONE);
-            }
+            totalViews.get(1).setText(String.format("%d", consoleState.totalMemory));
+            totalViews.get(2).setText(String.format("%d", mi.totalMem));
+            totalViews.get(3).setText(String.format("%d", mi.totalMem - consoleState.totalMemory));
+
         } catch (Exception ex) {
             m_log.e(ex.getMessage());
         }
@@ -506,40 +488,40 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
     private void snapConsole() {
         try {
             MemoryInfo mi = new MemoryInfo();
-            ActivityManager activityManager = (ActivityManager)
-                    getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager activityManager = getServiceSafe(Context.ACTIVITY_SERVICE);
             activityManager.getMemoryInfo(mi);
 
             consoleState.lastFreeze = new Date();
             consoleState.usingMemory = Debug.getNativeHeapSize();
             consoleState.freeMemory = mi.availMem;
-            if (Build.VERSION.SDK_INT >= 16) {
-                consoleState.totalMemory = mi.totalMem;
-            }
+            consoleState.totalMemory = mi.totalMem;
 
             consoleState.netRxBytes = TrafficStats.getTotalRxBytes();
             consoleState.netRxPacks = TrafficStats.getTotalRxPackets();
             consoleState.netTxBytes = TrafficStats.getTotalTxBytes();
             consoleState.netTxPacks = TrafficStats.getTotalRxPackets();
 
-            ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager actMgr = getServiceSafe(Context.ACTIVITY_SERVICE);
             consoleState.processCnt = actMgr.getRunningAppProcesses().size();
-            consoleState.batteryLevel = calculateBatteryLevel(getActivity());
+            consoleState.batteryLevel = calculateBatteryLevel(getActivitySafe());
         } catch (Exception ex) {
+            m_log.e(ex.getMessage());
         }
     }
 
     private int calculateBatteryLevel(Context context) {
         Intent batteryIntent = context.getApplicationContext().registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
-        return level * 100 / scale;
+        if (batteryIntent != null) {
+            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+            return level * 100 / scale;
+        }
+        return 0;
     }
 
     /**
      * Gets total system cpu usage (not just this app)
-     * @return
      */
     private float getCpuUsage() {
         try {
@@ -554,7 +536,9 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
             try {
                 Thread.sleep(360);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                m_log.e(e.getMessage());
+            }
 
             reader.seek(0);
             load = reader.readLine();

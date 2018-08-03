@@ -41,27 +41,27 @@ public class ConsoleState {
     public long freeMemory = 0;    // Free memory (available to use)
     public long totalMemory = 0;   // Total accessible memory
 
-    static final String KEY_CONSOLE = "Console";
-    static final String KEY_DATE1 = "Date1";
-    static final String KEY_USING = "Using";
-    static final String KEY_FREE = "Free";
-    static final String KEY_TOTAL = "Total";
+    private static final String KEY_CONSOLE = "Console";
+    private static final String KEY_DATE1 = "Date1";
+    private static final String KEY_USING = "Using";
+    private static final String KEY_FREE = "Free";
+    private static final String KEY_TOTAL = "Total";
 
     public long netRxBytes = 0;
     public long netRxPacks = 0;
     public long netTxBytes = 0;
     public long netTxPacks = 0;
 
-    static final String KEY_NET_RX_BYTES = "NetRxBytes";
-    static final String KEY_NET_RX_PACKS = "NetRxPacks";
-    static final String KEY_NET_TX_BYTES = "NetTxBytes";
-    static final String KEY_NET_TX_PACKS = "NetTxPacks";
+    private static final String KEY_NET_RX_BYTES = "NetRxBytes";
+    private static final String KEY_NET_RX_PACKS = "NetRxPacks";
+    private static final String KEY_NET_TX_BYTES = "NetTxBytes";
+    private static final String KEY_NET_TX_PACKS = "NetTxPacks";
 
     public long processCnt = 0;
     public long batteryLevel = 0;
 
-    static final String KEY_PROCESS_CNT = "ProcessCnt";
-    static final String KEY_BATTERY_LEVEL = "BatteryLevel";
+    private static final String KEY_PROCESS_CNT = "ProcessCnt";
+    private static final String KEY_BATTERY_LEVEL = "BatteryLevel";
 
     public void saveInstanceState(Bundle outState) {
         if (outState != null) {

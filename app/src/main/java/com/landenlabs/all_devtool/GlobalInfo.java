@@ -37,6 +37,7 @@ import android.widget.ShareActionProvider;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings("WeakerAccess")
 public class GlobalInfo {
 
     public final static GlobalInfo s_globalInfo = new GlobalInfo();
@@ -107,7 +108,6 @@ public class GlobalInfo {
     /**
      * Return theme resource for theme index.
      * @param themeIdx (0..10), if api >=21 (0..13)
-     * @return
      */
     public static int getThemeResId(int themeIdx) {
         // return themeIdx + R.style.Theme_00;

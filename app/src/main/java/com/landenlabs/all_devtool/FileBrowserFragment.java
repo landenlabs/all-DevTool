@@ -98,6 +98,7 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings({"Convert2Lambda", "OctalInteger"})
 public class FileBrowserFragment extends DevFragment
         implements  View.OnClickListener
         , View.OnLayoutChangeListener
@@ -158,7 +159,7 @@ public class FileBrowserFragment extends DevFragment
                         m_title.setText("No files");
 
                     if (m_errMsg != null && m_errMsg.length() > 0) {
-                        Ui.ShowMessage(FileBrowserFragment.this.getActivity(), m_errMsg.toString());
+                        Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(), m_errMsg.toString());
                         m_errMsg = null;
                     }
                     // m_fbDeletelBtn.setEnabled(m_list.size() > 0);
@@ -257,17 +258,17 @@ public class FileBrowserFragment extends DevFragment
         return Utils.getListViewAsCSV(m_listView);
     }
 
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        m_packageManager = this.getActivity().getPackageManager();
+        m_packageManager = getActivitySafe().getPackageManager();
         m_rootView = inflater.inflate(R.layout.file_browser_tab, container, false);
 
         m_listView = Ui.viewById(m_rootView, R.id.fb_listview);
-        final FileArrayAdapter adapter = new FileArrayAdapter(this.getActivity());
+        final FileArrayAdapter adapter = new FileArrayAdapter(this.getActivitySafe());
         m_listView.setAdapter(adapter);
 
         m_dirBar = Ui.viewById(m_rootView, R.id.fb_dirBar);
@@ -276,12 +277,13 @@ public class FileBrowserFragment extends DevFragment
         m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                final int grpPos = (Integer) view.getTag();
                 /*
+                final int grpPos = (Integer) view.getTag();
+
                 final TextView field = Ui.viewById(view, R.id.buildField);
                 final TextView value = Ui.viewById(view, R.id.buildValue);
                 if (field != null && value != null) {
-                    Button btn = Ui.ShowMessage(FileBrowserFragment.this.getActivity(), field.getText() + "\n" + value.getText()).getButton(AlertDialog.BUTTON_POSITIVE);
+                    Button btn = Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(), field.getText() + "\n" + value.getText()).getButton(AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -319,8 +321,8 @@ public class FileBrowserFragment extends DevFragment
 
         adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                // Toast.makeText(getActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
-                int grpPos = (Integer) view.getTag();
+                // Toast.makeText(getActivitySafe(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
+                // int grpPos = (Integer) view.getTag();
                 if (pos >= 0 && pos < m_list.size()) {
                     final FileUtil.FileInfo fileInfo = m_list.get(pos);
 
@@ -359,14 +361,13 @@ public class FileBrowserFragment extends DevFragment
 
                     try {
                         fileSb.append("\n\nPath:").append(fileInfo.getCanonicalPath().replaceAll("/", "\n  /"));
-                    } catch (IOException ex) {
-
+                    } catch (IOException ignore) {
                     }
 
                     AlertDialog fileInfoDlg =
                             fileInfo.isDirectory()
-                                    ? Ui.ShowFileDlg(FileBrowserFragment.this.getActivity(),fileSb.toString())
-                                    : Ui.ShowMessage(FileBrowserFragment.this.getActivity(),fileSb.toString());
+                                    ? Ui.ShowFileDlg(FileBrowserFragment.this.getActivitySafe(),fileSb.toString())
+                                    : Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(),fileSb.toString());
 
                     Button btn = fileInfoDlg.getButton(AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
@@ -401,7 +402,7 @@ public class FileBrowserFragment extends DevFragment
                                     List<String> duList = runShellCmd(new String[] { "du", "-chHL", fileInfo.getAbsolutePath() });
                                     // addString("du -chHL /sdcard", m_duSdcardList);
                                     if (duList.size() > 0) {
-                                        StringBuffer sb = new StringBuffer("--Disk Usage--\n");
+                                        StringBuilder sb = new StringBuilder("--Disk Usage--\n");
                                         for (String item : duList) {
                                             String[] parts = item.split("\t");
                                             if (parts.length == 2) {
@@ -409,7 +410,7 @@ public class FileBrowserFragment extends DevFragment
                                                         parts[1]));
                                             }
                                         }
-                                        Ui.ShowMessage(FileBrowserFragment.this.getActivity(),
+                                        Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(),
                                                 sb.toString());
                                     }
                                 }
@@ -473,7 +474,7 @@ public class FileBrowserFragment extends DevFragment
 
     void getDirDetails(String[] dirList) {
         for (String dirName : dirList) {
-            File dir = null;
+            File dir;
             if (dirName.compareToIgnoreCase("root") == 0) {
                 dir = File.listRoots()[0];
                 // dir = new File("/");
@@ -497,7 +498,7 @@ public class FileBrowserFragment extends DevFragment
             int perm = -1;
             try {
                 perm = OsUtils.getPermissions(dir);
-            } catch (Exception ex) {
+            } catch (Exception ignore) {
             }
 
             String permStr = SysUtils.getPermissionString(perm);
@@ -532,11 +533,12 @@ public class FileBrowserFragment extends DevFragment
     }
 
     // =============================================================================================
+    @SuppressWarnings("UnnecessaryLocalVariable")
     class DirPathSpinnerAdapter extends ArrayAdapter<String> {
         List<SpannableString> mSpanList;
         String[] mNameList;
 
-        public DirPathSpinnerAdapter(Context context, int txViewResId,
+        DirPathSpinnerAdapter(Context context, int txViewResId,
                 String[] nameList, List<SpannableString> spanList) {
             super(context, txViewResId);
             mNameList = nameList;
@@ -566,6 +568,7 @@ public class FileBrowserFragment extends DevFragment
             return mNameList[position];
         }
 
+        @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View view =  super.getView(position, convertView, parent);
@@ -595,7 +598,7 @@ public class FileBrowserFragment extends DevFragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
+        int pos;
         int id = item.getItemId();
         int show = m_show;
         switch (id) {
@@ -710,7 +713,7 @@ public class FileBrowserFragment extends DevFragment
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         if (m_menu == null)
             return;
-        String itemStr = parent.getItemAtPosition(pos).toString();
+        // String itemStr = parent.getItemAtPosition(pos).toString();
         if (parent == m_loadSpinner) {
             m_show = pos;
             int menu_id = R.id.filebrowser_root;
@@ -787,7 +790,7 @@ public class FileBrowserFragment extends DevFragment
     // ============================================================================================
     // Permission
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null && grantResults.length > 0)
+        if (grantResults.length > 0)
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -934,9 +937,7 @@ public class FileBrowserFragment extends DevFragment
      */
     void loadFiles(String dir) {
 
-        if (Build.VERSION.SDK_INT >= 16) {
-            checkPermissions(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
+        checkPermissions(Manifest.permission.READ_EXTERNAL_STORAGE);
 
         m_workList.clear();
         try {
@@ -989,8 +990,9 @@ public class FileBrowserFragment extends DevFragment
         m_handler.sendMessage(msgObj);
     }
 
-    public void ExecCallback(StringBuilder result, int flag) {
-        Ui.ShowMessage(FileBrowserFragment.this.getActivity(), result.toString());
+    @Override
+    public void Exec(StringBuilder result, int flag) {
+        Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(), result.toString());
     }
     
     void updateDeleteBtn() {
@@ -1005,7 +1007,8 @@ public class FileBrowserFragment extends DevFragment
         return (val & mask) != 0;
     }
 
-    StringBuilder appendPerm(StringBuilder perm, FileUtil.FileInfo fileItem) {
+    @SuppressWarnings("OctalInteger")
+    void appendPerm(StringBuilder perm, FileUtil.FileInfo fileItem) {
         perm.append("Perm: ");
 
         try {
@@ -1019,10 +1022,9 @@ public class FileBrowserFragment extends DevFragment
 
                 perm.append(fileItem.isFile() ? "F" : "");
                 perm.append(fileItem.isDirectory() ? "D" : "");
-                return perm;
+                return;
             }
-        } catch (Exception ex) {
-
+        } catch (Exception ignore) {
         }
 
         perm.append(fileItem.canRead() ? "R" : "-");
@@ -1031,7 +1033,6 @@ public class FileBrowserFragment extends DevFragment
         perm.append(fileItem.isHidden() ? "H" : "");
         perm.append(fileItem.isFile() ? "F" : "");
         perm.append(fileItem.isDirectory() ? "D" : "");
-        return perm;
     }
 
     // ============================================================================================
@@ -1046,8 +1047,8 @@ public class FileBrowserFragment extends DevFragment
         Drawable icon = m_icons.get(name);
 
         // StructStatVfs sb = Libcore.os.statvfs(path);
-        long sizeMB = fileInfo.getDevSizeMB();
-        long freeMB = fileInfo.getDevFreeMB();
+        // long sizeMB = fileInfo.getDevSizeMB();
+        // long freeMB = fileInfo.getDevFreeMB();
         long devID = fileInfo.getDeviceId();
 
         // boolean isRoot = (sizeMB == m_rootSizeMB && freeMB == m_rootFreeMB) || sizeMB == 0;
@@ -1070,14 +1071,13 @@ public class FileBrowserFragment extends DevFragment
                         layerDrawable.setLayerInset(0, 0, 0, 0, 0);
                         int offset = 8;
                         layerDrawable.setLayerInset(1, offset, offset, offset, offset);
-                        imageView.setBackgroundDrawable(layerDrawable);
+                        imageView.setBackground(layerDrawable);
                     } else {
-                        imageView.setBackgroundDrawable(icon);
+                        imageView.setBackground(icon);
                     }
                     return;
                 }
-            } catch (Exception ex) {
-
+            } catch (Exception ignore) {
             }
         }
 
@@ -1110,13 +1110,13 @@ public class FileBrowserFragment extends DevFragment
     private class FileArrayAdapter extends BaseExpandableListAdapter implements  View.OnClickListener, View.OnLongClickListener {
         private final LayoutInflater m_inflater;
 
-        public FileArrayAdapter(Context context) {
+        FileArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         AdapterView.OnItemLongClickListener m_onItemLongClickListener;
-        public void setOnItemLongClickListener1( AdapterView.OnItemLongClickListener longClickList) {
+        void setOnItemLongClickListener1( AdapterView.OnItemLongClickListener longClickList) {
             m_onItemLongClickListener = longClickList;
         }
 
@@ -1131,12 +1131,12 @@ public class FileBrowserFragment extends DevFragment
             if (groupPosition < 0 || groupPosition >= m_list.size())
                 return null;
 
-            FileUtil.FileInfo fileItem = m_list.get(groupPosition);
+            // FileUtil.FileInfo fileItem = m_list.get(groupPosition);
 
-            View expandView = null;    //  = convertView; Reuse had left overs
-            if (null == expandView) {
+            View expandView;    //  = convertView; Reuse had left overs
+            // if (null == expandView) {
                 expandView = m_inflater.inflate(EXPANDED_LAYOUT, parent, false);
-            }
+            // }
 
             /*
             if (childPosition < fileItem.valueListStr().size()) {
@@ -1247,6 +1247,7 @@ public class FileBrowserFragment extends DevFragment
 
                 OsUtils.Stat stat = OsUtils.getStat(fileItem);
                 if (stat != null) {
+                    //noinspection OctalInteger
                     perm.append(String.format("\n Mode:%03o  Vol Id: %d ",
                             (stat.st_mode & 0777), stat.st_dev));
                 }
@@ -1316,10 +1317,9 @@ public class FileBrowserFragment extends DevFragment
         public boolean onLongClick(View view) {
             int grpPos = (Integer) view.getTag();
             // PackageFragment.this.m_list.get(grpPos).m_checked = ((CheckBox)v).isChecked();
-            if (m_onItemLongClickListener != null)
-                return m_onItemLongClickListener.onItemLongClick(null, view, grpPos, -1);
+            return m_onItemLongClickListener == null || m_onItemLongClickListener
+                    .onItemLongClick(null, view, grpPos, -1);
 
-            return true;
         }
     }
 }

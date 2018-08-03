@@ -9,17 +9,22 @@ import android.graphics.Color;
 import android.net.MailTo;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Adapter;
+import android.widget.ExpandableListView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.landenlabs.all_devtool.R;
 
+@SuppressWarnings("Convert2Lambda")
 public class Ui {
 
     public static String HTML_CENTER_BOX = "<div style='min-height:128px;'><table height='100%%' width='100%%'><tr valign='middle'><td style='border: 2px solid; border-radius: 25px;'><center>%s</center></table></div>";
@@ -36,9 +41,9 @@ public class Ui {
 
     public static void ToastBig(Activity activity, String str) {
         LayoutInflater inflater = activity.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.toast_big, (ViewGroup) activity.findViewById(R.id.toast_layout_root));
+        View layout = inflater.inflate(R.layout.toast_big, activity.findViewById(R.id.toast_layout_root));
 
-        TextView text = (TextView) layout.findViewById(R.id.text);
+        TextView text = Ui.viewById(layout, R.id.text);
         text.setText(str);
 
         Toast toast = new Toast(activity);
@@ -73,6 +78,7 @@ public class Ui {
         return dialog;
     }
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public static Intent newEmailIntent(Context context, String address, String subject, String body, String cc) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
@@ -85,8 +91,6 @@ public class Ui {
 
     /***
      * Display html message in webView in a dialog.
-     * @param context
-     * @param htmlStr
      */
     public static void showWebMessage(final Context context, String... htmlStr) {
 
@@ -143,9 +147,9 @@ public class Ui {
     /***
      * Display image in webView dialog.
      *
-     * @param context
      * @param imagePath  "file:///android_asset/world_timezone_map.png"
      */
+    @SuppressWarnings("unused")
     public static void showWebImage(final Context context, String imagePath) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -193,5 +197,58 @@ public class Ui {
             }
         });
         builder.show();
+    }
+
+    /**
+     * Dump info about view and its children into StringBuffer returned.
+     */
+    public static StringBuilder dumpViews(View view, int level) {
+        StringBuilder sb  = new StringBuilder();
+        String prefix;
+        for (int i = 0; i < level; i++) {
+            sb.append("  ");
+        }
+        prefix = sb.toString();
+
+        sb = new StringBuilder();
+        sb.append(String.format("hasOnClick=%-5b focusable=%-5b inTouch=%-5b vis=%-5b shown=%-5b %2d ",
+                view.hasOnClickListeners(),
+                view.isFocusable(),
+                view.isFocusableInTouchMode(),
+                view.getVisibility() == View.VISIBLE,
+                view.isShown(),
+                level
+        ));
+        sb.append(prefix).append(view.getClass().getSimpleName());
+        if (!TextUtils.isEmpty(view.getContentDescription())) {
+            sb.append(" desc=").append(view.getContentDescription());
+        }
+        if (view instanceof TextView) {
+            sb.append(" text=").append(((TextView)view).getText());
+        }
+
+        sb.append("\n");
+
+        if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup)view;
+            for (int idx = 0; idx < viewGroup.getChildCount(); idx++){
+                View child = viewGroup.getChildAt(idx);
+                sb.append(dumpViews(child, level+1));
+            }
+
+            if (view instanceof ListView) {
+                ExpandableListView expView = (ExpandableListView) view;
+                Adapter adapter = expView.getAdapter();
+                int cnt = adapter.getCount();
+                for (int idx = 0; idx < cnt; idx++) {
+                    Object obj = adapter.getItem(idx);
+                    if (obj instanceof View) {
+                        sb.append(dumpViews((View) obj, level + 1));
+                    }
+                }
+            }
+        }
+
+        return sb;
     }
 }

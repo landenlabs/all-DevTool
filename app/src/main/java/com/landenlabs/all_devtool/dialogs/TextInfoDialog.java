@@ -12,7 +12,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.view.MotionEventCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef"})
 public class TextInfoDialog extends DialogFragment {
 
     static final int MSG_GET_UI_SIZE = 1;
@@ -67,13 +67,14 @@ public class TextInfoDialog extends DialogFragment {
     };
     char m_charMaxRange;
     float m_lastTouchX, m_lastTouchY;
-    boolean m_setDownStart = true;
+    // boolean m_setDownStart = true;
 
     public TextInfoDialog() {
         m_textInfoList = null;
         m_idx = -1;
     }
 
+    @SuppressWarnings("unused")
     public static TextInfoDialog create(TextFragment textFragment, final ArrayList<TextInfo> textInfoList, final int idx) {
         TextInfoDialog textInfoDialog = new TextInfoDialog();
         textInfoDialog.m_textInfoList = textInfoList;
@@ -85,7 +86,7 @@ public class TextInfoDialog extends DialogFragment {
 
     public static void showDialog(TextFragment textFragment, final ArrayList<TextInfo> textInfoList, final int idx) {
         DialogFragment newFragment = TextInfoDialog.create(textFragment, textInfoList, idx);
-        newFragment.show(textFragment.getActivity().getFragmentManager(), "dialog");
+        newFragment.show(textFragment.getActivitySafe().getFragmentManager(), "dialog");
     }
 
     void setTouch(View view) {
@@ -106,11 +107,12 @@ public class TextInfoDialog extends DialogFragment {
         });
     }
 
-    boolean handleEvent(View v, MotionEvent event) {
-        final int action = MotionEventCompat.getActionMasked(event);
-        final int pointerIndex = MotionEventCompat.getActionIndex(event);
-        final float x = MotionEventCompat.getX(event, pointerIndex);
-        final float y = MotionEventCompat.getY(event, pointerIndex);
+    @SuppressWarnings("unused")
+    boolean handleEvent(View view, MotionEvent event) {
+        final int action = event.getAction(); // MotionEventCompat.getActionMasked(event);
+        // final int pointerIndex = MotionEventCompat.getActionIndex(event);
+        final float x = event.getX(); // MotionEventCompat.getX(event, pointerIndex);
+        final float y = event.getY(); // MotionEventCompat.getY(event, pointerIndex);
         float dx, dy;
 
         switch (action) {
@@ -166,14 +168,13 @@ public class TextInfoDialog extends DialogFragment {
             m_idx = savedInstanceState.getInt(STATE_IDX, m_idx);
         }
 
-
         LayoutInflater inflater = getActivity().getLayoutInflater();
         m_dialogLayout = inflater.inflate(R.layout.text_dlg, null);
         m_textHeight = Ui.viewById(m_dialogLayout, R.id.text_height);
-        m_textGroup = (LinearLayout) m_dialogLayout.findViewById(R.id.text_group);
+        m_textGroup = m_dialogLayout.findViewById(R.id.text_group);
         m_charMaxText = Ui.viewById(m_dialogLayout, R.id.char_max_text);
         m_charMaxWidth = Ui.viewById(m_dialogLayout, R.id.char_max_width);
-        m_charGroup = (LinearLayout) m_dialogLayout.findViewById(R.id.char_group);
+        m_charGroup =  m_dialogLayout.findViewById(R.id.char_group);
 
         View shareBtn = Ui.viewById(m_dialogLayout, R.id.text_dlg_share);
         shareBtn.setOnClickListener(new OnClickListener() {
@@ -249,7 +250,7 @@ public class TextInfoDialog extends DialogFragment {
     void updateDialog() {
         if (m_textInfoList != null && m_idx >= 0 && m_idx < m_textInfoList.size()) {
             TextInfo textInfo = m_textInfoList.get(m_idx);
-            final TextView textTitle = (TextView)m_dialogLayout.findViewById(R.id.text_dlg_title);
+            final TextView textTitle = m_dialogLayout.findViewById(R.id.text_dlg_title);
             String infoStr = "Font typeface:" + textInfo.getTypefaceStr()
                     + "\nFont size:"
                     + String.valueOf(textInfo.m_sizeSP)

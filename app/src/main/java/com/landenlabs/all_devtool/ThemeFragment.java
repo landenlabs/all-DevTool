@@ -27,6 +27,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,7 @@ import java.util.List;
  *
  */
 
+@SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal"})
 public class ThemeFragment extends DevFragment implements OnItemSelectedListener,
         OnClickListener {
 
@@ -81,8 +83,8 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        Bitmap bitmap = Utils.grabScreen(this.getActivity());
+        List<Bitmap> bitmapList = new ArrayList<>();
+        Bitmap bitmap = Utils.grabScreen(getActivitySafe());
         if (null != bitmap && !bitmap.isRecycled())
             bitmapList.add(bitmap);
         else
@@ -99,8 +101,8 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
 
     /** Called when the activity is first created. */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         m_rootView = inflater.inflate(R.layout.theme_tab, container, false);

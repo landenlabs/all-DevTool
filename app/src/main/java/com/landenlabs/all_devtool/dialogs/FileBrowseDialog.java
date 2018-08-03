@@ -26,6 +26,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.view.Gravity;
 import android.view.View;
@@ -50,10 +51,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal"})
 public class FileBrowseDialog {
 
     // ============================================================================================
-    static final int DARK_GRAY = 0xff444444;
+    private static final int DARK_GRAY = 0xff444444;
     private final int FileOpen = 0;
     private final int FileSave = 1;
     private final int FolderChoose = 2;
@@ -62,19 +64,19 @@ public class FileBrowseDialog {
     // Default file or directory.
     public String DefaultFileName = "default.txt";
 
-    public boolean ShowDirs = true;
-    public String DirPattern = ".+";
+    private boolean ShowDirs;
+    private String DirPattern = ".+";
 
-    public boolean ShowFiles = true;
-    public String FilePattern = ".+";   // .+\..+
+    private boolean ShowFiles;
+    private String FilePattern = ".+";   // .+\..+
 
-    public boolean ShowPerm = true;
-    public boolean ShowNewFolderBtn = false;
-    public boolean ShowExt = true;
-    public DateFormat DateFmt = DateFormat.getDateInstance();
+    private boolean ShowPerm = true;
+    private boolean ShowNewFolderBtn = false;
+    private boolean ShowExt = true;
+    private DateFormat DateFmt = DateFormat.getDateInstance();
 
-    private int m_selectType = Browser;
-    private String m_defaultDirectory = "";
+    private int m_selectType; // = Browser;
+    private String m_defaultDirectory;
     private Context m_context;
     private TextView m_titleView;
     private TextView m_dirView;
@@ -84,7 +86,7 @@ public class FileBrowseDialog {
     private String m_dir = "";
     // private String m_ext = "";
     private List<String> m_fileList = null;
-    private SimpleFileDialogListener m_simpleFileDialogListener = null;
+    private SimpleFileDialogListener m_simpleFileDialogListener;
     private ArrayAdapter<String> m_listAdapter = null;
     private int m_dialogHeight;
 
@@ -94,22 +96,27 @@ public class FileBrowseDialog {
                             SimpleFileDialogListener SimpleFileDialogListener) {
 
         m_dialogHeight = dialogHeight;
-        if (file_select_type.equals("FolderChoose")) {
-            m_selectType = FolderChoose;
-            ShowFiles = false;
-            ShowDirs = true;
-        } else if (file_select_type.equals("FileSave")) {
-            m_selectType = FileSave;
-            ShowFiles = true;
-            ShowDirs = false;
-        } else if (file_select_type.equals("FileOpen")) {
-            m_selectType = FileOpen;
-            ShowFiles = true;
-            ShowDirs = false;
-        } else {
-            m_selectType = Browser;
-            ShowFiles = true;
-            ShowDirs = true;
+        switch (file_select_type) {
+            case "FolderChoose":
+                m_selectType = FolderChoose;
+                ShowFiles = false;
+                ShowDirs = true;
+                break;
+            case "FileSave":
+                m_selectType = FileSave;
+                ShowFiles = true;
+                ShowDirs = false;
+                break;
+            case "FileOpen":
+                m_selectType = FileOpen;
+                ShowFiles = true;
+                ShowDirs = false;
+                break;
+            default:
+                m_selectType = Browser;
+                ShowFiles = true;
+                ShowDirs = true;
+                break;
         }
 
         m_context = context;
@@ -199,10 +206,7 @@ public class FileBrowseDialog {
 
     private boolean createSubDir(String newDir) {
         File newDirFile = new File(newDir);
-        if (!newDirFile.exists())
-            return newDirFile.mkdir();
-        else
-            return false;
+        return !newDirFile.exists() && newDirFile.mkdir();
     }
 
     /**
@@ -214,7 +218,7 @@ public class FileBrowseDialog {
      */
     private List<String> getDirList(String dir) {
 
-        List<String> dirs = new ArrayList<String>();
+        List<String> dirs = new ArrayList<>();
 
         if (dir.isEmpty() || dir.equals("/")) {
             for (File file :  File.listRoots()) {
@@ -390,8 +394,9 @@ public class FileBrowseDialog {
 
     private ArrayAdapter<String> createListAdapter(List<String> items) {
         return new ArrayAdapter<String>(m_context, R.layout.file_list_row, R.id.fl_name, items) {
+            @NonNull
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View itemView = super.getView(position, convertView, parent);
                 String item = getItem(position);
 

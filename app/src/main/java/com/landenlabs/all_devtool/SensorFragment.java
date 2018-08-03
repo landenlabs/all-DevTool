@@ -81,7 +81,6 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,10 +144,12 @@ public class SensorFragment extends DevFragment
             };
     String m_sensorName = WIFI_STR;
 
+    /*
     final int ORIENTATION_AZ_SERIES = 0;
     final int ORIENTATION_PITCH_SERIES = 1;
     final int ORIENTATION_ROLL_SERIES = 2;
     final int SINGLE_SERIES = 0;
+    */
 
     static SimpleXYSeries m_seriesChg;  // Shared by all graphs.
 
@@ -166,12 +167,12 @@ public class SensorFragment extends DevFragment
     static SimpleXYSeries m_seriesProcCnt;
     static SimpleXYSeries m_seriesFreeMem;
 
-    static SimpleXYSeries m_seriesAccelerometer;
+    // static SimpleXYSeries m_seriesAccelerometer;
     static SimpleXYSeries m_seriesMagnetometer;
-    static SimpleXYSeries m_seriesGyroscope;
+    // static SimpleXYSeries m_seriesGyroscope;
     static SimpleXYSeries m_seriesPressure;
     static SimpleXYSeries m_seriesGravity;
-    static SimpleXYSeries m_seriesStepCounter;
+    // static SimpleXYSeries m_seriesStepCounter;
 
 
     static Format mLineFmt = new Format() {
@@ -211,7 +212,7 @@ public class SensorFragment extends DevFragment
     static SparseArray<String> m_menuIdToLbl;
 
     static {
-        m_menuIdToLbl = new SparseArray<String>();
+        m_menuIdToLbl = new SparseArray<>();
         m_menuIdToLbl.put(R.id.sensor_menu_100_msec, "1/100 Sec");
         m_menuIdToLbl.put(R.id.sensor_menu_1_second, "Seconds");
         m_menuIdToLbl.put(R.id.sensor_menu_5_seconds, "5 Sec");
@@ -248,8 +249,8 @@ public class SensorFragment extends DevFragment
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        bitmapList.add(Utils.grabScreen(this.getActivity()));
+        List<Bitmap> bitmapList = new ArrayList<>();
+        bitmapList.add(Utils.grabScreen(getActivitySafe()));
         return bitmapList;
     }
 
@@ -266,13 +267,13 @@ public class SensorFragment extends DevFragment
 
     @SuppressWarnings("deprecation")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         //  getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        m_sensorMgr = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        m_sensorMgr = getServiceSafe(Context.SENSOR_SERVICE);
         m_rootView = inflater.inflate(R.layout.sensor_tab, container, false);
         m_valueTv1 = Ui.viewById(m_rootView, R.id.sensor_value);
 
@@ -316,26 +317,14 @@ public class SensorFragment extends DevFragment
 
         m_consoleSpinner = Ui.viewById(m_rootView, R.id.sensor_spinner);
         List<String> sensorNames = new ArrayList<String>(Arrays.asList(SENSOR_NAMES));
-        if (Build.VERSION.SDK_INT < 16) {
-            // Total Memory not available < 16
-            sensorNames.remove(MEMORY_STR);
-
-            sensorNames.remove(ACCELEROMETER_STR);
-            sensorNames.remove(MAGNETOMETER_STR);
-            sensorNames.remove(GYROSCOPE_STR);  // Orientation ?
-            sensorNames.remove(PRESSURE_STR);
-            sensorNames.remove(GRAVITY_STR);
-            sensorNames.remove(STEP_COUNTER_STR);
-        } else {
-            // TODO - add, if non-null add to menu, create series, etc
-            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
-            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
-            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
-            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_PRESSURE));
-            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_GRAVITY));
-            if (Build.VERSION.SDK_INT >= 19) {
-                m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
-            }
+        // TODO - add, if non-null add to menu, create series, etc
+        m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
+        m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
+        m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
+        m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_PRESSURE));
+        m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_GRAVITY));
+        if (Build.VERSION.SDK_INT >= 19) {
+            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
         }
 
         //  ToDo - add multi-checkboxes instead of single.
@@ -458,7 +447,6 @@ public class SensorFragment extends DevFragment
     // Permission
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (grantResults != null)
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -486,6 +474,7 @@ public class SensorFragment extends DevFragment
         }
     }
 
+    @SuppressWarnings("unused")
     public void createGraph(View rootView, Bundle savedInstanceState) {
 
         final int lineOnlyWidth = 6;
@@ -731,7 +720,6 @@ public class SensorFragment extends DevFragment
             createGraph(m_rootView, null);
             // Add  sensor sample to series.
         }
-        Date now = new Date();
         final int NO_LIGHT = 0;
         final int MaxAgeMsec = 5000;
 
@@ -846,7 +834,7 @@ public class SensorFragment extends DevFragment
             m_plotValues.put(AUDIO_STR, String.format("%.0f Avg:%.0f", dbValue, avgDb));
         }
 
-        WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiMgr = (WifiManager) getContextSafe().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifiMgr != null && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null && m_seriesWifi != null) {
             WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
             int numberOfLevels = 10;
@@ -859,7 +847,7 @@ public class SensorFragment extends DevFragment
             }
         }
 
-        Intent batteryIntent = getActivity().getApplicationContext()
+        Intent batteryIntent = getActivitySafe().getApplicationContext()
                 .registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (batteryIntent != null && m_seriesBatteryPercent != null) {
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
@@ -884,8 +872,7 @@ public class SensorFragment extends DevFragment
             int chargeCounter = batteryIntent.getIntExtra("charge_counter", -1);
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                BatteryManager batteryManager =
-                        (BatteryManager) getActivity().getSystemService(Context.BATTERY_SERVICE);
+                BatteryManager batteryManager = getServiceSafe(Context.BATTERY_SERVICE);
                 Integer currentNow =
                         batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
 
@@ -923,8 +910,8 @@ public class SensorFragment extends DevFragment
 
         }
 
-        ActivityManager actMgr = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
-        if (actMgr != null && m_seriesProcCnt != null) {
+        ActivityManager actMgr = getServiceSafe(Context.ACTIVITY_SERVICE);
+        if (m_seriesProcCnt != null) {
             try {
                 int processCnt = actMgr.getRunningAppProcesses().size();
                 add(m_seriesProcCnt, null, Math.min(processCnt, MAX_PROC_CNT));
@@ -939,12 +926,11 @@ public class SensorFragment extends DevFragment
             }
         }
 
-        if (Build.VERSION.SDK_INT >= 16 && m_seriesFreeMem != null) {
+        if (m_seriesFreeMem != null) {
             //   Total Memory API >= 16
             try {
                 ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-                ActivityManager activityManager = (ActivityManager)
-                        getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+                ActivityManager activityManager = getServiceSafe(Context.ACTIVITY_SERVICE);
                 activityManager.getMemoryInfo(mi);
                 // long heapUsing = Debug.getNativeHeapSize();
                 long freeMem = 100 * mi.availMem / mi.totalMem;
@@ -954,7 +940,7 @@ public class SensorFragment extends DevFragment
                     setChangeSeries(m_seriesFreeMem);
                     setRange(m_plot, m_seriesFreeMem);
                 }
-            } catch (Exception ex) {
+            } catch (Exception ignore) {
             }
         }
 

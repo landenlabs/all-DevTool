@@ -41,7 +41,7 @@ public class SoundMeter {
             mRecorder.setOutputFile("/dev/null");
             try {
                 mRecorder.prepare();
-            } catch (Exception ex) {
+            } catch (Exception ignore) {
             }
             mRecorder.start();
         }

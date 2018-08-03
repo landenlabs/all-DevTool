@@ -26,38 +26,37 @@ package com.landenlabs.all_devtool;
 
 /**
  * Display Numeric assets in the android.R.dimen section.
- * 
- * @author Dennis Lang
  *
+ * @author Dennis Lang
  */
-public class NumDimenFragment  extends NumBaseFragment {
-	
-	public static final String s_name = "NumDimen";
+public class NumDimenFragment extends NumBaseFragment {
 
-	public NumDimenFragment() {
-	}
+    public static final String s_name = "NumDimen";
 
-	public static NumDimenFragment create() {
-		return new NumDimenFragment();
-	}
-	
-	// ============================================================================================
-	// NumBaseFragment methods
-	
-	@Override
-	public String getName() {
-		return s_name;
-	}
+    public NumDimenFragment() {
+    }
 
-	@Override
-	public void addToList() {
-		addNum("app_icon_size", android.R.dimen.app_icon_size);
-		addNum("dialog_min_width_major", android.R.dimen.dialog_min_width_major);
-		addNum("dialog_min_width_minor", android.R.dimen.dialog_min_width_minor);
-		addNum("notification_large_icon_height", android.R.dimen.notification_large_icon_height);
-		addNum("notification_large_icon_width", android.R.dimen.notification_large_icon_width);
-		addNum("thumbnail_height", android.R.dimen.thumbnail_height);
-		addNum("thumbnail_width", android.R.dimen.thumbnail_width);
-	}
+    public static NumDimenFragment create() {
+        return new NumDimenFragment();
+    }
+
+    // ============================================================================================
+    // NumBaseFragment methods
+
+    @Override
+    public String getName() {
+        return s_name;
+    }
+
+    @Override
+    public void addToList() {
+        addNum("app_icon_size", android.R.dimen.app_icon_size);
+        addNum("dialog_min_width_major", android.R.dimen.dialog_min_width_major);
+        addNum("dialog_min_width_minor", android.R.dimen.dialog_min_width_minor);
+        addNum("notification_large_icon_height", android.R.dimen.notification_large_icon_height);
+        addNum("notification_large_icon_width", android.R.dimen.notification_large_icon_width);
+        addNum("thumbnail_height", android.R.dimen.thumbnail_height);
+        addNum("thumbnail_width", android.R.dimen.thumbnail_width);
+    }
 }
 

@@ -34,7 +34,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
@@ -42,12 +41,12 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.Signature;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -55,6 +54,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -84,7 +84,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.dialogs.UninstallDialog;
 import com.landenlabs.all_devtool.receivers.UninstallIntentReceiver;
@@ -104,6 +104,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP;
@@ -115,6 +116,7 @@ import static com.landenlabs.all_devtool.R.id.appName;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings("Convert2Lambda")
 public class PackageFragment extends DevFragment
         implements  View.OnClickListener
         , View.OnLongClickListener
@@ -124,9 +126,9 @@ public class PackageFragment extends DevFragment
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    ArrayList<PackingItem> m_list = new ArrayList<PackingItem>();
+    ArrayList<PackingItem> m_list = new ArrayList<>();
     ArrayList<PackingItem> m_workList;
-    ArrayList<PackingItem> m_beforeFilter = new ArrayList<PackingItem>();
+    ArrayList<PackingItem> m_beforeFilter = new ArrayList<>();
     ExpandableListView m_listView;
 
     ToggleButton m_pkgLoadBtn;
@@ -157,6 +159,13 @@ public class PackageFragment extends DevFragment
     final int SHOW_LIB = 4;
 
     int m_show = SHOW_USER;
+
+    public static String s_name = "Packages";
+    // private static final int MB = 1 << 20;
+    private static int s_rowColor1 = 0;
+    private static int s_rowColor2 = 0x80d0ffe0;
+    private static SimpleDateFormat s_timeFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm");
+    private Set<String> m_storageDirs = new HashSet<>();
 
     static final int MSG_UPDATE_DONE = 1;
     static final int MSG_SORT_LIST = 2;
@@ -243,8 +252,6 @@ public class PackageFragment extends DevFragment
                                                 result = 0;
                                             } else if (pkgItem1 == null || pkgItem2 == null) {
                                                 result = pkgItem1 == null ? -1 : 1;
-                                            } else if (pkgItem1.m_packInfo == null || pkgItem2.m_packInfo == null) {
-                                                result = pkgItem1.m_packInfo == null ? -1 : 1;
                                             } else {
                                                 result = Long.compare(pkgItem1.m_packInfo.lastUpdateTime,
                                                         pkgItem2.m_packInfo.lastUpdateTime);
@@ -263,9 +270,6 @@ public class PackageFragment extends DevFragment
                                                 result = 0;
                                             } else if (pkgItem1 == null || pkgItem2 == null) {
                                                 result = pkgItem1 == null ? -1 : 1;
-                                            }
-                                            else if (pkgItem1.m_packInfo == null || pkgItem2.m_packInfo == null) {
-                                                result =  pkgItem1.m_packInfo == null ? -1 : 1;
                                             }
                                             else {
                                                 result = Long.compare(
@@ -289,6 +293,18 @@ public class PackageFragment extends DevFragment
         }
     };
 
+    @NonNull
+    private PackageManager getPackageMgr() {
+        return Objects.requireNonNull(getActivity()).getPackageManager();
+    }
+
+    @NonNull
+    NotificationManager getNotificationMgr() {
+        NotificationManager notificationManager =
+                (NotificationManager) getActivitySafe().getSystemService(Context.NOTIFICATION_SERVICE);
+        return Objects.requireNonNull(notificationManager);
+    }
+
     // handler for received Intents for the "my-event" event
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -309,6 +325,7 @@ public class PackageFragment extends DevFragment
      *
      * @param message GCM message received.
      */
+    @SuppressWarnings("unused")
     private void sendNotification(Context context, String from, String message) {
         /*
         Intent intent = new Intent(context, DevToolActivity.class);
@@ -317,7 +334,7 @@ public class PackageFragment extends DevFragment
                 PendingIntent.FLAG_ONE_SHOT);
         */
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        // Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.shortcut_pkg)
                 .setContentTitle("Uninstalled")
@@ -337,18 +354,8 @@ public class PackageFragment extends DevFragment
         note.defaults |= Notification.DEFAULT_SOUND;
         note.defaults |= Notification.DEFAULT_LIGHTS;
 
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notify(0 /* ID of notification */, note);
+        getNotificationMgr().notify(0 /* ID of notification */, note);
     }
-
-    public static String s_name = "Packages";
-    private static final int MB = 1 << 20;
-    private static int s_rowColor1 = 0;
-    private static int s_rowColor2 = 0x80d0ffe0;
-    private static SimpleDateFormat s_timeFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm");
-    private Set<String> m_storageDirs = new HashSet<String>();
 
     // --------------------------------------------------------------------------------------------
 
@@ -372,7 +379,8 @@ public class PackageFragment extends DevFragment
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            m_log.e(ex.getMessage());
         }
     }
 
@@ -399,6 +407,7 @@ public class PackageFragment extends DevFragment
     }
 
     FileBrowseDialog m_fileOpenDialog;
+    @SuppressWarnings("unused")
     void fireIntentOn(String field, String value, int grpPos) {
         try {
             File root = new File(Environment.getExternalStorageDirectory().getPath() + value);
@@ -424,7 +433,7 @@ public class PackageFragment extends DevFragment
 
                 */
                 m_fileOpenDialog = new FileBrowseDialog(this.getActivity(), "Browse",
-                        this.getActivity().getWindow().getDecorView().getHeight(),null);
+                        getWindow().getDecorView().getHeight(),null);
 
                 m_fileOpenDialog.DefaultFileName = root.getPath();
                 m_fileOpenDialog.choose(root.getPath());
@@ -435,7 +444,7 @@ public class PackageFragment extends DevFragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -443,8 +452,21 @@ public class PackageFragment extends DevFragment
         m_rootView = inflater.inflate(R.layout.package_tab, container, false);
 
         m_listView = Ui.viewById(m_rootView, R.id.pkgListView);
-        final PkgArrayAdapter adapter = new PkgArrayAdapter(this.getActivity());
+        final PkgArrayAdapter adapter = new PkgArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
+
+        adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
+                Toast.makeText(getActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
+                // int grpPos = (Integer) view.getTag();
+                if (pos >= 0 && pos < m_list.size()) {
+                    PackingItem packingItem = m_list.get(pos);
+                    openPackageInfo(packingItem.m_packInfo.packageName);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -452,7 +474,7 @@ public class PackageFragment extends DevFragment
                 if (view == null || view.getTag() == null)
                     return false;
 
-                final int grpPos = ((Integer) view.getTag()).intValue();
+                final int grpPos = (Integer) view.getTag();
                 final TextView field = Ui.viewById(view, R.id.buildField);
                 final TextView value = Ui.viewById(view, R.id.buildValue);
                 if (field != null && value != null) {
@@ -487,15 +509,6 @@ public class PackageFragment extends DevFragment
             }
         });
 
-        adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
-            public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                int grpPos = ((Integer)view.getTag()).intValue();
-                PackingItem packingItem = m_list.get(pos);
-                openPackageInfo(packingItem.m_packInfo.packageName);
-                return true;
-            }
-        });
-
         m_listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View view, int groupPosition, int childPosition, long id) {
@@ -503,18 +516,24 @@ public class PackageFragment extends DevFragment
                 if (groupPosition >= 0 && groupPosition < m_list.size()) {
                     PackingItem packingItem = m_list.get(groupPosition);
                     Pair<String, String> keyVal = packingItem.valueListStr().get(childPosition);
-                    if (keyVal.first.equals(m_regPermissionsStr)) {
-                        toggleRegPermissions(packingItem, childPosition);
-                    } else if (keyVal.first.equals(m_permissionsStr)) {
-                        togglePermissions(packingItem, childPosition);
-                    } else if (keyVal.first.equals(m_activitiesStr)) {
-                        toggleActivities(packingItem, childPosition);
-                    } else if (keyVal.first.equals(m_servicesStr)) {
-                        toggleServices(packingItem, childPosition);
-                    } else if (keyVal.first.equals(m_providers)) {
-                        toggleProviders(packingItem, childPosition);
-                    } else {
-                        return false;
+                    switch (keyVal.first) {
+                        case m_regPermissionsStr:
+                            toggleRegPermissions(packingItem, childPosition);
+                            break;
+                        case m_permissionsStr:
+                            togglePermissions(packingItem, childPosition);
+                            break;
+                        case m_activitiesStr:
+                            toggleActivities(packingItem, childPosition);
+                            break;
+                        case m_servicesStr:
+                            toggleServices(packingItem, childPosition);
+                            break;
+                        case m_providers:
+                            toggleProviders(packingItem, childPosition);
+                            break;
+                        default:
+                            return false;
                     }
 
                     m_listView.collapseGroup(groupPosition);
@@ -526,18 +545,6 @@ public class PackageFragment extends DevFragment
             }
         });
 
-        adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
-            public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                Toast.makeText(getActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
-                int grpPos = ((Integer)view.getTag()).intValue();
-                if (pos >= 0 && pos < m_list.size()) {
-                    PackingItem packingItem = m_list.get(pos);
-                    openPackageInfo(packingItem.m_packInfo.packageName);
-                    return true;
-                }
-                return false;
-            }
-        });
 
         m_pkgLoadBtn = Ui.viewById(m_rootView, R.id.pkgLoadBtn);
         m_pkgLoadBtn.setOnClickListener(this);
@@ -561,14 +568,14 @@ public class PackageFragment extends DevFragment
         updatePkgTitle();
 
         // Register mMessageReceiver to receive messages.
-        LocalBroadcastManager.getInstance(this.getContext()).registerReceiver(mMessageReceiver,
+        LocalBroadcastManager.getInstance(getContextSafe()).registerReceiver(mMessageReceiver,
                 new IntentFilter(UninstallIntentReceiver.MSG_PACKAGE_UNINSTALLED));
 
-        getContext().registerReceiver(mMessageReceiver,
+        getContextSafe().registerReceiver(mMessageReceiver,
                 new IntentFilter(Intent.ACTION_UNINSTALL_PACKAGE));
-        getContext().registerReceiver(mMessageReceiver,
+        getContextSafe().registerReceiver(mMessageReceiver,
                 new IntentFilter(Intent.ACTION_PACKAGE_FULLY_REMOVED));
-        getContext().registerReceiver(mMessageReceiver,
+        getContextSafe().registerReceiver(mMessageReceiver,
                 new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
 
         return m_rootView;
@@ -579,7 +586,7 @@ public class PackageFragment extends DevFragment
         super.onDestroyView();
 
         // Unregister since the activity is not visible
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(getContextSafe()).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
@@ -596,7 +603,7 @@ public class PackageFragment extends DevFragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int pos = -1;
+        int pos;
         int id = item.getItemId();
         int show = m_show;
         switch (id) {
@@ -638,6 +645,7 @@ public class PackageFragment extends DevFragment
                 break;
             default:
                 item.setChecked(true);
+                //noinspection SuspiciousMethodCalls
                 pos = Arrays.asList(getResources().getStringArray(R.array.pkg_sort_array)).indexOf(item.getTitle());
                 m_sortSpinner.setSelection(pos);
                 this.m_sortBy = id;
@@ -714,7 +722,9 @@ public class PackageFragment extends DevFragment
                                 filterPackages(filter);
                                 // hideKeyboard
                                 InputMethodManager imm= (InputMethodManager) edView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(edView.getWindowToken(), 0);
+                                if (imm != null) {
+                                    imm.hideSoftInputFromWindow(edView.getWindowToken(), 0);
+                                }
                                 return true; // consume.
                             }
                             return false; // pass on to other listeners.
@@ -759,7 +769,7 @@ public class PackageFragment extends DevFragment
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         if (m_menu == null)
             return;
-        String itemStr = parent.getItemAtPosition(pos).toString();
+        // String itemStr = parent.getItemAtPosition(pos).toString();
         if (parent == m_loadSpinner) {
             m_show = pos;
             int menu_id = R.id.package_user;
@@ -821,13 +831,12 @@ public class PackageFragment extends DevFragment
     class ArrayListPair<S, T> extends ArrayList<Pair<S, T>> {
 
         public boolean add(S v1, T v2) {
-            return this.add(new Pair<S, T>(v1, v2));
+            return this.add(new Pair<>(v1, v2));
         }
     }
 
-    class ArrayListPairString extends ArrayListPair<String, String> {
+    private class ArrayListPairString extends ArrayListPair<String, String> {
     }
-
 
     // ============================================================================================
     // Internal methods
@@ -886,9 +895,9 @@ public class PackageFragment extends DevFragment
         } else {
             for (int pidx = 0; pidx != packInfo.requestedPermissions.length; pidx++) {
                 String perm = packInfo.requestedPermissions[pidx].replaceAll("[a-z.]*", "");
-                if (perm.length() > 30)
-                    perm = perm.substring(0, 30);
-                valueListStr.add(row++, new Pair<String, String>(String.format("  %2d", pidx), perm));
+                // if (perm.length() > 30)
+                //    perm = perm.substring(0, 30);
+                valueListStr.add(row++, new Pair<>(String.format("  %2d", pidx), perm));
             }
         }
     }
@@ -909,9 +918,9 @@ public class PackageFragment extends DevFragment
             for (int pidx = 0; pidx != packInfo.permissions.length; pidx++) {
                 PermissionInfo pInfo = packInfo.permissions[pidx];
                 String perm = pInfo.name.replaceAll("[a-z.]*", "");
-                if (perm.length() > 30)
-                    perm = perm.substring(0, 30);
-                valueListStr.add(row++, new Pair<String, String>(String.format("  %2d", pidx), perm));
+                // if (perm.length() > 30)
+                //    perm = perm.substring(0, 30);
+                valueListStr.add(row++, new Pair<>(String.format("  %2d", pidx), perm));
             }
         }
     }
@@ -932,9 +941,9 @@ public class PackageFragment extends DevFragment
             for (int aidx = 0; aidx != packInfo.activities.length; aidx++) {
                 ActivityInfo  aInfo = packInfo.activities[aidx];
                 String name = aInfo.name.replaceAll(packInfo.packageName, "");
-                if (name.length() > 30)
-                    name = name.substring(0, 30);
-                valueListStr.add(row++, new Pair<String, String>(String.format("  %2d", aidx), name));
+                // if (name.length() > 30)
+                //    name = name.substring(0, 30);
+                valueListStr.add(row++, new Pair<>(String.format("  %2d", aidx), name));
             }
         }
     }
@@ -955,9 +964,9 @@ public class PackageFragment extends DevFragment
             for (int aidx = 0; aidx != packInfo.services.length; aidx++) {
                 ServiceInfo sInfo = packInfo.services[aidx];
                 String name = sInfo.name;
-                if (name.length() > 30)
-                    name = name.substring(0, 30);
-                valueListStr.add(row++, new Pair<String, String>(String.format("  %2d", aidx), name));
+                // if (name.length() > 30)
+                //    name = name.substring(0, 30);
+                valueListStr.add(row++, new Pair<>(String.format("  %2d", aidx), name));
             }
         }
     }
@@ -980,7 +989,7 @@ public class PackageFragment extends DevFragment
                 String provStr = providerInfo.name;
                 if (provStr.length() > 30)
                     provStr = provStr.substring(provStr.length() - 30);
-                valueListStr.add(row++, new Pair<String, String>(String.format("  %2d", pidx), provStr));
+                valueListStr.add(row++, new Pair<>(String.format("  %2d", pidx), provStr));
             }
         }
     }
@@ -994,6 +1003,18 @@ public class PackageFragment extends DevFragment
             m_title.setText("No packages");
 
         m_title.setHint("");
+
+        /* Debug -
+        if (m_listView != null && m_listView.getCount() > 0) {
+            m_listView.post(new Runnable() {
+                @Override
+                public void run() {
+                    String dumpStr = Ui.dumpViews(m_listView, 0).toString();
+                    m_log.d(dumpStr);
+                }
+            });
+        }
+        */
     }
 
     /**
@@ -1011,7 +1032,7 @@ public class PackageFragment extends DevFragment
         for (PackingItem packageItem : m_list) {
             if (packageName.equals(packageItem.m_packInfo.packageName)) {
                 m_list.remove(packageItem);
-                m_workList = new ArrayList<PackingItem>();
+                m_workList = new ArrayList<>();
                 m_workList.addAll(m_list);
                 Message msgObj = m_handler.obtainMessage(MSG_UPDATE_DONE);
                 m_handler.sendMessage(msgObj);
@@ -1027,7 +1048,7 @@ public class PackageFragment extends DevFragment
      * Uninstall checked items.
      */
     private void uninstallPackages() {
-        ArrayList<PackageInfo> uninstallList = new ArrayList<PackageInfo>();
+        ArrayList<PackageInfo> uninstallList = new ArrayList<>();
         for (PackingItem packageItem : m_list) {
             if (packageItem.m_checked) {
                 uninstallList.add(packageItem.m_packInfo);
@@ -1045,18 +1066,16 @@ public class PackageFragment extends DevFragment
      * Delete cache files.
      */
     private void deleteCaches() {
-        ArrayList<PackageInfo> uninstallList = new ArrayList<PackageInfo>();
         for (PackingItem packageItem : m_list) {
             if (packageItem.m_checked) {
 
                 try {
                     PackageInfo packInfo = packageItem.m_packInfo;
-                    long cacheSize = 0;
-                    long fileCount = 0;
-                    Context mContext = getActivity().createPackageContext(packInfo.packageName, Context.CONTEXT_IGNORE_SECURITY);
+                    Context mContext = Objects.requireNonNull(getActivity())
+                            .createPackageContext(packInfo.packageName, Context.CONTEXT_IGNORE_SECURITY);
 
-                    File cacheDirectory = null;
-                    Utils.DirSizeCount cacheDirSize = null;
+                    File cacheDirectory;
+                    Utils.DirSizeCount cacheDirSize;
                     if (mContext.getCacheDir() != null) {
                         cacheDirectory = mContext.getCacheDir();
                         // cacheSize = cacheDirectory.length()/1024;
@@ -1081,12 +1100,9 @@ public class PackageFragment extends DevFragment
 
                         if (cacheDirSize != null) {
                             List<String> deletedFiles = Utils.deleteFiles(cacheDirectory);
-                            if (deletedFiles == null || deletedFiles.isEmpty()) {
-
-                            } else {
+                            if (deletedFiles != null && !deletedFiles.isEmpty()) {
                                 String fileMsg = TextUtils.join("\n", deletedFiles.toArray());
-                                Toast.makeText(getContext(), packageItem.m_appName + "\n" + fileMsg, Toast.LENGTH_LONG).show();
-
+                                Toast.makeText(getContextSafe(), packageItem.m_appName + "\n" + fileMsg, Toast.LENGTH_LONG).show();
                             }
                         }
                     }
@@ -1119,11 +1135,7 @@ public class PackageFragment extends DevFragment
         m_pkgUninstallBtn.setEnabled((updateCheckCnt() > 0));
 
         // Start lengthy operation loading packages in background thread
-        new Thread(new Runnable() {
-            public void run() {
-                loadPackages();
-            }
-        }).start();
+        new Thread(this::loadPackages).start();
     }
 
     private int updateCheckCnt() {
@@ -1137,8 +1149,6 @@ public class PackageFragment extends DevFragment
 
     /**
      * Open Application Detail Info dialog for package.
-     *
-     * @param packageName
      */
     void openPackageInfo(String packageName) {
         //redirect user to app Settings
@@ -1153,12 +1163,7 @@ public class PackageFragment extends DevFragment
      */
     void loadPackages() {
         m_uninstallResId = R.string.package_uninstall;
-        m_pkgUninstallBtn.post(new Runnable() {
-            @Override
-            public void run() {
-                updateUninstallBtn();
-            }
-        });
+        m_pkgUninstallBtn.post(this::updateUninstallBtn);
 
         switch (m_show) {
         case SHOW_USER:
@@ -1185,8 +1190,9 @@ public class PackageFragment extends DevFragment
      *
      * Use "adb shell dumpsys package r" to get full list
      */
+    @SuppressWarnings({"ConstantConditions", "ConstantIfStatement"})
     void loadDefaultPackages() {
-        m_workList = new ArrayList<PackingItem>();
+        m_workList = new ArrayList<>();
 
         String[] actions = {
                 Intent.ACTION_SEND, Intent.ACTION_SEND, Intent.ACTION_SEND, Intent.ACTION_SEND,
@@ -1233,26 +1239,28 @@ public class PackageFragment extends DevFragment
                 }
             }
 
-            PackageManager pm = getActivity().getPackageManager();
-
+            PackageManager pm = getPackageMgr();
 
             // PackageManager.GET_RESOLVED_FILTER);  // or PackageManager.MATCH_DEFAULT_ONLY
             List<ResolveInfo> resolveList = pm
                     .queryIntentActivities(resolveIntent, -1); // PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_INTENT_FILTERS);
 
             if (resolveList != null) {
-                String actType = type =  Utils.last(actions[idx].split("[.]")) + ":" + type;
+                String actType = Utils.last(actions[idx].split("[.]")) + ":" + type;
                 for (ResolveInfo resolveInfo : resolveList) {
                     ArrayListPairString pkgList = new ArrayListPairString();
                     String appName = resolveInfo.activityInfo.loadLabel(pm).toString().trim();
 
                     addList(pkgList, "Type", actType);
                     String pkgName = resolveInfo.activityInfo.packageName;
-                    PackageInfo packInfo = null;
+                    PackageInfo packInfo;
                     try {
                         packInfo = pm.getPackageInfo(pkgName, 0);
                         addList(pkgList, "Version", packInfo.versionName);
                         addList(pkgList, "VerCode", String.valueOf(packInfo.versionCode));
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            addList(pkgList, "MinSDK", String.valueOf(packInfo.applicationInfo.minSdkVersion));
+                        }
                         addList(pkgList, "TargetSDK", String.valueOf(packInfo.applicationInfo.targetSdkVersion));
                         m_date.setTime(packInfo.firstInstallTime);
                         addList(pkgList, "Install First", s_timeFormat.format(m_date));
@@ -1282,6 +1290,7 @@ public class PackageFragment extends DevFragment
                         }
                         m_workList.add(new PackingItem(pkgName.trim(), pkgList, packInfo, orderCnt++, appName, actType));
                     } catch (Exception ex) {
+                        m_log.e(ex.getMessage());
                     }
                 }
             }
@@ -1305,7 +1314,7 @@ public class PackageFragment extends DevFragment
         // getPreferredAppInfo();
 
         /*
-        List<ProviderInfo> providerList = getActivity().getPackageManager().queryContentProviders(null, 0, 0);
+        List<ProviderInfo> providerList = getPackageMgr().queryContentProviders(null, 0, 0);
         if (providerList != null) {
             for (ProviderInfo providerInfo : providerList) {
                 String name = providerInfo.name;
@@ -1318,20 +1327,19 @@ public class PackageFragment extends DevFragment
 
     /**
      * Get info on the preferred (launch by default) applications.
-     * @return
      */
+    @SuppressWarnings("unused")
     public String getPreferredAppInfo() {
-        List<PackageInfo> packages = getActivity().getPackageManager()
-                .getInstalledPackages(0);
-        List<IntentFilter> filters = new ArrayList<IntentFilter>();
-        List<ComponentName> activities = new ArrayList<ComponentName>();
-        String info = "";
-        int nPref = 0, nFilters = 0, nActivities = 0;
-        PackageInfo packInfo = null;
+        List<PackageInfo> packages = getPackageMgr().getInstalledPackages(0);
+        List<IntentFilter> filters = new ArrayList<>();
+        List<ComponentName> activities = new ArrayList<>();
+        StringBuilder info = new StringBuilder();
+        int nPref, nFilters, nActivities;
+        PackageInfo packInfo;
         // int orderCnt = 0;
         for (int i = 0; i < packages.size(); i++) {
             packInfo = packages.get(i);
-            nPref = getActivity().getPackageManager().getPreferredActivities(filters,
+            nPref = getPackageMgr().getPreferredActivities(filters,
                     activities, packInfo.packageName);
             nFilters = filters.size();
             nActivities = activities.size();
@@ -1341,7 +1349,7 @@ public class PackageFragment extends DevFragment
                 ArrayListPairString pkgList = new ArrayListPairString();
 
                 for (IntentFilter filter : filters) {
-                    info += "IntentFilter:\n";
+                    info.append("IntentFilter:\n");
                     for (int j = 0; j < filter.countActions(); j++) {
                         addList(pkgList, "Action", filter.getAction(j));
                     }
@@ -1371,7 +1379,7 @@ public class PackageFragment extends DevFragment
             }
         }
 
-        return info;
+        return info.toString();
     }
 
     /**
@@ -1379,7 +1387,7 @@ public class PackageFragment extends DevFragment
      */
     void loadInstalledPackages() {
         try {
-            m_workList = new ArrayList<PackingItem>();
+            m_workList = new ArrayList<>();
             int flags1 = PackageManager.GET_PERMISSIONS
                     | PackageManager.GET_PROVIDERS           // use hides some app, may require permissions
                     | PackageManager.GET_ACTIVITIES
@@ -1412,7 +1420,7 @@ public class PackageFragment extends DevFragment
     }
 
     void loadAndAddPackages(boolean showSys, int flags) {
-        List<PackageInfo> packList = getActivity().getPackageManager().getInstalledPackages(flags);
+        List<PackageInfo> packList = getPackageMgr().getInstalledPackages(flags);
         if (packList != null) {
             for (int idx = 0; idx < packList.size(); idx++) {
                 PackageInfo packInfo = packList.get(idx);
@@ -1424,6 +1432,7 @@ public class PackageFragment extends DevFragment
         }
     }
 
+    @SuppressWarnings("unused")
     List<PackageInfo>  mergePackages(List<PackageInfo> pkgMain, List<PackageInfo> pkgAdd) {
         if (pkgAdd != null) {
             for (int addIdx = 0; addIdx < pkgAdd.size(); addIdx++) {
@@ -1442,10 +1451,13 @@ public class PackageFragment extends DevFragment
         return pkgMain;
     }
 
+    @SuppressWarnings("unused")
     interface IPackageStatsObserver1 {
         void onGetStatsCompleted(PackageStats pStats, boolean succeeded);
     }
 
+    @SuppressWarnings({"SingleStatementInBlock", "ConstantConditions", "ConstantIfStatement",
+            "UnusedReturnValue"})
     boolean addPackageInfo(PackageInfo packInfo) {
         if (packInfo == null)
             return false;
@@ -1458,7 +1470,7 @@ public class PackageFragment extends DevFragment
         }
 
         ArrayListPairString pkgList = new ArrayListPairString();
-        String appName = packInfo.applicationInfo.loadLabel(getActivity().getPackageManager()).toString().trim();
+        String appName = packInfo.applicationInfo.loadLabel(Objects.requireNonNull(getActivity()).getPackageManager()).toString().trim();
         long pkgSize = 0;
 
         addList(pkgList, "Version", packInfo.versionName);
@@ -1470,12 +1482,30 @@ public class PackageFragment extends DevFragment
             pkgSize = file.length();
             addList(pkgList, "FileSize", NumberFormat.getNumberInstance(Locale.getDefault()).format(pkgSize));
         } catch (Exception ex) {
+            m_log.d("package filesize " + ex.getLocalizedMessage());
+        }
+
+        PackingItem packingItem = new PackingItem(packInfo.packageName.trim(), pkgList, packInfo, pkgSize, appName);
+        if (packingItem.m_iconDrawable == null) {
+            // Get Default icon
+            // packingItem.m_iconDrawable = packingItem.m_packInfo.applicationInfo.loadIcon(getActivity().getPackageManager());
+            // Get app icon
+            packingItem.m_iconDrawable = getPackageMgr().getApplicationIcon(packingItem.m_packInfo.applicationInfo);
         }
 
         if (!TextUtils.isEmpty(packInfo.applicationInfo.permission))
             addList(pkgList, "Permission", packInfo.applicationInfo.permission);
         if (packInfo.applicationInfo.sharedLibraryFiles != null)
-            addList(pkgList, "ShrLibs", packInfo.applicationInfo.sharedLibraryFiles.toString());
+            addList(pkgList, "ShrLibs",
+                    Arrays.toString(packInfo.applicationInfo.sharedLibraryFiles));
+
+        if (packingItem.m_iconDrawable != null) {
+            addList(pkgList, "IconType", packingItem.m_iconDrawable.getClass().getSimpleName());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            addList(pkgList, "MinSDK", String.valueOf(packInfo.applicationInfo.minSdkVersion));
+        }
         addList(pkgList, "TargetSDK", String.valueOf(packInfo.applicationInfo.targetSdkVersion));
         m_date.setTime(packInfo.firstInstallTime);
         addList(pkgList, "Install First", s_timeFormat.format(m_date));
@@ -1530,27 +1560,27 @@ public class PackageFragment extends DevFragment
             addList(pkgList, "Flags", flagStr.toString());
         }
 
-
         if (packInfo.signatures != null) {
-            String signatures = "";
-            for (android.content.pm.Signature sig : packInfo.signatures) {
-                signatures = signatures + " " + sig.toCharsString();
+            StringBuilder signatures = new StringBuilder();
+            for (Signature sig : packInfo.signatures) {
+                signatures.append(" ").append(sig);
             }
-            addList(pkgList, "Signature", signatures);
+            addList(pkgList, "Signature", signatures.toString());
         }
 
         if (packInfo.providers != null) {
             addList(pkgList, m_providers, String.valueOf(packInfo.providers.length));
             if (false) {
-                String providers = "";
+                StringBuilder providers = new StringBuilder();
                 for (ProviderInfo providerInfo : packInfo.providers) {
-                    providers = providers + " " + providerInfo.name;
+                    providers.append(" ").append(providerInfo.name);
                 }
-                addList(pkgList, "Providers", providers);
+                addList(pkgList, "Providers", providers.toString());
             }
         }
 
-        m_workList.add(new PackingItem(packInfo.packageName.trim(), pkgList, packInfo, pkgSize, appName));
+
+        m_workList.add(packingItem);
         return true;
     }
 
@@ -1564,37 +1594,37 @@ public class PackageFragment extends DevFragment
      *    /sdcard/download
      *
      */
+    @SuppressWarnings("unused")
     void loadCachedPackages() {
         try {
             // m_pkgUninstallBtn.setText(R.string.package_uninstall);
             m_uninstallResId = R.string.package_del_cache;
-            m_pkgUninstallBtn.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateUninstallBtn();
-                }
-            });
+            m_pkgUninstallBtn.post(this::updateUninstallBtn);
 
-            m_workList = new ArrayList<PackingItem>();
+            m_workList = new ArrayList<>();
 
             // PackageManager.GET_SIGNATURES | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS;
             int flags1 = PackageManager.GET_META_DATA
                     | PackageManager.GET_SHARED_LIBRARY_FILES
-                    | PackageManager.GET_INTENT_FILTERS
-                    | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+                    | PackageManager.GET_INTENT_FILTERS;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                flags1 |= PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+            }
+            /*
             int flags2 = PackageManager.GET_META_DATA
                     | PackageManager.GET_SHARED_LIBRARY_FILES;
             int flags3 = PackageManager.GET_META_DATA;
             int flags4 = 0;
+            */
 
-            List<PackageInfo> packList = getActivity().getPackageManager().getInstalledPackages(flags1);
+            List<PackageInfo> packList = getPackageMgr().getInstalledPackages(flags1);
             /*
             packList = mergePackages(packList,
-                    getActivity().getPackageManager().getInstalledPackages(flags2));
+                    getPackageMgr().getInstalledPackages(flags2));
             packList = mergePackages(packList,
-                    getActivity().getPackageManager().getInstalledPackages(flags3));
+                    getPackageMgr().getInstalledPackages(flags3));
             packList = mergePackages(packList,
-                    getActivity().getPackageManager().getInstalledPackages(flags4));
+                    getPackageMgr().getInstalledPackages(flags4));
             */
 
             if (packList != null)
@@ -1632,7 +1662,7 @@ public class PackageFragment extends DevFragment
                     Method myUserId=UserHandle.class.getDeclaredMethod("myUserId");//ignore check this when u set ur min SDK < 17
                     int userID = (Integer) myUserId.invoke(getActivity().getPackageManager());
 
-                    getActivity().getPackageManager().getPackageSizeInfoAsUser(packInfo.packageName, userID,
+                    getPackageMgr().getPackageSizeInfoAsUser(packInfo.packageName, userID,
                             new android.content.pm.IPackageStatsObserver.Stub() {
 
                                 public void onGetStatsCompleted(PackageStats pStats, boolean succeeded)
@@ -1648,25 +1678,24 @@ public class PackageFragment extends DevFragment
                     {
                         // cacheSize = cacheDirectory.length()/1024;
                         cacheDirSize  = Utils.getDirectorySize(cacheDirectory);
-                        if (true) {
-                            // Cache is not readable or empty,
-                            // Try and map cache dir to one of the sd storage paths
-                            for (String storageDir : m_storageDirs) {
-                                try {
-                                    String path = cacheDirectory.getCanonicalPath();
-                                    File cacheDirectory2 = new File(path
-                                            .replace("/data/data", storageDir + "/Android/data"));
-                                    if (cacheDirectory2.exists()) {
+                        // Cache is not readable or empty,
+// Try and map cache dir to one of the sd storage paths
+                        for (String storageDir : m_storageDirs) {
+                            try {
+                                String path = cacheDirectory.getCanonicalPath();
+                                File cacheDirectory2 = new File(path
+                                        .replace("/data/data", storageDir + "/Android/data"));
+                                if (cacheDirectory2.exists()) {
+                                    cacheDirectory = cacheDirectory2;
+                                    Utils.DirSizeCount dirSize =
+                                            Utils.getDirectorySize(cacheDirectory2);
+                                    if (cacheDirSize == null || dirSize.size > cacheDirSize.size) {
+                                        cacheDirSize = dirSize;
                                         cacheDirectory = cacheDirectory2;
-                                        Utils.DirSizeCount dirSize = Utils.getDirectorySize(cacheDirectory2);
-                                        if (cacheDirSize == null || dirSize.size > cacheDirSize.size) {
-                                            cacheDirSize = dirSize;
-                                            cacheDirectory = cacheDirectory2;
-                                        }
                                     }
-                                } catch (Exception ex) {
-                                    m_log.d(ex.getMessage());
                                 }
+                            } catch (Exception ex) {
+                                m_log.d(ex.getMessage());
                             }
                         }
                     } else {
@@ -1678,7 +1707,7 @@ public class PackageFragment extends DevFragment
                         try {
                             datDirSize = Utils.getDirectorySize(new File(packInfo.applicationInfo.dataDir));
                         } catch (Exception ex) {
-
+                            m_log.d(ex.getMessage());
                         }
                     }
 
@@ -1686,11 +1715,11 @@ public class PackageFragment extends DevFragment
 /*
                     Method getPackageSizeInfo;
                     try {
-                        getPackageSizeInfo = getActivity().getPackageManager().getClass().getMethod(
+                        getPackageSizeInfo = getPackageMgr().getClass().getMethod(
                                 "getPackageSizeInfo", String.class,
                                 Class.forName("android.content.pm.IPackageStatsObserver"));
 
-                        getPackageSizeInfo.invoke(getActivity().getPackageManager(), packInfo.packageName,
+                        getPackageSizeInfo.invoke(getPackageMgr, packInfo.packageName,
                                 new IPackageStatsObserver() {
 
                                     @Override
@@ -1717,6 +1746,9 @@ public class PackageFragment extends DevFragment
                         long pkgSize = 0;
 
                         addList(pkgList, "Version", packInfo.versionName);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            addList(pkgList, "MinSDK", String.valueOf(packInfo.applicationInfo.minSdkVersion));
+                        }
                         addList(pkgList, "TargetSDK", String.valueOf(packInfo.applicationInfo.targetSdkVersion));
                         String installTyp = "auto";
                         if (Build.VERSION.SDK_INT >= 21) {
@@ -1750,6 +1782,7 @@ public class PackageFragment extends DevFragment
                             File file = new File(packInfo.applicationInfo.sourceDir);
                             pkgSize = file.length();
                         } catch (Exception ex) {
+                            m_log.e(ex.getMessage());
                         }
 
                         addList(pkgList, "Apk File", packInfo.applicationInfo.publicSourceDir);
@@ -1780,16 +1813,14 @@ public class PackageFragment extends DevFragment
                             }
                         }
 
-                        if (true) {
-                            // packInfo.configPreferences; use with flag= GET_CONFIGURATIONS;
-                            // packInfo.providers use with GET_PROVIDERS;
+                        // packInfo.configPreferences; use with flag= GET_CONFIGURATIONS;
+                        // packInfo.providers use with GET_PROVIDERS;
 
-                            List< IntentFilter > outFilters = new ArrayList<IntentFilter>();
-                            List < ComponentName > outActivities  = new ArrayList<ComponentName>();
-                            int num = getActivity().getPackageManager().getPreferredActivities(outFilters, outActivities, packInfo.packageName);
-                            if (num > 0) {
-                                addList(pkgList, "Preferred #", String.valueOf(num));
-                            }
+                        List< IntentFilter > outFilters = new ArrayList<>();
+                        List < ComponentName > outActivities  = new ArrayList<>();
+                        int num = getPackageMgr().getPreferredActivities(outFilters, outActivities, packInfo.packageName);
+                        if (num > 0) {
+                            addList(pkgList, "Preferred #", String.valueOf(num));
                         }
 
                         /* if (null != cacheDirectory) */
@@ -1811,21 +1842,17 @@ public class PackageFragment extends DevFragment
     String  getResourceName(PackageInfo packInfo, int resId ) throws PackageManager.NameNotFoundException {
         String resName = "";
         if (resId != 0) {
-            AssetManager assetMgr = this.getActivity().createPackageContext(packInfo.packageName, 0).getAssets();
-            try {
-                Resources res;
-                Configuration config = new Configuration();
-                DisplayMetrics metrics = Utils.getDisplayMetrics(GlobalInfo.s_globalInfo.mainFragActivity);
+            AssetManager assetMgr = Objects.requireNonNull(this.getActivity())
+                    .createPackageContext(packInfo.packageName, 0).getAssets();
+            Resources res;
+            Configuration config = new Configuration();
+            DisplayMetrics metrics = Utils.getDisplayMetrics(GlobalInfo.s_globalInfo.mainFragActivity);
 
-                res = new Resources(assetMgr, metrics, config);
-                resName = res.getResourceName(resId);
-                if (resName.length() > 30)
-                    resName = resName.substring(resName.length() - 30);
-                // String resName = res.getText(resId).toString();
-            } finally {
-                // res.getAssets().close();
-                // assetMgr.close();
-            }
+            res = new Resources(assetMgr, metrics, config);
+            resName = res.getResourceName(resId);
+            if (resName.length() > 30)
+                resName = resName.substring(resName.length() - 30);
+            // String resName = res.getText(resId).toString();
         }
         return resName;
     }
@@ -1835,9 +1862,9 @@ public class PackageFragment extends DevFragment
      */
     void loadLibraries() {
         try {
-            m_workList = new ArrayList<PackingItem>();
+            m_workList = new ArrayList<>();
             int flag = PackageManager.GET_META_DATA;
-            String[] libraries = getActivity().getPackageManager().getSystemSharedLibraryNames();
+            String[] libraries = getPackageMgr().getSystemSharedLibraryNames();
             if (libraries != null && libraries.length != 0) {
                 ArrayListPairString libList = new ArrayListPairString();
                 addList(libList, "Libraries", String.format("%,d", libraries.length));
@@ -1846,23 +1873,28 @@ public class PackageFragment extends DevFragment
                     addList(libList, "  ", lib);
                 }
 
-                m_workList.add(new PackingItem("Libraries", libList, null, libSize, "lib"));
+                PackageInfo pkgInfo = new PackageInfo();
+                m_workList.add(new PackingItem("Libraries", libList, pkgInfo, libSize, "lib"));
             }
 
             // Getting status
-            int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity());
-            if(status == ConnectionResult.SUCCESS) {
+            // int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivitySafe());
+            int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContextSafe());
 
-                PackageInfo packInfo = getActivity().getPackageManager().getPackageInfo(GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_PACKAGE, flag);
+            if(status == ConnectionResult.SUCCESS) {
+                // String GOOGLE_PLAY_SERVICES_PACKAGE = "com.google.android.gms";
+                PackageInfo packInfo = getPackageMgr().getPackageInfo(GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE, flag);
                 addPackageInfo(packInfo);
                 // GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_PACKAGE;
                 // GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE;
             }
 
-            FeatureInfo[] features = getActivity().getPackageManager().getSystemAvailableFeatures();
+            /*
+            FeatureInfo[] features = getPackageMgr().getSystemAvailableFeatures();
             if (features != null && features.length != 0) {
                 // features.name
             }
+            */
 
         } catch (Exception ex) {
             m_log.e(ex.getMessage());
@@ -1873,6 +1905,7 @@ public class PackageFragment extends DevFragment
         list.add(value1, value2);
     }
 
+    @SuppressWarnings("unused")
     void addList(Map<String, String> list, String name, String value) {
         if (!TextUtils.isEmpty(value)) {
             list.put(name, value);
@@ -1880,6 +1913,7 @@ public class PackageFragment extends DevFragment
     }
 
     // Put values in List ifValue true.
+    @SuppressWarnings("unused")
     private static <M extends Map<E, E>, E> void putIf(M listObj, E v1, E v2, boolean ifValue) {
         if (ifValue) {
             listObj.put(v1, v2);
@@ -1901,25 +1935,20 @@ public class PackageFragment extends DevFragment
     /**
      * Hold Package information
      */
+    @SuppressWarnings("unused")
     class PackingItem {
         final String m_fieldStr;
         final String m_valueStr;
         final ArrayListPairString m_valueList;
+        @NonNull
         final PackageInfo m_packInfo;
         String m_typeStr;
         Drawable m_iconDrawable = null;
-        long m_pkgSize = 0;
+        long m_pkgSize;
         String m_appName;
         boolean m_checked = false;
 
-        PackingItem() {
-            m_fieldStr = m_valueStr = null;
-            m_valueList = null;
-            m_iconDrawable = null;
-            m_packInfo = null;
-        }
-
-        PackingItem(String str1, ArrayListPairString list2, PackageInfo packInfo, long pkgSize, String appName) {
+        PackingItem(String str1, ArrayListPairString list2, @NonNull PackageInfo packInfo, long pkgSize, String appName) {
             m_fieldStr = str1;
             m_valueStr = null;
             m_valueList = list2;
@@ -1928,7 +1957,7 @@ public class PackageFragment extends DevFragment
             m_appName = appName;
         }
 
-        PackingItem(String str1, ArrayListPairString list2, PackageInfo packInfo, long pkgSize, String appName, String typeStr) {
+        PackingItem(String str1, ArrayListPairString list2, @NonNull PackageInfo packInfo, long pkgSize, String appName, String typeStr) {
             m_fieldStr = str1;
             m_valueStr = null;
             m_valueList = list2;
@@ -1971,16 +2000,18 @@ public class PackageFragment extends DevFragment
      * ExpandableLis UI 'data model' class
      */
     private class PkgArrayAdapter extends BaseExpandableListAdapter
-            implements  View.OnClickListener, View.OnLongClickListener {
+            implements  View.OnLongClickListener
+            ,View.OnClickListener
+            {
         private final LayoutInflater m_inflater;
 
-        public PkgArrayAdapter(Context context) {
+        PkgArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         AdapterView.OnItemLongClickListener m_onItemLongClickListener;
-        public void setOnItemLongClickListener1( AdapterView.OnItemLongClickListener longClickList) {
+        void setOnItemLongClickListener1( AdapterView.OnItemLongClickListener longClickList) {
             m_onItemLongClickListener = longClickList;
         }
 
@@ -1997,16 +2028,16 @@ public class PackageFragment extends DevFragment
 
             PackingItem packingItem = m_list.get(groupPosition);
 
-            View expandView = null;    //  = convertView; Reuse had left overs
-            if (null == expandView) {
+            View expandView;    //  = convertView; Reuse had left overs
+            // if (null == expandView) {
                 expandView = m_inflater.inflate(EXPANDED_LAYOUT, parent, false);
-            }
+            // }
 
-            if (packingItem == null || packingItem.m_packInfo == null || packingItem.m_packInfo.lastUpdateTime <= 0)
+            if (packingItem == null || packingItem.m_packInfo.lastUpdateTime <= 0)
                 return expandView; // package is broken
 
             if (childPosition < packingItem.valueListStr().size()) {
-                expandView.setTag(Integer.valueOf(groupPosition));
+                expandView.setTag(groupPosition);
 
                 Pair<String, String> keyVal = packingItem.valueListStr().get(childPosition);
                 String key = keyVal.first;
@@ -2014,10 +2045,14 @@ public class PackageFragment extends DevFragment
 
                 TextView textView = Ui.viewById(expandView, R.id.buildField);
                 textView.setText(key);
+                textView.setContentDescription(key);
                 textView.setPadding(40, 0, 0, 0);
 
                 textView = Ui.viewById(expandView, R.id.buildValue);
                 textView.setText(val);
+                if (textView.isFocusable()) {
+                    textView.setFocusable(false);
+                }
 
                 if ((groupPosition & 1) == 1)
                     expandView.setBackgroundColor(s_rowColor1);
@@ -2040,22 +2075,23 @@ public class PackageFragment extends DevFragment
 
         @Override
         public Object getGroup(int groupPosition) {
-            return null;
+            return m_list.get(groupPosition);
         }
 
         @Override
         public Object getChild(int groupPosition, int childPosition) {
-            return null;
+            PackingItem packingItem = m_list.get(groupPosition);
+            return packingItem.valueListStr().get(childPosition);
         }
 
         @Override
         public long getGroupId(int groupPosition) {
-            return 0;
+            return groupPosition;
         }
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            return 0;
+            return childPosition;
         }
 
         @Override
@@ -2080,23 +2116,27 @@ public class PackageFragment extends DevFragment
                 summaryView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             }
 
-            if (packingItem == null || packingItem.m_packInfo == null || packingItem.m_packInfo.lastUpdateTime <= 0)
+            if (packingItem == null || packingItem.m_packInfo.lastUpdateTime <= 0)
                 return summaryView; // package is broken
 
-            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setTag(groupPosition);
             summaryView.setOnClickListener(this);
             summaryView.setOnLongClickListener(this);
+            summaryView.setFocusable(false);    // Must disable focus to allow ExpandableList to forward events.
 
-
-            if (packingItem.m_iconDrawable == null && packingItem.m_packInfo != null) {
-                packingItem.m_iconDrawable = packingItem.m_packInfo.applicationInfo.loadIcon(getActivity().getPackageManager());
+            if (packingItem.m_iconDrawable == null) {
+                // Get Default icon
+                // packingItem.m_iconDrawable = packingItem.m_packInfo.applicationInfo.loadIcon(getActivity().getPackageManager());
+                // Get app icon
+                packingItem.m_iconDrawable = Objects.requireNonNull(getActivity()).getPackageManager()
+                        .getApplicationIcon(packingItem.m_packInfo.applicationInfo);
             }
 
             ImageView imageView = Ui.viewById(summaryView, R.id.packageIcon);
             imageView.setImageDrawable(packingItem.m_iconDrawable);
 
             Ui.<TextView>viewById(summaryView, R.id.packageName).setText(packingItem.fieldStr());
-            String ver =  (packingItem.m_packInfo != null ? String.format(" v%.5s", packingItem.m_packInfo.versionName) : "");
+            String ver = String.format(" v%.5s", packingItem.m_packInfo.versionName);
             Ui.<TextView>viewById(summaryView, appName).setText(packingItem.m_appName + ver);
 
             if (m_show == SHOW_PREF) {
@@ -2104,26 +2144,17 @@ public class PackageFragment extends DevFragment
             } else {
                 switch (m_sortBy) {
                     case R.id.package_sort_by_update_date:
-                        if (packingItem.m_packInfo != null) {
                             Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(s_timeFormat.format(packingItem.m_packInfo.lastUpdateTime));
-                        } else {
-                            Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText("");
-                        }
                         break;
                     case R.id.package_sort_by_install_date:
-                        if (packingItem.m_packInfo != null) {
                             Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(s_timeFormat.format(packingItem.m_packInfo.firstInstallTime));
-                        } else {
-                            Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText("");
-                        }
                         break;
                     default:
-                        TextView sizeTv = Ui.<TextView>viewById(summaryView, R.id.pkgSize);
+                        TextView sizeTv = Ui.viewById(summaryView, R.id.pkgSize);
                         sizeTv.setText(
                                 NumberFormat.getNumberInstance(Locale.getDefault()).format(packingItem.m_pkgSize));
                         int color = 0xff800000;
-                        if (packingItem.m_packInfo != null
-                            && packingItem.m_packInfo.installLocation != PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY
+                        if (packingItem.m_packInfo.installLocation != PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY
                             && packingItem.m_packInfo.applicationInfo.sourceDir.startsWith("/mnt"))
                             color = 0xff008000;
                         sizeTv.setTextColor(color);
@@ -2134,8 +2165,9 @@ public class PackageFragment extends DevFragment
             CheckBox checkBox = Ui.viewById(summaryView, R.id.pkgChecked);
             checkBox.setVisibility((m_show == SHOW_SYS) ? View.INVISIBLE : View.VISIBLE);
             checkBox.setChecked(packingItem.m_checked);
-            checkBox.setTag(Integer.valueOf(groupPosition));
+            checkBox.setTag(groupPosition);
             checkBox.setOnClickListener(this);
+            checkBox.setFocusable(false);   // Must disable focus to allow ExpandableList to forward events.
 
             if ((groupPosition & 1) == 1)
                 summaryView.setBackgroundColor(s_rowColor1);
@@ -2150,34 +2182,42 @@ public class PackageFragment extends DevFragment
             return true;
         }
 
-        // ============================================================================================
+
+        // =========================================================================================
         // View.OnClickListener
+
         @Override
         public void onClick(View view) {
-            int grpPos = ((Integer)view.getTag()).intValue();
-            if (view instanceof  CheckBox) {
-                boolean checked = ((CheckBox) view).isChecked();
-                PackageFragment.this.m_list.get(grpPos).m_checked = checked;
-                // m_checkCnt += (checked ? 1 : -1);
-                updateUninstallBtn();
+            int grpPos;
+            String description = String.valueOf(view.getContentDescription());
+            if (!TextUtils.isEmpty(description) && description.contains("details")) {
+                grpPos = (Integer) view.getTag();
+                m_listView.performItemClick(m_listView, grpPos, view.getId());
             } else {
-                if (m_listView.isGroupExpanded(grpPos))
-                    m_listView.collapseGroup(grpPos);
-                else
-                    m_listView.expandGroup(grpPos);
+                grpPos = (Integer) view.getTag();
+                if (view instanceof CheckBox) {
+                    PackageFragment.this.m_list.get(grpPos).m_checked = ((CheckBox) view).isChecked();
+                    // m_checkCnt += (checked ? 1 : -1);
+                    updateUninstallBtn();
+                } else {
+                    if (m_listView.isGroupExpanded(grpPos))
+                        m_listView.collapseGroup(grpPos);
+                    else
+                        m_listView.expandGroup(grpPos);
+                }
             }
         }
 
         // ============================================================================================
         // View.OLongClickListener
+
         @Override
         public boolean onLongClick(View view) {
-            int grpPos = ((Integer)view.getTag()).intValue();
+            int grpPos = (Integer) view.getTag();
             // PackageFragment.this.m_list.get(grpPos).m_checked = ((CheckBox)v).isChecked();
-            if (m_onItemLongClickListener != null)
-                return m_onItemLongClickListener.onItemLongClick(null, view, grpPos, -1);
+            return m_onItemLongClickListener == null || m_onItemLongClickListener
+                    .onItemLongClick(null, view, grpPos, -1);
 
-            return true;
         }
     }
 }

@@ -99,7 +99,12 @@
         android:inputType="textFilter"
         android:layout_alignBottom="@+id/pkg_plus_minus_toggle" />
 
-    <com.landenlabs.all_devtool.dialogs.BounceExpandableListView
+    <!-- <com.landenlabs.all_devtool.dialogs.BounceExpandableListView
+            android:focusable="false"
+            android:longClickable="false"
+            android:groupIndicator="@android:color/transparent"
+    -->
+    <ExpandableListView
         android:id="@+id/pkgListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -108,12 +113,10 @@
         android:divider="#ff0000"
         android:dividerHeight="1px"
         android:fadingEdgeLength="60dp"
-        android:focusable="false"
         android:footerDividersEnabled="true"
-        android:groupIndicator="@android:color/transparent"
+
         android:headerDividersEnabled="true"
         android:listSelector="#8080ff80"
-        android:longClickable="false"
         android:overScrollFooter="@null"
         android:requiresFadingEdge="vertical"
         android:scrollbars="none"

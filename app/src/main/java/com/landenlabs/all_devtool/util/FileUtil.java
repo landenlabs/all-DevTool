@@ -6,7 +6,6 @@ import android.os.Build;
 import android.system.StructStat;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-import android.widget.Button;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -50,7 +49,7 @@ public class FileUtil {
     }
 
     public static class FileInfo extends File {
-        public static final int FILESIZE_MAX_DIR_DEPTH = 3;
+        // public static final int FILESIZE_MAX_DIR_DEPTH = 3;
         public boolean isChecked = false;
         int mFileCount = 0;
         long mDepthSize = 0;
@@ -97,8 +96,7 @@ public class FileUtil {
                 try {
                     StructStat st = android.system.Os.stat(this.getCanonicalPath());
                     return st.st_dev;
-                } catch (Exception ex) {
-
+                } catch (Exception ignore) {
                 }
             }
 
@@ -117,8 +115,7 @@ public class FileUtil {
                 try {
                     StructStat st = android.system.Os.stat(this.getCanonicalPath());
                     return st.st_atime * 1000L;
-                } catch (Exception ex) {
-
+                } catch (Exception ignore) {
                 }
             }
 
@@ -135,7 +132,6 @@ public class FileUtil {
          * files.
          *
          * @param fileCnt  Caller pass in -1. Used internally during recursion.
-         * @param maxFiles
          * @return  Total file size of files encountered during recursion, stopping at maxFiles.
          */
         public long findDepthSize(int fileCnt, int maxFiles) {
@@ -158,6 +154,7 @@ public class FileUtil {
                         try {
                             FileUtil.FileInfo fileInfo = new FileUtil.FileInfo(file.getAbsolutePath());
                             if (fileInfo.isDirectory()) {
+                                //noinspection ResultOfMethodCallIgnored
                                 fileInfo.findDepthSize(fileCnt + 1, fileCnt);
                             } else if (file.isFile()) {
                                 mDepthSize += fileInfo.length();
@@ -178,7 +175,7 @@ public class FileUtil {
         }
     }
 
-    public static class DirInfo extends Button {
+    public static class DirInfo extends android.support.v7.widget.AppCompatButton {
         File m_dir;
         public DirInfo(Context context, File dir) {
             super(context);
@@ -195,7 +192,7 @@ public class FileUtil {
     // =============================================================================================
 
     public interface ExecCallback {
-        void ExecCallback(StringBuilder result, int flag);
+        void Exec(StringBuilder result, int flag);
     }
 
     /**
@@ -221,7 +218,7 @@ public class FileUtil {
                             BufferedReader bufferedReaderErr = new BufferedReader(
                                     new InputStreamReader(process.getErrorStream()));
 
-                            String line = "";
+                            String line;
                             while ((line = bufferedReader.readLine()) != null) {
                                 if (line.trim().length() > 2) {
                                     publishProgress(line);
@@ -242,12 +239,12 @@ public class FileUtil {
 
                     @Override
                     protected void onProgressUpdate(String... values) {
-                        resultSb.append(values[0] + "\n");
+                        resultSb.append(values[0]).append("\n");
                     }
 
                     @Override
                     protected void onPostExecute(Void aVoid) {
-                        callable.ExecCallback(resultSb, 0);
+                        callable.Exec(resultSb, 0);
                     }
                 };
 

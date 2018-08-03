@@ -32,19 +32,20 @@ import com.landenlabs.all_devtool.GlobalInfo;
  *
  * Created by Dennis Lang on 11/28/2015.
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class LLog {
 
     // LLog states OFF or ON, use DBG to auto enable in Debug build.
-    public static final LLog OFF = new LLog(false);
-    public static final LLog ON = new LLog(true);
+    private static final LLog OFF = new LLog(false);
+    private static final LLog ON = new LLog(true);
     public static final LLog DBG = GlobalInfo.s_globalInfo.isDebug ? ON : OFF;
 
     // Auxilary 'fmt' meta tags
-    public static final String PID = "{pid}";   // Process ID
-    public static final String TID = "{tid}";   // Thread ID
+    private static final String PID = "{pid}";   // Process ID
+    private static final String TID = "{tid}";   // Thread ID
 
-    static final String NAME = LLog.class.getCanonicalName();
-    final boolean mEnabled;
+    private static final String NAME = LLog.class.getCanonicalName();
+    private final boolean mEnabled;
 
     public LLog(boolean enabled) {
         mEnabled = enabled;
@@ -72,8 +73,8 @@ public class LLog {
         return tag;
     }
 
-    public static String fmt(String msg, Object... args) {
-        return fmt(msg.format(msg, args));
+    private static String fmt(String msg, Object... args) {
+        return fmt(String.format(msg, args));
     }
 
     public final void d(String msg) {
@@ -91,7 +92,7 @@ public class LLog {
             Log.e(getTag(), msg);
     }
 
-    public static String fmt(String msg) {
+    private static String fmt(String msg) {
         msg = msg.replace(PID, String.valueOf(android.os.Process.myPid()));
         msg = msg.replace(TID, String.valueOf(android.os.Process.myTid()));
         return msg;

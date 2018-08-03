@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -60,6 +61,7 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
  *
  * @author Dennis Lang
  */
+@SuppressWarnings({"Convert2Lambda", "UnnecessaryLocalVariable"})
 public class ProcFragment extends DevFragment {
 
     private final ArrayList<ProcInfo> m_list = new ArrayList<>();
@@ -104,8 +106,8 @@ public class ProcFragment extends DevFragment {
 
     @SuppressWarnings("deprecation")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.proc_tab, container, false);
@@ -122,7 +124,7 @@ public class ProcFragment extends DevFragment {
             public void onClick(View v) {
                 m_titleTime.setText("");
                 m_titleTime.setHint("enter search text");
-                InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = getServiceSafe(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(m_titleTime, InputMethodManager.SHOW_IMPLICIT);
             }
         });
@@ -134,7 +136,7 @@ public class ProcFragment extends DevFragment {
             {
                 if(actionId == EditorInfo.IME_ACTION_DONE)
                 {
-                    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = getServiceSafe(Context.INPUT_METHOD_SERVICE);
                     // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
                     imm.toggleSoftInput(0, 0);
 
@@ -173,6 +175,7 @@ public class ProcFragment extends DevFragment {
     /**
      * Populate list with 'Build' parameters.
      */
+    @SuppressWarnings({"ConstantConditions", "ConstantIfStatement"})
     private void updateList() {
         // Time today = new Time(Time.getCurrentTimezone());
         // today.setToNow();
@@ -237,7 +240,7 @@ public class ProcFragment extends DevFragment {
 
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
-            final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivity());
+            final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -258,12 +261,14 @@ public class ProcFragment extends DevFragment {
             m_list.add(new ProcInfo(name, value.trim()));
     }
 
+    @SuppressWarnings("unused")
     void addMap(String name, Map<String, String> value) {
         if (!value.isEmpty())
             m_list.add(new ProcInfo(name, value));
     }
 
 
+    @SuppressWarnings("SameParameterValue")
     private static ArrayList<String> readFile(String filename, String splitPat, int  minSplitCnt) {
         ArrayList<String> list = new ArrayList<>();
         try {
@@ -282,6 +287,7 @@ public class ProcFragment extends DevFragment {
         return list;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static ArrayList<String> getPkgMemInfo(String packageName) {
         ArrayList<String> list = runShellCmd(
                 new String[] {"dumpsys", "meminfo", packageName});
@@ -332,7 +338,7 @@ public class ProcFragment extends DevFragment {
 
     // =============================================================================================
 
-    final static int EXPANDED_LAYOUT = R.layout.build_list_row;
+    // final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     private final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
     /**
@@ -342,7 +348,7 @@ public class ProcFragment extends DevFragment {
             implements View.OnClickListener {
         private final LayoutInflater m_inflater;
 
-        public BuildArrayAdapter(Context context) {
+        BuildArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -357,7 +363,7 @@ public class ProcFragment extends DevFragment {
 
             ProcInfo buildInfo = m_list.get(groupPosition);
 
-            View expandView = convertView;
+            View expandView; // = convertView;
             // if (null == expandView) {
             expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             // }
@@ -461,7 +467,7 @@ public class ProcFragment extends DevFragment {
                     summaryView.setBackgroundColor(0x80d0ffe0);
             }
 
-            summaryView.setTag(Integer.valueOf(groupPosition));
+            summaryView.setTag(groupPosition);
             summaryView.setOnClickListener(this);
             return summaryView;
         }
@@ -473,7 +479,7 @@ public class ProcFragment extends DevFragment {
 
         @Override
         public void onClick(View view) {
-            int grpPos = ((Integer) view.getTag()).intValue();
+            int grpPos = (Integer) view.getTag();
 
             if (m_listView.isGroupExpanded(grpPos))
                 m_listView.collapseGroup(grpPos);
