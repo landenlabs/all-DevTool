@@ -81,7 +81,6 @@ import net.danlew.android.joda.JodaTimeAndroid;
  */
 public class DevToolActivity extends FragmentActivity {
 
-    private MenuItem m_shareMenuItem;
     protected String m_startFrag;
 
 
@@ -159,7 +158,7 @@ public class DevToolActivity extends FragmentActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menus, menu);
 
-        m_shareMenuItem = menu.findItem(R.id.menu_share);
+        MenuItem m_shareMenuItem = menu.findItem(R.id.menu_share);
         GlobalInfo.s_globalInfo.shareActionProvider = (ShareActionProvider) m_shareMenuItem.getActionProvider();
 
         return super.onCreateOptionsMenu(menu);

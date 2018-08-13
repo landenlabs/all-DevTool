@@ -3,24 +3,35 @@
 File javaDocDstDir= file('javadoc')
 File zipDstDir= file('zip')
 
+// Provide configuration used by Gradle for plugins.
 buildscript {
     repositories {
+        // println "==== Gradle version " + GradleVersion.current().getVersion()
+        if (GradleVersion.current() >= GradleVersion.version('4.0')) {
+            google() // Gradle 4.0+
+        } else {
+            maven { url "https://maven.google.com" } // Gradle < 4.0
+        }
         jcenter()
-        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.3'
+        classpath 'com.android.tools.build:gradle:3.1.4'
 
         // Firebase
-        classpath 'com.google.gms:google-services:3.2.0'
+        classpath 'com.google.gms:google-services:3.3.0'
     }
 }
 
+// Provide configuration to build Android projects.
 allprojects {
     repositories {
+        // println "==== Gradle version " + GradleVersion.current().getVersion()
+        if (GradleVersion.current() >= GradleVersion.version('4.0')) {
+            google() // Gradle 4.0+
+        } else {
+            maven { url "https://maven.google.com" } // Gradle < 4.0
+        }
         jcenter()
-        google()
-        maven { url "https://maven.google.com" }
     }
 }
 

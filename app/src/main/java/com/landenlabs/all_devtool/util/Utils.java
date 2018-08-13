@@ -236,8 +236,8 @@ public class Utils {
      */
     public static DisplayMetrics getDisplayMetrics(Context context) {
         DisplayMetrics dm = new DisplayMetrics();
-        ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay().getMetrics(dm);
+        WindowManager winMgr = SysUtils.getServiceSafe(context, Context.WINDOW_SERVICE);
+        winMgr.getDefaultDisplay().getMetrics(dm);
         return dm;
     }
 
@@ -579,7 +579,7 @@ public class Utils {
      */
     public static void shareScreen(FragmentActivity activity, String what, ShareActionProvider shareActionProvider) {
         Bitmap screenBitmap = Utils.grabScreen(activity);
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
+        List<Bitmap> bitmapList = new ArrayList<>();
         bitmapList.add(screenBitmap);
         shareList(activity, bitmapList, null, what, "screenshot.png", shareActionProvider);
         GoogleAnalyticsHelper.event(activity, "share", "screen", activity.getClass().getName());
@@ -587,7 +587,7 @@ public class Utils {
 
     public static void shareScreen(View view, String what, ShareActionProvider shareActionProvider) {
         Bitmap screenBitmap = getBitmap(view);
-        List<Bitmap> bitmapList = new ArrayList<Bitmap>();
+        List<Bitmap> bitmapList = new ArrayList<>();
         bitmapList.add(screenBitmap);
         shareList(view.getContext(), bitmapList, null, what, "screenshot.png", shareActionProvider);
     }
@@ -705,15 +705,14 @@ public class Utils {
 
     public static void sendNotification(Context context, int id, String msg) {
         s_log.i("Preparing to send notification...: " + msg);
-        NotificationManager notificationManager = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = SysUtils.getServiceSafe(context, Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
                 new Intent(context, DevToolActivity.class), 0);
 
         Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.dev_tool_ic);
         NotificationCompat.Builder alamNotificationBuilder =
-                new NotificationCompat.Builder(context)
+                new NotificationCompat.Builder(context, "Alarm")
                         .setContentTitle("DevTool Alarm")
                         .setSmallIcon(R.drawable.dev_tool)
                         .setLargeIcon(largeIcon)
@@ -728,8 +727,7 @@ public class Utils {
 
     public static void cancelNotification(Context context, int id) {
         s_log.i("Cancel notification");
-        NotificationManager notificationManager = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = SysUtils.getServiceSafe(context, Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(id);
     }
 

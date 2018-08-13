@@ -118,7 +118,7 @@ public class FileBrowserFragment extends DevFragment
     TextView m_title;
 
     LinearLayout m_dirBar;
-    ArrayList<FileUtil.DirInfo> m_dirList = new ArrayList<>();
+    ArrayList<FileUtil.DirInfoButton> m_dirList = new ArrayList<>();
     FileUtil.FileInfo m_dirInfo;
     File  m_dir;
     long m_rootSizeMB;
@@ -273,7 +273,6 @@ public class FileBrowserFragment extends DevFragment
 
         m_dirBar = Ui.viewById(m_rootView, R.id.fb_dirBar);
 
-
         m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -380,9 +379,18 @@ public class FileBrowserFragment extends DevFragment
                             //    viewIntent.setData(Uri.fromFile(fileInfo));
                                 viewIntent.setDataAndType(Uri.fromFile(fileInfo),
                                         getMimeType(fileInfo.getAbsolutePath()));
+
+                                // TODO - need to use file provider to pass file name !!
                                 Intent openIntent = Intent.createChooser(viewIntent,
                                         "Choose an application to open with:");
-                                startActivity(openIntent);
+                                try {
+                                    startActivity(openIntent);
+                                } catch (Exception ex) {
+                                    Toast.makeText(getContextSafe(), "Failed to start intent on\n"
+                                                    + fileInfo.getName()
+                                                    + "\n" + ex.getLocalizedMessage(),
+                                            Toast.LENGTH_LONG).show();
+                                }
 
                                 // fireIntentOn(field.getText().toString(), value.getText().toString(), grpPos);
                             }
@@ -508,7 +516,7 @@ public class FileBrowserFragment extends DevFragment
             int resColor  = 0xff40ff80;
             int pathColor = 0xffd0d0d0;
 
-            if (dir.listFiles() == null) {
+            if (dir == null || dir.listFiles() == null) {
                 // No files - colorize yellow
                 nameColor = resColor = pathColor = 0xffffffb0;
             }
@@ -890,7 +898,7 @@ public class FileBrowserFragment extends DevFragment
         if (dir.getParentFile() != null)
             addDir(dir.getParentFile());
 
-        FileUtil.DirInfo button = new FileUtil.DirInfo(m_dirBar.getContext(), dir);
+        FileUtil.DirInfoButton button = new FileUtil.DirInfoButton(m_dirBar.getContext(), dir);
         m_dirBar.addView(button);
         button.setTag(m_dirList.size());
         button.setTextColor(Color.WHITE);
@@ -955,8 +963,8 @@ public class FileBrowserFragment extends DevFragment
                     }
                     m_workList.add(fileInfo);
                 }
-            } else {
-                /*
+            } /* else {
+
                 if (Build.VERSION.SDK_INT >= 21) {
                     StructStat stat = Os.stat(dirFile.getAbsolutePath());
                     // Permission denied.
@@ -966,8 +974,7 @@ public class FileBrowserFragment extends DevFragment
                     AsyncTaskCompat.executeParallel(
                             FileUtil.getAsyncExec(this, new StringBuilder(), new String[] {"find", dir, "-maxdepth", "1"} ));
                 }
-                */
-            }
+            } */
         } catch (NullPointerException ex) {
             // ignore null exception
             if (m_errMsg == null)

@@ -17,6 +17,7 @@ import static android.content.ContentValues.TAG;
 /**
  * Created by Dennis Lang on 7/13/16.
  */
+@SuppressWarnings("UnnecessaryLocalVariable")
 public class FileUtil {
     public static final int KB = 1 << 10;
     public static final int MB = 1 << 20;
@@ -175,13 +176,14 @@ public class FileUtil {
         }
     }
 
-    public static class DirInfo extends android.support.v7.widget.AppCompatButton {
+    // android.support.v7.widget.AppCompatButton
+    public static class DirInfoButton extends android.support.v7.widget.AppCompatButton {
+
         File m_dir;
-        public DirInfo(Context context, File dir) {
-            super(context);
+        public DirInfoButton(Context context, File dir) {
+            super(context,null, android.R.attr.buttonStyle);
             setText("/" + dir.getName());
             m_dir = dir;
-
         }
 
         public File getDir() {

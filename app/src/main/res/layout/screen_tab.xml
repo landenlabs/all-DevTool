@@ -135,7 +135,7 @@
             android:layout_marginBottom="40dp"
             android:background="@color/alphaBlack"
             android:gravity="center"
-            android:text="Grid 100 x 100"
+            android:text="Grid 100 x 100 dp"
             android:textColor="@android:color/white"
             android:textSize="@dimen/title_size" />
 

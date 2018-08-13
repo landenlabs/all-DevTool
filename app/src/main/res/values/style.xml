@@ -57,15 +57,15 @@
       	<item name="android:textColor">@android:color/white</item>
     </style>
      
-    <style name="AlertDialogStyle_0" parent="@android:style/Theme.Dialog"></style>
-    <style name="AlertDialogStyle_1" parent="@android:style/Theme.Holo.Dialog"></style>
-    <style name="AlertDialogStyle_2" parent="@android:style/Theme.Holo.Light.Dialog"></style>
-    <style name="AlertDialogStyle_3" parent="@android:style/Theme.Wallpaper"></style>
-    <style name="AlertDialogStyle_4" parent="@android:style/Theme.DeviceDefault.Dialog"></style>
-    <style name="AlertDialogStyle_5" parent="@android:style/Theme.DeviceDefault.Panel"></style>
-    <style name="AlertDialogStyle_6" parent="@android:style/Theme.DeviceDefault.Light.Dialog"></style>
+    <style name="AlertDialogStyle_0" parent="@android:style/Theme.Dialog"/>
+    <style name="AlertDialogStyle_1" parent="@android:style/Theme.Holo.Dialog"/>
+    <style name="AlertDialogStyle_2" parent="@android:style/Theme.Holo.Light.Dialog"/>
+    <style name="AlertDialogStyle_3" parent="@android:style/Theme.Wallpaper"/>
+    <style name="AlertDialogStyle_4" parent="@android:style/Theme.DeviceDefault.Dialog"/>
+    <style name="AlertDialogStyle_5" parent="@android:style/Theme.DeviceDefault.Panel"/>
+    <style name="AlertDialogStyle_6" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
 
-    <style name="AlertDialogStyle" parent="@android:style/Theme.Dialog"></style>
+    <style name="AlertDialogStyle" parent="@android:style/Theme.Dialog"/>
      
      
      

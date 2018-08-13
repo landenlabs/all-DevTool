@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="app_name">all DevTool</string>
     <string name="Theme">Theme</string>
     <string name="app_description">Display build info, text sizes, themes, screen size</string>
 
-    <string-array name="theme_array">
+    <string-array name="theme_array" tools:ignore="InconsistentArrays">
         <item> 0 Theme</item>
         <item> 1 Theme.Black</item>
         <item> 2 Theme.WithActionBar</item>

@@ -16,7 +16,8 @@
         android:background="@color/alphaGray"
         android:clickable="true"
         android:contentDescription="@string/menu_share"
-        android:src="@drawable/share" />
+        android:src="@drawable/share"
+        android:focusable="true" />
 
     <TextView
         android:id="@+id/icon_dlg_name"

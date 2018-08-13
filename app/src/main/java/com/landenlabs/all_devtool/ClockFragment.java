@@ -502,7 +502,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     }
 
     private void showTimezoneMap() {
-        String htmlStr = Utils.LoadData(getContext(), "timezone.html");
+        String htmlStr = Utils.LoadData(getContextSafe(), "timezone.html");
 
         Ui.showWebMessage(getContext(), Ui.HTML_CENTER_BOX, htmlStr);
         // Ui.showWebImage(getContext(), "file:///android_asset/world_timezone_map.png");

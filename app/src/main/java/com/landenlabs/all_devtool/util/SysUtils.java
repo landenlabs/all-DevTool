@@ -1,21 +1,24 @@
 package com.landenlabs.all_devtool.util;
 
+import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static android.system.Os.sysconf;
-import static android.system.OsConstants._SC_CLK_TCK;
+
 
 /**
  * Created by Dennis Lang on 2/23/17.
  */
 
-@SuppressWarnings({"unused", "OctalInteger"})
+@SuppressWarnings({"unused", "OctalInteger", "UnnecessaryLocalVariable"})
 public class SysUtils {
 
 
@@ -321,32 +324,28 @@ public class SysUtils {
         final String path = ("/proc/" + pid + "/stat");
         final String stat;
         final String fieldSep = " ";
-        BufferedReader reader = null;
+
 
         long SYSTEM_CLK_TCK = 100;
         if (Build.VERSION.SDK_INT >= 21) {
-            SYSTEM_CLK_TCK = sysconf(_SC_CLK_TCK);
+            SYSTEM_CLK_TCK = sysconf(android.system.OsConstants._SC_CLK_TCK);
         }
 
         try {
-            reader = new BufferedReader(new FileReader(path));
-            stat = reader.readLine();
-        } catch (Exception ex) {
-            return null;
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException ignore) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+                stat = reader.readLine();
             }
+
+            // Example
+            // 21999 (android.weather) S 355 355 0 0 -1 4194624 38743 0 1 0 135 20 0 0 20 0 22 0 9653936 1797201920 25056 4294967295 3069771776 3069789584 3198867776 3198863800 3066840876 0 6660 0 38136 4294967295 0 0 17 2 0 0 0 0 0 3069795544 3069796352 3072176128
+
+            final String[] fields = stat.split(fieldSep);
+            // final long startTimeTicks = Long.parseLong(fields[fieldStartTime]);
+            // return startTimeTicks * 1000 / SYSTEM_CLK_TCK;
+            return fields;
+        } catch (IOException ex) {
+            return new String[0];
         }
-
-        // Example
-        // 21999 (android.weather) S 355 355 0 0 -1 4194624 38743 0 1 0 135 20 0 0 20 0 22 0 9653936 1797201920 25056 4294967295 3069771776 3069789584 3198867776 3198863800 3066840876 0 6660 0 38136 4294967295 0 0 17 2 0 0 0 0 0 3069795544 3069796352 3072176128
-
-        final String[] fields = stat.split(fieldSep);
-        // final long startTimeTicks = Long.parseLong(fields[fieldStartTime]);
-        // return startTimeTicks * 1000 / SYSTEM_CLK_TCK;
-        return fields;
     }
 
     // =============================================================================================
@@ -402,4 +401,10 @@ public class SysUtils {
         return rwStr;
     }
 
+
+    @NonNull
+    public static  <T> T getServiceSafe(Context context, String service) {
+        //noinspection unchecked
+        return (T) Objects.requireNonNull(context.getSystemService(service));
+    }
 }

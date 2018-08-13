@@ -20,6 +20,7 @@ import java.lang.ref.WeakReference;
  * @author Dennis Lang on 11/15/16.
  */
 
+@SuppressWarnings("UnnecessaryLocalVariable")
 public class AppCrash extends CrashManagerListener {
 
     private Context mContext;

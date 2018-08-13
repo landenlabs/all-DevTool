@@ -96,6 +96,7 @@ import static com.landenlabs.all_devtool.R.id.plot;
  * @author Dennis Lang
  *
  */
+@SuppressWarnings("UnnecessaryLocalVariable")
 public class SensorFragment extends DevFragment
         implements SensorEventListener, View.OnLayoutChangeListener, AdapterView.OnItemSelectedListener {
 
@@ -110,9 +111,9 @@ public class SensorFragment extends DevFragment
 
     // ----- Sensor selector
     private SensorManager m_sensorMgr;
-    List<Sensor> m_sensorList = new ArrayList<Sensor>();
-    private Map<String, SensorEvent> m_sensorEvents = new HashMap<String, SensorEvent>();
-    Map<String, String> m_plotValues = new HashMap<String, String>();
+    List<Sensor> m_sensorList = new ArrayList<>();
+    private Map<String, SensorEvent> m_sensorEvents = new HashMap<>();
+    Map<String, String> m_plotValues = new HashMap<>();
 
     Spinner m_consoleSpinner;
     SoundMeter m_soundMeter;
@@ -177,7 +178,7 @@ public class SensorFragment extends DevFragment
 
     static Format mLineFmt = new Format() {
         @Override
-        public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+        public StringBuffer format(Object obj, StringBuffer toAppendTo, @NonNull FieldPosition pos) {
             // obj contains the raw Number value representing the position of the label being drawn.
             // customize the labeling however you want here:
             int iValue = Math.round(((Number) obj).floatValue());
@@ -185,7 +186,7 @@ public class SensorFragment extends DevFragment
         }
 
         @Override
-        public Object parseObject(String source, ParsePosition pos) {
+        public Object parseObject(String source, @NonNull ParsePosition pos) {
             // unused
             return null;
         }
@@ -277,34 +278,6 @@ public class SensorFragment extends DevFragment
         m_rootView = inflater.inflate(R.layout.sensor_tab, container, false);
         m_valueTv1 = Ui.viewById(m_rootView, R.id.sensor_value);
 
-        // Make all series - update them all the time
-        if (false && m_seriesOrientation_az == null) {
-            m_seriesChg = createChgSeries();
-            m_seriesOrientation_az = createSeries("Az.");
-            m_seriesOrientation_pitch = createSeries("Pitch");
-            m_seriesOrientation_roll = createSeries("Roll");
-            m_seriesLight = createSeries("Lux");
-            m_seriesAudio = createSeries("Sound");
-            m_seriesAudioAvg = createSeries("Avg");
-            m_seriesProcCnt = createSeries("Proc");
-            m_seriesFreeMem = createSeries("Mem");
-            m_seriesBatteryPercent = createSeries("Percent");
-            m_seriesBatteryCharge = createSeries("Charge");
-            m_seriesBatteryDrain = createSeries("Drain");
-            m_seriesWifi = createSeries("WiFi");
-            m_seriesPressure = createSeries("Pressure");
-
-            /*
-            Currently not pre-making these less common sensor graphs
-             m_seriesAccelerometer;
-             m_seriesMagnetometer;
-             m_seriesGyroscope;
-             m_seriesPressure;
-             m_seriesGravity;
-             m_seriesStepCounter;
-             */
-        }
-
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_ORIENTATION));
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_LIGHT));
 
@@ -316,7 +289,7 @@ public class SensorFragment extends DevFragment
                 Arrays.asList(new Plot[]{plot /* ,m_plot2 */}), 100, false);
 
         m_consoleSpinner = Ui.viewById(m_rootView, R.id.sensor_spinner);
-        List<String> sensorNames = new ArrayList<String>(Arrays.asList(SENSOR_NAMES));
+        List<String> sensorNames = new ArrayList<>(Arrays.asList(SENSOR_NAMES));
         // TODO - add, if non-null add to menu, create series, etc
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
@@ -329,7 +302,8 @@ public class SensorFragment extends DevFragment
 
         //  ToDo - add multi-checkboxes instead of single.
         ArrayAdapter<String> spinnerArrayAdapter =
-                new ArrayAdapter<String>(m_rootView.getContext(), android.R.layout.simple_spinner_item, sensorNames);
+                new ArrayAdapter<>(m_rootView.getContext(), android.R.layout.simple_spinner_item,
+                        sensorNames);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         m_consoleSpinner.setAdapter(spinnerArrayAdapter);
         m_consoleSpinner.addOnLayoutChangeListener(this);
@@ -511,147 +485,194 @@ public class SensorFragment extends DevFragment
         final boolean LINE_MODE = false;
         final boolean FILL_MODE = true;
 
-        if (m_sensorName.equals(ORIENTATION_STR)) {
-            m_plot.setRangeBoundaries(-180, 359, FIXED);
-            m_plot.setRangeLabel("Angle (Degs)");
+        switch (m_sensorName) {
+            case ORIENTATION_STR:
+                m_plot.setRangeBoundaries(-180, 359, FIXED);
+                m_plot.setRangeLabel("Angle (Degs)");
 
-            if (m_seriesOrientation_az == null) {
-                m_seriesOrientation_az = createSeries("Az.");
-                m_seriesOrientation_pitch = createSeries("Pitch");
-                m_seriesOrientation_roll = createSeries("Roll");
-            }
+                if (m_seriesOrientation_az == null) {
+                    m_seriesOrientation_az = createSeries("Az.");
+                    m_seriesOrientation_pitch = createSeries("Pitch");
+                    m_seriesOrientation_roll = createSeries("Roll");
+                }
 
-            m_plot.addSeries(m_seriesOrientation_az, makeFormatter(lineOnlyWidth, Color.rgb(40, 40, 255), Color.BLUE, 0, height / 3, LINE_MODE));
-            m_plot.addSeries(m_seriesOrientation_pitch, makeFormatter(lineOnlyWidth, Color.rgb(40, 255, 40), Color.GREEN, 0, height / 3, LINE_MODE));
-            m_plot.addSeries(m_seriesOrientation_roll, makeFormatter(lineOnlyWidth, Color.rgb(255, 40, 40), Color.RED, 0, height / 3, LINE_MODE));
-        } else if (m_sensorName.equals(LIGHT_STR)) {
+                m_plot.addSeries(m_seriesOrientation_az,
+                        makeFormatter(lineOnlyWidth, Color.rgb(40, 40, 255), Color.BLUE, 0,
+                                height / 3, LINE_MODE));
+                m_plot.addSeries(m_seriesOrientation_pitch,
+                        makeFormatter(lineOnlyWidth, Color.rgb(40, 255, 40), Color.GREEN, 0,
+                                height / 3, LINE_MODE));
+                m_plot.addSeries(m_seriesOrientation_roll,
+                        makeFormatter(lineOnlyWidth, Color.rgb(255, 40, 40), Color.RED, 0,
+                                height / 3, LINE_MODE));
+                break;
+            case LIGHT_STR:
 
-            if (m_seriesLight == null) {
-                m_seriesLight = createSeries("Lux");
-                m_seriesChg = createChgSeries();
-            }
+                if (m_seriesLight == null) {
+                    m_seriesLight = createSeries("Lux");
+                    m_seriesChg = createChgSeries();
+                }
 
-            m_plot.setRangeBoundaries(0, MAX_LIGHT, FIXED);
-            m_plot.setRangeLabel("LUX");
+                m_plot.setRangeBoundaries(0, MAX_LIGHT, FIXED);
+                m_plot.setRangeLabel("LUX");
 
-            m_plot.addSeries(m_seriesLight, makeFormatter(lineFillWidth, Color.rgb(128, 0, 0), Color.WHITE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.GREEN, Color.GREEN, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(AUDIO_STR)) {
+                m_plot.addSeries(m_seriesLight,
+                        makeFormatter(lineFillWidth, Color.rgb(128, 0, 0), Color.WHITE, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.GREEN, Color.GREEN, 0, height, LINE_MODE));
+                break;
+            case AUDIO_STR:
 
-            if (m_seriesAudio == null) {
-                m_seriesAudio = createSeries("Sound");
-                m_seriesAudioAvg = createSeries("Avg");
-                m_seriesChg = createChgSeries();
-            }
+                if (m_seriesAudio == null) {
+                    m_seriesAudio = createSeries("Sound");
+                    m_seriesAudioAvg = createSeries("Avg");
+                    m_seriesChg = createChgSeries();
+                }
 
-            if (m_soundMeter == null && checkPermissions(Manifest.permission.RECORD_AUDIO)) {
-                m_soundMeter = new SoundMeter();
-                m_soundMeter.start();
-            }
+                if (m_soundMeter == null && checkPermissions(Manifest.permission.RECORD_AUDIO)) {
+                    m_soundMeter = new SoundMeter();
+                    m_soundMeter.start();
+                }
 
-            m_plot.setRangeBoundaries(0, m_maxAudio, FIXED);
-            m_plot.setRangeLabel("Sound");
+                m_plot.setRangeBoundaries(0, m_maxAudio, FIXED);
+                m_plot.setRangeLabel("Sound");
 
-            m_plot.addSeries(m_seriesAudio, makeFormatter(2, Color.WHITE, Color.RED, 0, height, LINE_MODE));
-            m_plot.addSeries(m_seriesAudioAvg, makeFormatter(1, Color.BLUE, Color.BLUE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.GREEN, Color.GREEN, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(PROCESSES_STR)) {
-            if (m_seriesProcCnt == null) {
-                m_seriesProcCnt = createSeries("#Running");
-            }
+                m_plot.addSeries(m_seriesAudio,
+                        makeFormatter(2, Color.WHITE, Color.RED, 0, height, LINE_MODE));
+                m_plot.addSeries(m_seriesAudioAvg,
+                        makeFormatter(1, Color.BLUE, Color.BLUE, 0, height, FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.GREEN, Color.GREEN, 0, height, LINE_MODE));
+                break;
+            case PROCESSES_STR:
+                if (m_seriesProcCnt == null) {
+                    m_seriesProcCnt = createSeries("#Running");
+                }
 
-            m_plot.setRangeBoundaries(0, 10, AUTO);
-            m_plot.setRangeLabel("#Process Running");
+                m_plot.setRangeBoundaries(0, 10, AUTO);
+                m_plot.setRangeLabel("#Process Running");
 
-            m_plot.addSeries(m_seriesProcCnt, makeFormatter(lineFillWidth, Color.YELLOW, Color.RED, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(MEMORY_STR)) {
+                m_plot.addSeries(m_seriesProcCnt,
+                        makeFormatter(lineFillWidth, Color.YELLOW, Color.RED, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+                break;
+            case MEMORY_STR:
 
-            if (m_seriesFreeMem == null) {
-                m_seriesFreeMem = createSeries("Mem");
-                m_seriesChg = createChgSeries();
-            }
+                if (m_seriesFreeMem == null) {
+                    m_seriesFreeMem = createSeries("Mem");
+                    m_seriesChg = createChgSeries();
+                }
 
-            m_plot.setRangeBoundaries(0, 100, FIXED);
-            m_plot.setRangeLabel("Memory Free %");
+                m_plot.setRangeBoundaries(0, 100, FIXED);
+                m_plot.setRangeLabel("Memory Free %");
 
-            m_plot.addSeries(m_seriesFreeMem, makeFormatter(lineFillWidth, Color.RED, Color.YELLOW, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.WHITE, Color.WHITE, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(BATTERY_STR)) {
-            if (m_seriesBatteryPercent == null) {
-                m_seriesBatteryPercent = createSeries("Percent");
-                m_seriesBatteryCharge = createSeries("Charge");
-                m_seriesBatteryDrain = createSeries("Drain");
-            }
+                m_plot.addSeries(m_seriesFreeMem,
+                        makeFormatter(lineFillWidth, Color.RED, Color.YELLOW, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.WHITE, Color.WHITE, 0, height, LINE_MODE));
+                break;
+            case BATTERY_STR:
+                if (m_seriesBatteryPercent == null) {
+                    m_seriesBatteryPercent = createSeries("Percent");
+                    m_seriesBatteryCharge = createSeries("Charge");
+                    m_seriesBatteryDrain = createSeries("Drain");
+                }
 
-            m_plot.setRangeBoundaries(0, 350, GROW);
-            m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 10);
-            //2 m_plot.setTicksPerRangeLabel(2);
-            m_plot.setRangeLabel("Battery % and Amps");
+                m_plot.setRangeBoundaries(0, 350, GROW);
+                m_plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 10);
+                //2 m_plot.setTicksPerRangeLabel(2);
+                m_plot.setRangeLabel("Battery % and Amps");
 
-            m_plot.addSeries(m_seriesBatteryCharge, makeFormatter(lineFillWidth, Color.argb(128, 100, 255, 100), Color.GREEN, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesBatteryDrain, makeFormatter(lineFillWidth, Color.argb(128, 255, 100, 100), Color.RED, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesBatteryPercent, makeFormatter(lineFillWidth, Color.rgb(255, 128, 0), Color.BLUE, 0, height, LINE_MODE));
+                m_plot.addSeries(m_seriesBatteryCharge,
+                        makeFormatter(lineFillWidth, Color.argb(128, 100, 255, 100), Color.GREEN, 0,
+                                height, FILL_MODE));
+                m_plot.addSeries(m_seriesBatteryDrain,
+                        makeFormatter(lineFillWidth, Color.argb(128, 255, 100, 100), Color.RED, 0,
+                                height, FILL_MODE));
+                m_plot.addSeries(m_seriesBatteryPercent,
+                        makeFormatter(lineFillWidth, Color.rgb(255, 128, 0), Color.BLUE, 0, height,
+                                LINE_MODE));
 
-        } else if (m_sensorName.equals(WIFI_STR)) {
-            if (m_seriesWifi == null) {
-                m_seriesWifi = createSeries("WiFi");
-                m_seriesChg = createChgSeries();
-            }
+                break;
+            case WIFI_STR:
+                if (m_seriesWifi == null) {
+                    m_seriesWifi = createSeries("WiFi");
+                    m_seriesChg = createChgSeries();
+                }
 
-            m_plot.setRangeBoundaries(0, 110, FIXED);
-            m_plot.setRangeStep(StepMode.SUBDIVIDE, 11 + 1);
-            //2 m_plot.setTicksPerRangeLabel(2);
+                m_plot.setRangeBoundaries(0, 110, FIXED);
+                m_plot.setRangeStep(StepMode.SUBDIVIDE, 11 + 1);
+                //2 m_plot.setTicksPerRangeLabel(2);
 
-            m_plot.setRangeLabel("WiFi Signal%");
-            m_plot.addSeries(m_seriesWifi, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(PRESSURE_STR)) {
-            if (m_seriesPressure == null) {
-                m_seriesPressure = createSeries("Pressure");
-                m_seriesChg = createChgSeries();
-            }
+                m_plot.setRangeLabel("WiFi Signal%");
+                m_plot.addSeries(m_seriesWifi,
+                        makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+                break;
+            case PRESSURE_STR:
+                if (m_seriesPressure == null) {
+                    m_seriesPressure = createSeries("Pressure");
+                    m_seriesChg = createChgSeries();
+                }
 
-            if (true) {
-                m_plot.setRangeBoundaries(990, 1020, BoundaryMode.AUTO);
-            } else {
-                // Lowest tornadoe 870mb,  strong high press 1030mb,  highest ever 1086mb.
-                m_plot.setRangeBoundaries(850, 1030, FIXED);
-                m_plot.setRangeStep(StepMode.SUBDIVIDE, 9 + 1);  // 1030 - 850 = 180 / 9 = 20
-                //2 m_plot.setTicksPerRangeLabel(1);
-            }
+                if (true) {
+                    m_plot.setRangeBoundaries(990, 1020, BoundaryMode.AUTO);
+                } else {
+                    // Lowest tornadoe 870mb,  strong high press 1030mb,  highest ever 1086mb.
+                    m_plot.setRangeBoundaries(850, 1030, FIXED);
+                    m_plot.setRangeStep(StepMode.SUBDIVIDE, 9 + 1);  // 1030 - 850 = 180 / 9 = 20
+                    //2 m_plot.setTicksPerRangeLabel(1);
+                }
 
-            m_plot.setRangeLabel("Pressure mB");
-            m_plot.addSeries(m_seriesPressure, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(MAGNETOMETER_STR)) {
-            if (m_seriesMagnetometer == null) {
-                m_seriesMagnetometer = createSeries("Magnetometer");
-                m_seriesChg = createChgSeries();
-            }
+                m_plot.setRangeLabel("Pressure mB");
+                m_plot.addSeries(m_seriesPressure,
+                        makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+                break;
+            case MAGNETOMETER_STR:
+                if (m_seriesMagnetometer == null) {
+                    m_seriesMagnetometer = createSeries("Magnetometer");
+                    m_seriesChg = createChgSeries();
+                }
 
-            m_plot.setRangeLabel("Magnetic");
-            m_plot.setRangeBoundaries(-10, 10, AUTO);
-            m_plot.addSeries(m_seriesMagnetometer, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
-        } else if (m_sensorName.equals(GRAVITY_STR)) {
-            if (m_seriesGravity == null) {
-                m_seriesGravity = createSeries("Gravity");
-                m_seriesChg = createChgSeries();
-            }
+                m_plot.setRangeLabel("Magnetic");
+                m_plot.setRangeBoundaries(-10, 10, AUTO);
+                m_plot.addSeries(m_seriesMagnetometer,
+                        makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+                break;
+            case GRAVITY_STR:
+                if (m_seriesGravity == null) {
+                    m_seriesGravity = createSeries("Gravity");
+                    m_seriesChg = createChgSeries();
+                }
 
-            m_plot.setRangeLabel("Gavity");
-            m_plot.setRangeBoundaries(-10, 10, AUTO);
-            m_plot.addSeries(m_seriesGravity, makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height, FILL_MODE));
-            m_plot.addSeries(m_seriesChg, makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+                m_plot.setRangeLabel("Gavity");
+                m_plot.setRangeBoundaries(-10, 10, AUTO);
+                m_plot.addSeries(m_seriesGravity,
+                        makeFormatter(lineFillWidth, Color.BLUE, Color.WHITE, 0, height,
+                                FILL_MODE));
+                m_plot.addSeries(m_seriesChg,
+                        makeFormatter(4, Color.RED, Color.RED, 0, height, LINE_MODE));
+                break;
         }
 
-          /*
+        /*
             TODO  - add these graphs
              m_seriesAccelerometer;
              m_seriesGyroscope;
              m_seriesStepCounter;
-             */
+         */
 
         m_plot.setDomainBoundaries(0, HISTORY_SIZE, FIXED);
         m_plot.setDomainStepMode(StepMode.INCREMENT_BY_VAL);

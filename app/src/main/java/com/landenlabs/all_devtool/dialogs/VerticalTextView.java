@@ -32,6 +32,7 @@ public class VerticalTextView extends android.support.v7.widget.AppCompatTextVie
         }
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(heightMeasureSpec, widthMeasureSpec);

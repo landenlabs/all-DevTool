@@ -285,6 +285,7 @@ public class FileBrowseDialog {
                 break;
             case FolderChoose:
                 prompt = "Folder Select:";
+                break;
             case Browser:
                 prompt = "Browse";
         }
@@ -399,6 +400,9 @@ public class FileBrowseDialog {
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View itemView = super.getView(position, convertView, parent);
                 String item = getItem(position);
+                if (item == null) {
+                    return itemView;
+                }
 
                 int rowHeight = m_dialogHeight / (this.getCount() + 2);
                 if (itemView.getHeight() < rowHeight) {

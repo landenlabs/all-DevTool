@@ -5,9 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+
+import com.landenlabs.all_devtool.R;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -95,37 +100,82 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
         //    @Override
         //    public void run() {
         //        Looper.prepare();
-        builder.setTitle("Crash report:");
-        builder.create();
-        builder.setNegativeButton("Exit",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        System.exit(0);
-                    }
-                });
-        builder.setPositiveButton("Email",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                        StringBuilder body = new StringBuilder("Trace\n\n")
-                                .append(msg);
-                        //        .append(wsiApp.getAllVersions());
 
-                        // sendIntent.setType("text/plain");
-                        sendIntent.setType("message/rfc822");
-                        //    sendIntent.putExtra(Intent.EXTRA_EMAIL,
-                        //           new String[] { "wsimobile1@gmail.com" });
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, body.toString());
-                        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Crash report");
-                        sendIntent.setType("message/rfc822");
-                        context.startActivity(sendIntent);
-                        System.exit(0);
-                    }
-                });
-        builder.setMessage(msg);
-        builder.show();
+        if (false) {
+            builder.setTitle("Crash report:");
+            builder.create();
+            builder.setNegativeButton("Continue",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            System.exit(0);
+                        }
+                    });
+            builder.setPositiveButton("Email",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                            StringBuilder body = new StringBuilder("Trace\n\n")
+                                    .append(msg);
+                            //        .append(wsiApp.getAllVersions());
+
+                            // sendIntent.setType("text/plain");
+                            sendIntent.setType("message/rfc822");
+                            //    sendIntent.putExtra(Intent.EXTRA_EMAIL,
+                            //           new String[] { "wsimobile1@gmail.com" });
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, body.toString());
+                            sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Crash report");
+                            sendIntent.setType("message/rfc822");
+                            context.startActivity(sendIntent);
+                            System.exit(0);
+                        }
+                    });
+
+
+            builder.setMessage(msg);
+            builder.show();
+        } else {
+
+            if (Build.VERSION.SDK_INT >= 21) {
+                builder.setView(R.layout.crash_dlg);
+                AlertDialog dialog = builder.show();
+
+                ((TextView)dialog.findViewById(R.id.crash_text)).setText(msg);
+
+                dialog.findViewById(R.id.crash_cont_btn).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                System.exit(0);
+                            }
+                        }
+                );
+
+                dialog.findViewById(R.id.crash_email_btn).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                                StringBuilder body = new StringBuilder("Trace\n\n")
+                                        .append(msg);
+                                //        .append(wsiApp.getAllVersions());
+
+                                // sendIntent.setType("text/plain");
+                                sendIntent.setType("message/rfc822");
+                                //    sendIntent.putExtra(Intent.EXTRA_EMAIL,
+                                //           new String[] { "wsimobile1@gmail.com" });
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, body.toString());
+                                sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Crash report");
+                                sendIntent.setType("message/rfc822");
+                                context.startActivity(sendIntent);
+                                System.exit(0);
+                            }
+                        }
+                );
+
+            }
+        }
 
         Looper.loop();
         //   }

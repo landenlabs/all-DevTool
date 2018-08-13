@@ -26,7 +26,9 @@ public class UninstallIntentReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         mLog.i("onReceive " + intent);
-        mLog.i("onReceive keys=" + TextUtils.join(", ", intent.getExtras().keySet()));
+        if (intent.getExtras() != null) {
+            mLog.i("onReceive keys=" + TextUtils.join(", ", intent.getExtras().keySet()));
+        }
         // String packageName = intent.getData().getSchemeSpecificPart();
         String packageName = intent.getDataString().replace("package:", "");
 

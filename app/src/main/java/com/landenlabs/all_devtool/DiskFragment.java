@@ -205,7 +205,12 @@ public class DiskFragment extends DevFragment {
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                String[] parts = value.getText().toString().split(" ");
+                                String str =
+                                 (field.getText().length() > value.getText().length())
+                                        ? field.getText().toString()
+                                         : value.getText().toString();
+
+                                String[] parts = str.split("[ \t]");
                                 if (parts.length == 2) {
                                     fireIntentOn(parts[1]);
                                 }
@@ -320,6 +325,7 @@ public class DiskFragment extends DevFragment {
                     addFile("getFilesDir", getActivitySafe().getApplicationContext().getDataDir());
                 }
                 try {
+                    //noinspection deprecation
                     addFile("getDir(null)", getContextSafe().getDir(null, Context.MODE_WORLD_READABLE));
                 } catch (Exception ignored) {
                 }
@@ -393,14 +399,21 @@ public class DiskFragment extends DevFragment {
             }
 
             if (m_diskUsageCb.isChecked()) {
+                m_duStorageList = getShellCmd(new String[]{"ls", "-l",  "/storage"});
+                addString("ls -l /storage", m_duStorageList);
                 m_duStorageList = getShellCmd(new String[]{"du", "-chHLd", "2", "/storage"});
                 addString("du -chHLd 2 /storage", m_duStorageList);
 
+                m_duMntList = getShellCmd(new String[]{"ls", "-l", "/mnt"});
+                addString("ls -l /mnt", m_duMntList);
                 m_duMntList = getShellCmd(new String[]{"du", "-chHLd", "1", "/mnt/"});
                 addString("du -chHLs /mnt", m_duMntList);
 
-                // String sdCard = Environment.getExternalStorageDirectory().getPath();
-                m_duSdcardList = getShellCmd(new String[] { "du", "-chHL", "/sdcard/" });
+                String sdCard = Environment.getExternalStorageDirectory().getPath();
+                m_duSdcardList = getShellCmd(new String[] { "ls", "-l", sdCard });
+                addString("ls -l " + sdCard, m_duSdcardList);
+                m_duSdcardList = getShellCmd(new String[] { "du", "-chHL", sdCard });
+                // m_duSdcardList = getShellCmd(new String[] { "du", "-chHL", "/sdcard/" });
                 addString("du -chHL /sdcard", m_duSdcardList);
             }
 
@@ -427,7 +440,7 @@ public class DiskFragment extends DevFragment {
 
 
         /*
-        final BuildArrayAdapter adapter = new BuildArrayAdapter(this.getActivitySafe());
+        final DiskArrayAdapter adapter = new DiskArrayAdapter(this.getActivitySafe());
         m_listView.setAdapter(adapter);
 
         int count = adapter.getGroupCount();
@@ -439,7 +452,7 @@ public class DiskFragment extends DevFragment {
 
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
-            final DiskFragment.BuildArrayAdapter adapter = new DiskFragment.BuildArrayAdapter(this.getActivitySafe());
+            final DiskFragment.DiskArrayAdapter adapter = new DiskFragment.DiskArrayAdapter(this.getActivitySafe());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -509,10 +522,43 @@ public class DiskFragment extends DevFragment {
             if (vals.length > 1) {
                 mapList.put(vals[0], vals[1]);
             } else {
+                line = expandTabs(line, 8);
                 mapList.put(line, "");
             }
         }
         return mapList;
+    }
+
+    public static String expandTabs(String str, int tabSize) {
+        if (str == null)
+            return null;
+        StringBuilder buf = new StringBuilder(str.length()+tabSize);
+        int col = 0;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            switch (c) {
+                case '\n' :
+                    col = 0;
+                    buf.append(c);
+                    break;
+                case '\t' :
+                    buf.append(spaces(tabSize - col % tabSize));
+                    col += tabSize - col % tabSize;
+                    break;
+                default :
+                    col++;
+                    buf.append(c);
+                    break;
+            }
+        }
+        return buf.toString();
+    }
+
+    public static StringBuilder spaces(int n) {
+        StringBuilder buf = new StringBuilder(n);
+        for (int sp = 0; sp < n; sp++)
+            buf.append(" ");
+        return buf;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -611,15 +657,15 @@ public class DiskFragment extends DevFragment {
 
     // =============================================================================================
 
-    final static int SUMMARY_LAYOUT = R.layout.build_list_row;
+    final static int SUMMARY_LAYOUT = R.layout.disk_list_row;
 
     /**
      * ExpandableLis UI 'data model' class
      */
-    private class BuildArrayAdapter extends BaseExpandableListAdapter {
+    private class DiskArrayAdapter extends BaseExpandableListAdapter {
         private final LayoutInflater m_inflater;
 
-        BuildArrayAdapter(Context context) {
+        DiskArrayAdapter(Context context) {
             m_inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -645,6 +691,7 @@ public class DiskFragment extends DevFragment {
             TextView textView = Ui.viewById(expandView, R.id.buildField);
             textView.setText(key);
             textView.setPadding(40, 0, 0, 0);
+            textView.setTypeface(Typeface.MONOSPACE);
 
             textView = Ui.viewById(expandView, R.id.buildValue);
             textView.setText(val);

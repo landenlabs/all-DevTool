@@ -45,6 +45,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
@@ -70,6 +71,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
@@ -116,7 +118,7 @@ public class NetFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    final ArrayList<BuildInfo> m_list = new ArrayList<>();
+    final ArrayList<NetInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
     ImageButton m_search;
@@ -132,6 +134,7 @@ public class NetFragment extends DevFragment {
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
     private static IntentFilter INTENT_FILTER_SCAN_AVAILABLE = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
     private WifiManager wifiMgr;
+    private boolean m_updateTime = true;
 
     // =============================================================================================
     @SuppressWarnings("Convert2Lambda")
@@ -240,12 +243,14 @@ public class NetFragment extends DevFragment {
         Ui.<TextView>viewById(rootView, R.id.list_title).setText(R.string.network_title);
         Ui.viewById(rootView, R.id.list_time_bar).setVisibility(View.VISIBLE);
         m_titleTime = Ui.viewById(rootView, R.id.list_time);
+        m_updateTime = true;
 
         m_search = Ui.viewById(rootView, R.id.list_search);
         m_search.setVisibility(View.VISIBLE);
         m_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                m_updateTime = false;
                 m_titleTime.setText("");
                 m_titleTime.setHint("enter search text");
                 InputMethodManager imm = getServiceSafe(Context.INPUT_METHOD_SERVICE);
@@ -264,12 +269,27 @@ public class NetFragment extends DevFragment {
                     // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
                     imm.toggleSoftInput(0, 0);
 
-                    Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
                     m_filter = edView.getText().toString();
-                    updateList();
+                    Toast.makeText(getContext(), "Searching for " + m_filter , Toast.LENGTH_SHORT).show();
+                    // updateList();
+                    expandFiltered();
+                    m_listView.invalidate();
+                    m_updateTime = true;
                     return true; // consume.
                 }
                 return false; // pass on to other listeners.
+            }
+        });
+
+        final ToggleButton expandTb = Ui.viewById(rootView, R.id.list_collapse_tb);
+        expandTb.setVisibility(View.VISIBLE);
+        expandTb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (expandTb.isChecked())
+                    expandAll();
+                else
+                    collapseAll();
             }
         });
 
@@ -305,7 +325,7 @@ public class NetFragment extends DevFragment {
         int id = item.getItemId();
         switch (id) {
             case R.id.net_clean_networks:
-                clean_networks();
+                clearNetworks();
                 break;
 
             default:
@@ -329,13 +349,51 @@ public class NetFragment extends DevFragment {
         // m_menu.findItem(m_sortBy).setChecked(true);
     }
 
+    private void collapseAll() {
+        int count = m_listView.getAdapter().getCount(); // m_list.size();
+        for (int position = 0; position < count; position++) {
+            // m_log.d("Collapse " + position);
+            m_listView.collapseGroup(position);
+        }
+    }
+
+    private void expandAll() {
+        int count = m_listView.getAdapter().getCount(); // m_list.size();
+        for (int position = 0; position < count; position++)
+            m_listView.expandGroup(position);
+    }
+
+    void expandFiltered() {
+        if (!TextUtils.isEmpty(m_filter) && !m_filter.equals("*")) {
+            for (int grpPos = 0; grpPos < m_list.size(); grpPos++) {
+
+                NetInfo buildInfo = m_list.get(grpPos);
+
+                String key = TextUtils.join(",", buildInfo.valueListStr().keySet().toArray());
+                String val = TextUtils.join(",", buildInfo.valueListStr().values().toArray());
+
+                String text = key + val;
+
+                if (text.matches(m_filter) || Utils.containsIgnoreCase(text, m_filter)) {
+                    m_listView.expandGroup(grpPos);
+                } else {
+                    m_listView.collapseGroup(grpPos);
+                }
+            }
+        } else {
+            collapseAll();
+        }
+    }
+
     @SuppressLint("MissingPermission")
     public void updateList() {
         // Time today = new Time(Time.getCurrentTimezone());
         // today.setToNow();
         // today.format(" %H:%M:%S")
         Date dt = new Date();
-        m_titleTime.setText(m_timeFormat.format(dt));
+        if (m_updateTime) {
+            m_titleTime.setText(m_timeFormat.format(dt));
+        }
 
         boolean firstTime = m_list.isEmpty();
         m_list.clear();
@@ -712,8 +770,9 @@ public class NetFragment extends DevFragment {
                         wifiScanListStr.put("  Capabilities", scanResult.capabilities);
                         //       wifiScanListStr.put("  Center Freq", String.valueOf(scanResult.centerFreq0));
                         //       wifiScanListStr.put("  Freq width", String.valueOf(scanResult.channelWidth));
-                        wifiScanListStr.put("  Level, Freq", String.format("%d db, %d MHz",
-                                scanResult.level, scanResult.frequency));
+                        String levelFreq = String.format("%d db, %d MHz",
+                                scanResult.level, scanResult.frequency);
+                        wifiScanListStr.put("  Level, Freq", levelFreq);
                         // wifiScanListStr.put("  Width", scanResult.channelWidth);
                         if (Build.VERSION.SDK_INT >= 17) {
                             Date wifiTime = new Date(scanResult.timestamp/1000 + bootTime);
@@ -722,7 +781,8 @@ public class NetFragment extends DevFragment {
                             // wifiScanListStr.put("  Time", wifiTime.toLocaleString());
                         }
 
-                        addBuild(String.format("WiFiScan #%d", ++idx), wifiScanListStr);
+                        addBuild(String.format("WiFi%d %s %s", ++idx,
+                                wifiScanListStr.get("SSID"), levelFreq), wifiScanListStr);
                     }
                 }
             } catch (Exception ex) {
@@ -813,7 +873,8 @@ public class NetFragment extends DevFragment {
                     // wifiMgr.removeNetwork(wifiCfg.networkId);
                 }
 
-                addBuild("WiFiCfg #" + wifiCfg.networkId, wifiCfgListStr);
+                addBuild(String.format("WiFiCfg#%s %s",
+                        wifiCfg.networkId, wifiCfg.SSID), wifiCfgListStr);
             }
 
         } catch (Exception ex) {
@@ -823,10 +884,10 @@ public class NetFragment extends DevFragment {
 
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
-            m_list.add(new BuildInfo(name, value));
+            m_list.add(new NetInfo(name, value));
     }
 
-    private void clean_networks() {
+    private void clearNetworks() {
         StringBuilder sb = new StringBuilder();
         final WifiManager wifiMgr = getServiceSafe(Context.WIFI_SERVICE);
         if (checkPermissions(Manifest.permission.CHANGE_WIFI_STATE)) { // && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null) {
@@ -839,6 +900,7 @@ public class NetFragment extends DevFragment {
                         if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
 
                             // Remove network connections with no Password.
+                            // ONLY allowed to remove networks we have added !!
                             if (wifiMgr.removeNetwork(wifiCfg.networkId)) {
                                 sb.append("Removed:\n   ")
                                     .append(wifiCfg.SSID)
@@ -860,6 +922,8 @@ public class NetFragment extends DevFragment {
         if (sb.length() != 0) {
             Toast.makeText(this.getContext(), "WiFi Networks:\n"
                     + sb.toString(), Toast.LENGTH_LONG).show();
+            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            // Settings.ACTION_WIFI_IP_SETTINGS
         }
     }
 
@@ -930,18 +994,18 @@ public class NetFragment extends DevFragment {
 
     // =============================================================================================
     @SuppressWarnings("unused")
-    class BuildInfo {
+    class NetInfo {
         final String m_fieldStr;
         final String m_valueStr;
         final Map<String, String> m_valueList;
 
-        BuildInfo(String str1, String str2) {
+        NetInfo(String str1, String str2) {
             m_fieldStr = str1;
             m_valueStr = str2;
             m_valueList = null;
         }
 
-        BuildInfo(String str1, Map<String, String> list2) {
+        NetInfo(String str1, Map<String, String> list2) {
             m_fieldStr = str1;
             m_valueStr = null;
             m_valueList = list2;
@@ -989,20 +1053,21 @@ public class NetFragment extends DevFragment {
          * Generated expanded detail view object.
          */
         @Override
-        public View getChildView(final int groupPosition,
-                                 final int childPosition, boolean isLastChild, View convertView,
-                                 ViewGroup parent) {
+        public View getChildView(
+            final int groupPosition,
+            final int childPosition, boolean isLastChild, View convertView,
+            ViewGroup parent) {
 
-            BuildInfo buildInfo = m_list.get(groupPosition);
+            NetInfo netInfo = m_list.get(groupPosition);
 
             View expandView = convertView;
             if (null == expandView) {
                 expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             }
 
-            if (childPosition < buildInfo.valueListStr().keySet().size()) {
-                String key = (String) buildInfo.valueListStr().keySet().toArray()[childPosition];
-                String val = buildInfo.valueListStr().get(key);
+            if (childPosition < netInfo.valueListStr().keySet().size()) {
+                String key = (String) netInfo.valueListStr().keySet().toArray()[childPosition];
+                String val = netInfo.valueListStr().get(key);
 
                 TextView textView = Ui.viewById(expandView, R.id.buildField);
                 textView.setText(key);
@@ -1067,10 +1132,11 @@ public class NetFragment extends DevFragment {
          * Generate summary (row) presentation view object.
          */
         @Override
-        public View getGroupView(int groupPosition, boolean isExpanded,
-                                 View convertView, ViewGroup parent) {
+        public View getGroupView(
+                int groupPosition, boolean isExpanded,
+                View convertView, ViewGroup parent) {
 
-            BuildInfo buildInfo = m_list.get(groupPosition);
+            NetInfo netInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {
@@ -1079,11 +1145,11 @@ public class NetFragment extends DevFragment {
 
             TextView textView;
             textView = Ui.viewById(summaryView, R.id.buildField);
-            textView.setText("" + groupPosition + " " + buildInfo.fieldStr());
+            textView.setText("" + groupPosition + " " + netInfo.fieldStr());
             textView.setPadding(10, 0, 0, 0);
 
             textView = Ui.viewById(summaryView, R.id.buildValue);
-            textView.setText(buildInfo.valueStr());
+            textView.setText(netInfo.valueStr());
 
             if ((groupPosition & 1) == 1)
                 summaryView.setBackgroundColor(m_rowColor1);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minWidth="1000dp"
@@ -24,7 +25,8 @@
         android:layout_margin="10dp"
         android:clickable="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/share" />
+        android:src="@drawable/share"
+        android:focusable="true" />
 
     <LinearLayout
         android:id="@+id/text_dlg_inner"
@@ -46,55 +48,55 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row1"
+                tools:text="Row1"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row2"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row3"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row4"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row5"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row6"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row7"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row8"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Row2"
+                tools:text="Row9"
                 android:textSize="12sp" />
         </LinearLayout>
 

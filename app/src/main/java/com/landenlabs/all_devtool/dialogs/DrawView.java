@@ -1,5 +1,6 @@
 package com.landenlabs.all_devtool.dialogs;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -86,12 +87,17 @@ public class DrawView extends View {
         prunePath();
     }
 
-    public void autoPrune(boolean prune) {
+     public void setAutoPrune(boolean prune) {
         m_autoPrune = prune;
         if (m_autoPrune) {
             prunePath();
         }
     }
+
+    public boolean getAutoPrune() {
+        return m_autoPrune;
+    }
+
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -117,6 +123,7 @@ public class DrawView extends View {
     }
     ArrayList<PointfTime> m_pathPoints = new ArrayList<>();
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float touchX = event.getX();
@@ -140,6 +147,7 @@ public class DrawView extends View {
         prunePath();
         return true;
     }
+
 
     public void setOnTouchInfo(TouchInfo touchInfo) {
         m_touchInfo = touchInfo;

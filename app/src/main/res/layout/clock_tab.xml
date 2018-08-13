@@ -32,7 +32,8 @@
         android:layout_marginRight="10dp"
         android:gravity="center|right"
         android:text="Show\nMap"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+         />
 
     <TextView
         android:id="@+id/clockTitle"
@@ -152,7 +153,7 @@
             android:id="@+id/scrollClocks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true">
+            >
 
             <LinearLayout
                 android:orientation="vertical"
@@ -177,7 +178,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:checked="true"
-                        android:stateListAnimator="@anim/press"
+                        android:stateListAnimator="@animator/press"
                         android:text="Has DS" />
 
                     <RadioButton
@@ -185,7 +186,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:stateListAnimator="@anim/press"
+                        android:stateListAnimator="@animator/press"
                         android:text="In DS" />
 
                     <RadioButton
@@ -193,7 +194,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:stateListAnimator="@anim/press"
+                        android:stateListAnimator="@animator/press"
                         android:text="No DS" />
                 </RadioGroup>
 

@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:contentDescription="package details"
+    android:contentDescription="Disk details"
     tools:background="#ccc"
+    android:orientation="vertical"
     >
 
+    <!--
+      android:singleLine="true"
+      -->
     <TextView
+        android:focusable="false"
         android:id="@+id/buildField"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         tools:text="buildField"
-        android:textStyle="bold" />
+        android:fontFamily="monospace"
+        android:scrollHorizontally="true"
+          />
 
     <!-- Have to disable focusable on all elements used inside ExpandableList
     to allow ExpandableList to handle default expand/collapse actions
@@ -30,11 +38,10 @@
         android:textStyle="italic"
         android:ellipsize="middle"
         android:maxLines="2"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@id/buildField"
+        android:layout_gravity="right"
         android:gravity="right"
         android:textIsSelectable="true"
         android:focusable="false"
         tools:text="buildValue"/>
 
-</RelativeLayout>
+</LinearLayout>

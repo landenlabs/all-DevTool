@@ -18,7 +18,7 @@ import com.landenlabs.all_devtool.GlobalInfo;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings("Convert2Lambda")
+@SuppressWarnings({"Convert2Lambda", "UnnecessaryLocalVariable"})
 public class GoogleAnalyticsHelper {
 
     static String GOOGLE_ANALYTICS_KEY = "none";
@@ -77,10 +77,8 @@ public class GoogleAnalyticsHelper {
     private static Tracker getTracker(Activity activity) {
         if (s_tracker == null) {
             s_tracker = getAnalytics(activity).newTracker(GOOGLE_ANALYTICS_KEY);
-            if (s_tracker != null) {
-                s_tracker.enableAutoActivityTracking(true);
-                s_tracker.enableExceptionReporting(true);
-            }
+            s_tracker.enableAutoActivityTracking(true);
+            s_tracker.enableExceptionReporting(true);
         }
         return s_tracker;
     }

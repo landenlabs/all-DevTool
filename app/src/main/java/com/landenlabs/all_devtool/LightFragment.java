@@ -40,7 +40,6 @@ public class LightFragment extends DevFragment
 
     private final LLog m_log = LLog.DBG;
     public static final String s_name = "Light";
-    private View m_rootView;
 
 
     private ToggleButton m_cameraLightTb;
@@ -94,7 +93,7 @@ public class LightFragment extends DevFragment
 
         setHasOptionsMenu(true);
 
-        m_rootView = inflater.inflate(R.layout.light_tab, container, false);
+        View m_rootView = inflater.inflate(R.layout.light_tab, container, false);
 
         m_cameraLightTb =  Ui.viewById(m_rootView, R.id.lightCameraOnTb);
         if (!getContextSafe().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {

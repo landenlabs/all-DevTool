@@ -3,10 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    tools:background="#444"
     android:orientation="vertical">
 
     <FrameLayout
+        tools:background="#448"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -31,14 +32,28 @@
 
     </FrameLayout>
 
-    <FrameLayout
+    <LinearLayout
+        tools:background="#484"
+        android:orientation="horizontal"
         android:id="@id/list_time_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
         tools:visibility="visible">
 
+        <ToggleButton
+            android:visibility="gone"
+            android:id="@+id/list_collapse_tb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/pkg_menu_bar"
+            android:checked="true"
+            android:textOff="Expand"
+            android:textOn="Collapse" />
+
         <EditText
+            android:layout_weight="1"
+            android:labelFor="@id/list_title"
             android:id="@id/list_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +63,8 @@
             android:imeOptions="actionDone"
             android:inputType="textFilter"
             tools:text="Time"
-            tools:visibility="visible" />
+            tools:visibility="visible"
+            tools:ignore="LabelFor" />
 
         <ImageButton
             android:id="@id/list_refresh"
@@ -56,6 +72,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:src="@android:drawable/ic_popup_sync" />
-    </FrameLayout>
+    </LinearLayout>
 
 </LinearLayout>

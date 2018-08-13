@@ -227,10 +227,12 @@ public abstract class IconBaseFragment extends DevFragment {
         @Override
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
-
             TextView imageInfo = Ui.viewById(view, R.id.iconInfo);
-
             IconInfo iconInfo = getItem(position);
+            if (iconInfo == null) {
+                return view;
+            }
+
             Drawable iconD = iconInfo.getDrawable();
             if (iconD != null) {
                 String className = iconD.getClass().getSimpleName();

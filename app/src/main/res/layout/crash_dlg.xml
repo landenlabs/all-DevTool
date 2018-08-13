@@ -8,16 +8,14 @@
     android:padding="10dp">
 
     <TextView
-        android:id="@+id/delete_dlg_title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/text_dlg_title_height"
         android:background="@color/alphaGray"
         android:gravity="center"
-        android:text="Delete Files"
+        android:text="Crash Report"
         android:textSize="@dimen/title_size" />
 
     <ScrollView
-        android:id="@+id/delete_scroll_group"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -28,23 +26,16 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
-                android:id="@+id/delete_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- will be cleared and rebuild -->
                 <TextView
+                    android:id="@+id/crash_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     tools:text="Row1 blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah " />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    tools:text="Row2" />
 
             </LinearLayout>
 
@@ -52,22 +43,23 @@
     </ScrollView>
 
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/delete_cancel_btn"
+            android:id="@+id/crash_cont_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="Continue" />
 
         <Button
-            android:id="@+id/delete_all_btn"
+            android:id="@+id/crash_email_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete" />
+            android:text="Email" />
     </LinearLayout>
 
 </LinearLayout>

@@ -167,7 +167,8 @@
             android:checkMark="?android:attr/listChoiceIndicatorMultiple"
             android:checked="true"
             android:clickable="true"
-            android:text="CkTxt" />
+            android:text="CkTxt"
+            android:focusable="true" />
     </TableRow>
 
     <TableRow
@@ -217,7 +218,7 @@
                 android:ems="10"
                 android:hint="hint"
                 android:id="@+id/editText"
-                android:layout_weight="1" />
+                />
         </LinearLayout>
 
         <ListView

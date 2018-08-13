@@ -4,7 +4,7 @@
 
 
     <group
-        android:title="foo"
+        android:title="Time Format"
         android:id="@+id/clock_fmt"
         android:checkableBehavior="single">
         <item

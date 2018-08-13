@@ -25,6 +25,7 @@ package com.landenlabs.all_devtool;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -65,9 +66,11 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.landenlabs.all_devtool.receivers.GpsReceiver;
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
@@ -533,10 +536,11 @@ public class GpsFragment extends DevFragment implements
         boolean isDupLoc = false;
 
         try {
+            @SuppressLint("MissingPermission")
             Location gpsLoc = m_locMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (gpsLoc != null) {
                 showGPS(gpsLoc);
-                isDupLoc = isDupLoc || isLocDup(location, gpsLoc);
+                isDupLoc = isLocDup(location, gpsLoc);
             }
         } catch (Exception ex) {
             Toast.makeText(this.getActivitySafe(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -684,7 +688,7 @@ public class GpsFragment extends DevFragment implements
                             m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
                     addMsgToDetailRow(s_colorMsg, "GPS request made");
                 } else {
-                    // Disable GPS provider
+                    // Disable GPS provider by setting a very long update cycle.
                     m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                             Long.MAX_VALUE, Long.MAX_VALUE, this);
                 }
@@ -695,15 +699,31 @@ public class GpsFragment extends DevFragment implements
                 // Toast.makeText(getContextSafe(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
             }
         }
+
+        //noinspection ConstantConditions
+        if (false) {
+            FusedLocationProviderClient fusedLocationProviderClient =
+                    LocationServices.getFusedLocationProviderClient(getActivitySafe());
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(getActivitySafe(), new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                showGPS(location);
+                            }
+                        }
+                    });
+        }
     }
 
     protected void stopLocationUpdates() {
         if (isGooglePlayServicesAvailable()
             && m_googleApiClient != null
-            && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+            && (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+            || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED)) {
             LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
         }
     }

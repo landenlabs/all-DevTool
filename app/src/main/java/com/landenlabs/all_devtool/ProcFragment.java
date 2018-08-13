@@ -50,6 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -209,10 +210,14 @@ public class ProcFragment extends DevFragment {
             }
 
             if (true) {
-                ArrayList<String> cpuInfoList = readFile("/proc/cpuinfo", ": ", 2);
-                for (String line : cpuInfoList) {
-                    String[] vals = line.split(": ");
-                    addString(vals[0], vals[1]);
+                ArrayList<ArrayList<String>> cpuInfoLists = readFile("/proc/cpuinfo", "",": ", 2);
+                for (ArrayList<String> cpuInfoList : cpuInfoLists) {
+                    Map<String, String> cpuItems = new HashMap<>();
+                    for (String line : cpuInfoList) {
+                        String[] vals = line.split(": ");
+                        cpuItems.put(vals[0], vals[1]);
+                    }
+                    addMap("CPU " + cpuInfoList.get(0), "", cpuItems);
                 }
             }
 
@@ -235,6 +240,17 @@ public class ProcFragment extends DevFragment {
                         addString(String.format("pkgMem %3d", rowCnt++), line);
                     }
                 }
+            }
+
+            if (false) {
+                // Need android.permission.DUMP which is only allowed to system apps.
+                ArrayList<String> netList = runShellCmd(
+                        new String[] {"dumpsys", "netpolicy"});
+                ArrayList<String> pkgList = runShellCmd(
+                        new String[] {"dumpsys", "package"});
+
+                addString("netpolicy ", " " + netList.size());
+                addString("package ", " " + pkgList.size());
             }
         }
 
@@ -262,14 +278,14 @@ public class ProcFragment extends DevFragment {
     }
 
     @SuppressWarnings("unused")
-    void addMap(String name, Map<String, String> value) {
-        if (!value.isEmpty())
-            m_list.add(new ProcInfo(name, value));
+    void addMap(String name, String value, Map<String, String> map) {
+        m_list.add(new ProcInfo(name, value, map));
     }
 
 
     @SuppressWarnings("SameParameterValue")
-    private static ArrayList<String> readFile(String filename, String splitPat, int  minSplitCnt) {
+    private static ArrayList<ArrayList<String>> readFile(String filename, String sectionPat, String splitPat, int  minSplitCnt) {
+        ArrayList<ArrayList<String>> listOfList = new ArrayList<>();
         ArrayList<String> list = new ArrayList<>();
         try {
             Scanner scan = new Scanner(new File(filename));
@@ -280,7 +296,36 @@ public class ProcFragment extends DevFragment {
                     list.add(line);
                     // map.put(vals[0].trim(), vals[1].trim());
                 }
+                if (line.equals(sectionPat)) {
+                    listOfList.add(list);
+                    list = new ArrayList<>();
+                }
             }
+
+            if (list.size() != 0) {
+                listOfList.add(list);
+            }
+        } catch (Exception e) {
+            Log.e("getCpuInfoMap",Log.getStackTraceString(e));
+        }
+        return listOfList;
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static ArrayList<String> readFile(String filename,  String splitPat, int  minSplitCnt) {
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            Scanner scan = new Scanner(new File(filename));
+            while (scan.hasNextLine()) {
+                String line = scan.nextLine();
+                String[] vals = line.split(splitPat);
+                if (vals.length >= minSplitCnt) {
+                    list.add(line);
+                    // map.put(vals[0].trim(), vals[1].trim());
+                }
+
+            }
+
         } catch (Exception e) {
             Log.e("getCpuInfoMap",Log.getStackTraceString(e));
         }
@@ -308,10 +353,10 @@ public class ProcFragment extends DevFragment {
             m_valueList = null;
         }
 
-        ProcInfo(String str1, Map<String, String> list2) {
-            m_fieldStr = str1;
-            m_valueStr = null;
-            m_valueList = list2;
+        ProcInfo(String str, String value, Map<String, String> list) {
+            m_fieldStr = str;
+            m_valueStr = value;
+            m_valueList = list;
         }
 
         public String toString() {
@@ -361,15 +406,15 @@ public class ProcFragment extends DevFragment {
                  final int childPosition, boolean isLastChild, View convertView,
                  ViewGroup parent) {
 
-            ProcInfo buildInfo = m_list.get(groupPosition);
+            ProcInfo procInfo = m_list.get(groupPosition);
 
             View expandView; // = convertView;
             // if (null == expandView) {
             expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             // }
 
-            String key = (String) buildInfo.valueListStr().keySet().toArray()[childPosition];
-            String val = buildInfo.valueListStr().get(key);
+            String key = (String) procInfo.valueListStr().keySet().toArray()[childPosition];
+            String val = procInfo.valueListStr().get(key);
 
             TextView textView = Ui.viewById(expandView, R.id.buildField);
             textView.setText(key);
@@ -436,7 +481,7 @@ public class ProcFragment extends DevFragment {
         public View getGroupView(int groupPosition, boolean isExpanded,
                                  View convertView, ViewGroup parent) {
 
-            ProcInfo buildInfo = m_list.get(groupPosition);
+            ProcInfo procInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {
@@ -444,15 +489,15 @@ public class ProcFragment extends DevFragment {
             }
 
             TextView textView = Ui.viewById(summaryView, R.id.buildField);
-            textView.setText(buildInfo.fieldStr());
+            textView.setText(procInfo.fieldStr());
             textView.setPadding(10, 0, 0, 0);
 
             textView = Ui.viewById(summaryView, R.id.buildValue);
-            textView.setText(buildInfo.valueStr());
+            textView.setText(procInfo.valueStr());
 
-            String text = buildInfo.fieldStr();
-            if (buildInfo.valueStr() != null) {
-                text += buildInfo.valueStr();
+            String text = procInfo.fieldStr();
+            if (procInfo.valueStr() != null) {
+                text += procInfo.valueStr();
             }
 
 

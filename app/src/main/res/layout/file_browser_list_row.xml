@@ -13,7 +13,7 @@
         android:adjustViewBounds="true"
         android:maxHeight="48dp"
         android:maxWidth="64dp"
-        android:text="123"
+        tools:text="123"
         android:background="@drawable/folder" />
 
     <!--  -->
@@ -42,7 +42,7 @@
         android:textColor="@android:color/black"
         android:textStyle="bold"
         tools:text="filename"
-        android:text="filename"/>
+        />
 
     <TextView
         android:id="@+id/fb_size"

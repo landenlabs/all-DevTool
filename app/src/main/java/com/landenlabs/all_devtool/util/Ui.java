@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.MailTo;
 import android.net.Uri;
+import android.support.annotation.FloatRange;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -250,5 +251,24 @@ public class Ui {
         }
 
         return sb;
+    }
+
+
+    /**
+     * Blends to colors according to target percent1.
+     *
+     * @param color1 first color to blend
+     * @param color2 second color to blend
+     * @param percent1  percent of color1
+     *
+     * @return blended color = (color1 * percent1) + (color2 * (1-percent1)
+     */
+    public static int blendColors(int color1, int color2, @FloatRange(from = 0, to = 1) float percent1) {
+        float percent2 = (1f - percent1);
+        float a = (Color.alpha(color1) * percent1) + (Color.alpha(color2) * percent2);
+        float r = (Color.red(color1) * percent1) + (Color.red(color2) * percent2);
+        float g = (Color.green(color1) * percent1) + (Color.green(color2) * percent2);
+        float b = (Color.blue(color1) * percent1) + (Color.blue(color2) * percent2);
+        return Color.argb((int) a, (int) r, (int) g, (int) b);
     }
 }

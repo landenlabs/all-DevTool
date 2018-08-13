@@ -77,7 +77,6 @@
         android:id="@+id/lightCameraSB"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/lightCameraOnTb"
         android:background="#880"
         android:max="100"
         android:progress="50" />
@@ -125,7 +124,6 @@
             android:id="@+id/screenBrightnessSB"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/lightCameraOnTb"
             android:background="#880"
             android:max="100"
             android:progress="50" />

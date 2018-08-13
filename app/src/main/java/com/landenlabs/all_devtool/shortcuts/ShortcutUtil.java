@@ -34,6 +34,7 @@ public class ShortcutUtil {
         updateShortcut(makeIt, ScreenFragment.s_name, "DS Screen", R.drawable.shortcut_scn);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void makeShortcuts() {
         boolean makeIt = true;
         ShortcutUtil.updateShortcutFileBrowser(makeIt);
@@ -42,6 +43,7 @@ public class ShortcutUtil {
         ShortcutUtil.updateShortcutScreen(makeIt);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void removeShortcuts() {
         boolean makeIt = false;
         ShortcutUtil.updateShortcutFileBrowser(makeIt);

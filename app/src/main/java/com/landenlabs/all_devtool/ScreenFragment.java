@@ -192,12 +192,13 @@ public class ScreenFragment extends DevFragment {
         switch (id) {
             case R.id.screen_clear_menu:
                 m_drawPoints.clear();
+                m_drawPoints.invalidate();
                 break;
             case R.id.screen_freeze_menu:
-                m_drawPoints.autoPrune(false);
+                m_drawPoints.setAutoPrune(false);
                 break;
             case R.id.screen_prune_menu:
-                m_drawPoints.autoPrune(true);
+                m_drawPoints.setAutoPrune(true);
                 break;
 
             default:
@@ -217,6 +218,8 @@ public class ScreenFragment extends DevFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.screen_menu, menu.addSubMenu("Screen Options"));
+
+        menu.findItem(R.id.screen_prune_menu).setChecked(m_drawPoints.getAutoPrune());
     }
 
     // ============================================================================================
@@ -251,8 +254,10 @@ public class ScreenFragment extends DevFragment {
             densityStr = "x-High";
         else if (m_displayMetrics.densityDpi <= DisplayMetrics.DENSITY_XXHIGH)
             densityStr = "xx-High";
-        else if (m_displayMetrics.densityDpi > DisplayMetrics.DENSITY_XXHIGH)
+        else if (m_displayMetrics.densityDpi <= DisplayMetrics.DENSITY_XXXHIGH)
             densityStr = "xxx-High";
+        else
+            densityStr = "xxxx-High";
 
         screenDensityText.setText(String.format("Density %s(%d) px/dp=%.2f",
                 densityStr, m_displayMetrics.densityDpi, m_displayMetrics.density));

@@ -34,6 +34,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -119,7 +120,37 @@ public abstract class NumBaseFragment extends DevFragment {
                 m_list);
         m_listView.setAdapter(adapter);
 
+        m_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getContextSafe(), String.format("Item click pos=%d", position),
+                        Toast.LENGTH_LONG).show();
+                m_list.get(position).m_selected = !m_list.get(position).m_selected;
+                m_listView.invalidateViews();
+            }
+        });
+        m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                    long id) {
+                Toast.makeText(getContextSafe(), String.format("Item LONG click pos=%d", position), Toast.LENGTH_LONG).show();
+                m_list.get(position).m_zoom = !m_list.get(position).m_zoom;
+                m_listView.invalidateViews();
+                return false;
+            }
+        });
+
         return rootView;
+    }
+
+    private boolean setTextSizePx(float textSizePx, TextView ... textViews) {
+        boolean changed = false;
+        for (TextView textView : textViews) {
+            float oldSizePx = textView.getTextSize();
+            changed |= (textSizePx != oldSizePx);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizePx);
+        }
+        return changed;
     }
 
     // ============================================================================================
@@ -182,6 +213,8 @@ public abstract class NumBaseFragment extends DevFragment {
         final String m_fieldStr;
         final String m_value;
         final String m_fieldType;
+        boolean m_selected = false;
+        boolean m_zoom = false;
 
         NumInfo(String str1, String value, String fieldType) {
             m_fieldStr = str1;
@@ -208,6 +241,8 @@ public abstract class NumBaseFragment extends DevFragment {
 
     private class NumArrayAdapter extends ArrayAdapter<NumInfo> {
 
+        float defSizePx = 0;
+        int defHeight = 0;
         NumArrayAdapter(Context context, int rowLayoutId,
                                int textViewResourceId, List<NumInfo> objects) {
             super(context, rowLayoutId, textViewResourceId, objects);
@@ -218,19 +253,46 @@ public abstract class NumBaseFragment extends DevFragment {
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
             NumInfo numInfo = getItem(position);
+            if (numInfo == null) {
+                return view;
+            }
 
-            TextView textView = Ui.viewById(view, R.id.numValue);
-            textView.setText(numInfo.getValue());
+            TextView numField = Ui.viewById(view, R.id.numField);
+            TextView numValue = Ui.viewById(view, R.id.numValue);
+            numValue.setText(numInfo.getValue());
 
-            textView = Ui.viewById(view, R.id.numType);
-            textView.setText(numInfo.getType());
+            TextView numType = Ui.viewById(view, R.id.numType);
+            numType.setText(numInfo.getType());
 
+            int color = ((position & 1) == 1) ? m_backgroundColor : m_alternateColor;
 
-            if ((position & 1) == 1)
-                view.setBackgroundColor(m_backgroundColor);
-            else
-                view.setBackgroundColor(m_alternateColor);
+            if (numInfo.m_selected) {
+                color = Ui.blendColors(0xff00ff00, color, 0.2f);
+            }
+            view.setBackgroundColor(color);
 
+            if (defHeight == 0) {
+                defHeight = view.getMeasuredHeight();
+            }
+            if (defSizePx == 0 && defHeight != 0) {
+                defSizePx = numField.getTextSize();
+            }
+
+            if (false) {
+                ViewGroup.LayoutParams lp = view.getLayoutParams();
+                lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                if (numInfo.m_zoom && defHeight != 0) {
+                    lp.height = Math.round(defHeight * 1.5f);
+                }
+                view.setLayoutParams(lp);
+            }
+
+            if (defSizePx > 0) {
+                float textSizePx = numInfo.m_zoom ? (defSizePx * 1.5f) : defSizePx;
+                if (setTextSizePx(textSizePx, numField, numType, numValue)) {
+                    view.requestLayout();
+                }
+            }
             return view;
         }
     }

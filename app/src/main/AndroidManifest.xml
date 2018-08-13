@@ -23,15 +23,16 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
-    <!--
+    <!-- System will prompt for permission -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+
+    <!--  System apps only.
     <uses-permission android:name="android.permission.DUMP" />
     -->
 
     <!-- wake-up -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!-- Uninstaller -->
-    <uses-permission android:name="android.permission.GET_TASKS"/>
 
     <!-- Add shortcuts to app -->
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
@@ -45,10 +46,11 @@
     <application
         android:allowClearUserData="true"
         android:description="@string/app_description"
-        android:icon="@drawable/dev_tool"
+        android:icon="@mipmap/all_devtool"
         android:roundIcon="@mipmap/all_devtool_round"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
+        android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor">
 
         <meta-data android:name="com.google.android.gms.version"

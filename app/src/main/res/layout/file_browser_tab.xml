@@ -15,7 +15,8 @@
         android:id="@+id/fb_menu_bar"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -62,7 +63,6 @@
                 android:id="@+id/fb_sort_spinner"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
                 android:layout_weight="1"
                 android:entries="@array/fb_sort_array" />
         </LinearLayout>
@@ -104,10 +104,11 @@
         android:paddingRight="10dp"
         android:id="@+id/fb_dirBarScroll"
         android:layout_below="@id/fb_plus_minus_toggle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:orientation="horizontal"
             android:id="@+id/fb_dirBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

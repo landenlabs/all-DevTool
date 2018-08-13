@@ -13,6 +13,8 @@ import com.landenlabs.all_devtool.util.LLog;
 
 /**
  * Created by Dennis Lang on 2/27/2015.
+ *
+ * Look into: android.app.job.JobScheduler
  */
 public class AlarmReceiver extends WakefulBroadcastReceiver {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On to always log.

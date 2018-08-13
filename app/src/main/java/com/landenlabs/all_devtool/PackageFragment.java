@@ -238,7 +238,10 @@ public class PackageFragment extends DevFragment
                                             if (pkgItem1 == null || pkgItem2 == null) {
                                                 return pkgItem1 == null ? -1 : 1;
                                             }
-                                            return Long.compare(pkgItem1.m_pkgSize, pkgItem2.m_pkgSize);
+                                            // Largest first
+                                            return Long.compare(
+                                                    pkgItem2.m_pkgSize,
+                                                    pkgItem1.m_pkgSize);
                                         }
                                     });
                                     break;
@@ -253,8 +256,10 @@ public class PackageFragment extends DevFragment
                                             } else if (pkgItem1 == null || pkgItem2 == null) {
                                                 result = pkgItem1 == null ? -1 : 1;
                                             } else {
-                                                result = Long.compare(pkgItem1.m_packInfo.lastUpdateTime,
-                                                        pkgItem2.m_packInfo.lastUpdateTime);
+                                                // Newest first
+                                                result = Long.compare(
+                                                        pkgItem2.m_packInfo.lastUpdateTime,
+                                                        pkgItem1.m_packInfo.lastUpdateTime);
                                             }
                                             return result;
                                         }
@@ -272,9 +277,10 @@ public class PackageFragment extends DevFragment
                                                 result = pkgItem1 == null ? -1 : 1;
                                             }
                                             else {
+                                                // Newest first
                                                 result = Long.compare(
-                                                        pkgItem1.m_packInfo.firstInstallTime,
-                                                        pkgItem2.m_packInfo.lastUpdateTime);
+                                                        pkgItem2.m_packInfo.firstInstallTime,
+                                                        pkgItem1.m_packInfo.firstInstallTime);
                                             }
                                             return result;
                                         }
@@ -335,7 +341,7 @@ public class PackageFragment extends DevFragment
         */
 
         // Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "Test")
                 .setSmallIcon(R.drawable.shortcut_pkg)
                 .setContentTitle("Uninstalled")
                 .setContentText(message)

@@ -308,7 +308,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
          * On swiping the viewpager sets respective tab selected.
          */
         if (m_actionBar != null) {
-            m_viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            // TODO - need to remove this listener in detach
+            m_viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            // m_viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
                 @Override
                 public void onPageSelected(int position) {

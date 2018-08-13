@@ -30,7 +30,7 @@ import java.util.ArrayList;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings({"Convert2Lambda", "BooleanMethodIsAlwaysInverted"})
+@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "Convert2Lambda"})
 public class UninstallDialog extends DialogFragment {
     private final LLog mLog = LLog.DBG;
 

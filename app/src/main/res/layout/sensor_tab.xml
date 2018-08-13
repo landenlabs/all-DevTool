@@ -42,13 +42,11 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_margin="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="10px"
-        android:layout_marginLeft="10px"
-        android:layout_marginRight="10px"
-
+        app:marginLeft="10dp"
+        app:marginRight="10dp"
+        app:marginTop="10dp"
+        app:marginBottom="10dp"
         app:gridBackgroundColor="#000"
-
         app:domainTitle="Domain"
         app:domainTitleTextSize="16sp"
         app:domainStepMode="subdivide"
