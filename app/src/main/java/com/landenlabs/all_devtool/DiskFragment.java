@@ -26,6 +26,7 @@ package com.landenlabs.all_devtool;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -76,6 +77,9 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 @SuppressWarnings("Convert2Lambda")
 public class DiskFragment extends DevFragment {
 
+    final static int SUMMARY_LAYOUT = R.layout.disk_list_row;
+    public static String s_name = "Disk";
+    private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
     final ArrayList<GroupInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
@@ -83,7 +87,6 @@ public class DiskFragment extends DevFragment {
     CheckBox m_diskUsageCb;
     CheckBox m_fileSystemCb;
     CheckBox m_diskStatsCb;
-
     Map<String, String> m_javaDirList;
     Map<String, String> m_duList;
     Map<String, String> m_lsList;
@@ -92,13 +95,12 @@ public class DiskFragment extends DevFragment {
     Map<String, String> m_duStorageList;
     Map<String, String> m_duSdcardList;
     Map<String, String> m_dfList;
-
     // Map<String, String> m_diskDumpStats;
     ArrayList<String> m_diskProcStats;
-    
-    private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
+    FileBrowseDialog m_fileOpenDialog;
 
-    public static String s_name = "Disk";
+    // ============================================================================================
+    // DevFragment methods
 
     public DiskFragment() {
     }
@@ -107,8 +109,73 @@ public class DiskFragment extends DevFragment {
         return new DiskFragment();
     }
 
+    public static String expandTabs(String str, int tabSize) {
+        if (str == null)
+            return null;
+        StringBuilder buf = new StringBuilder(str.length() + tabSize);
+        int col = 0;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            switch (c) {
+                case '\n':
+                    col = 0;
+                    buf.append(c);
+                    break;
+                case '\t':
+                    buf.append(spaces(tabSize - col % tabSize));
+                    col += tabSize - col % tabSize;
+                    break;
+                default:
+                    col++;
+                    buf.append(c);
+                    break;
+            }
+        }
+        return buf.toString();
+    }
+
     // ============================================================================================
-    // DevFragment methods
+    // Fragment methods
+
+    public static StringBuilder spaces(int n) {
+        StringBuilder buf = new StringBuilder(n);
+        for (int sp = 0; sp < n; sp++)
+            buf.append(" ");
+        return buf;
+    }
+
+    /**
+     * @param diskFileName example /proc/cpuinfo
+     * @param splitPat     Ex  " " or ": "
+     * @param splitMinCnt  Ex 1
+     */
+    @SuppressWarnings("SameParameterValue")
+    private static ArrayList<String> readFile(String diskFileName, String splitPat,
+            int splitMinCnt) {
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            Scanner scan = new Scanner(new File(diskFileName));
+            while (scan.hasNextLine()) {
+                String line = scan.nextLine();
+                String[] vals = line.split(splitPat);
+                if (vals.length > splitMinCnt) {
+                    list.add(line);
+                    // map.put(vals[0].trim(), vals[1].trim());
+                }
+            }
+        } catch (Exception ex) {
+            list.add("Failed " + ex.getMessage());
+            Log.e("readFile", ex.getMessage());
+
+            // File inFile = new File(diskFileName);
+            // boolean canRead = inFile.canRead();
+        }
+
+        return list;
+    }
+
+    // ============================================================================================
+    // Permission
 
     @Override
     public String getName() {
@@ -124,9 +191,6 @@ public class DiskFragment extends DevFragment {
     public List<String> getListAsCsv() {
         return Utils.getListViewAsCSV(m_listView);
     }
-
-    // ============================================================================================
-    // Fragment methods
 
     @SuppressWarnings("deprecation")
     @Override
@@ -156,7 +220,8 @@ public class DiskFragment extends DevFragment {
                     grantWritePermission();
                     updateList(true);
                 } else {
-                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Intent intent = new Intent(
+                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
                     startActivity(intent);
                 }
@@ -185,30 +250,46 @@ public class DiskFragment extends DevFragment {
         m_diskStatsCb = Ui.viewById(rootView, R.id.diskStatsCb);
         m_diskStatsCb.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                updateList(true);
+            public void onClick(View view) {
+
+                if (Build.VERSION.SDK_INT > 19) {
+                    AppOpsManager appOps = (AppOpsManager) getContextSafe()
+                            .getSystemService(Context.APP_OPS_SERVICE);
+                    int mode = appOps.checkOpNoThrow("android:get_usage_stats",
+                            android.os.Process.myUid(), getContextSafe().getPackageName());
+                    boolean granted = (mode == AppOpsManager.MODE_ALLOWED);
+                    if (!granted)
+                        Toast.makeText(getContextSafe(), "Don't have Usage Stat Access",
+                            Toast.LENGTH_LONG).show();
+                }
+
+                // CheckPermissions calls updateList if permission granted.
+                checkPermissions(Manifest.permission.PACKAGE_USAGE_STATS, Manifest.permission.READ_EXTERNAL_STORAGE);
+                // updateList(true);
             }
         });
 
         m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                    long id) {
                 if (view == null)
                     return false;
 
                 final TextView field = Ui.viewById(view, R.id.buildField);
                 final TextView value = Ui.viewById(view, R.id.buildValue);
                 if (field != null && value != null) {
-                    Button btn = Ui.ShowMessage(DiskFragment.this.getActivitySafe(), field.getText() + "\n" + value.getText()).getButton(
+                    Button btn = Ui.ShowMessage(DiskFragment.this.getActivitySafe(),
+                            field.getText() + "\n" + value.getText()).getButton(
                             AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 String str =
-                                 (field.getText().length() > value.getText().length())
-                                        ? field.getText().toString()
-                                         : value.getText().toString();
+                                        (field.getText().length() > value.getText().length())
+                                                ? field.getText().toString()
+                                                : value.getText().toString();
 
                                 String[] parts = str.split("[ \t]");
                                 if (parts.length == 2) {
@@ -241,6 +322,9 @@ public class DiskFragment extends DevFragment {
         return rootView;
     }
 
+    // ============================================================================================
+    // Internal methods
+
     // Coming into forground - update list.
     @Override
     public void onResume() {
@@ -248,39 +332,42 @@ public class DiskFragment extends DevFragment {
         updateList(false);
     }
 
-    // ============================================================================================
-    // Permission
-
     private boolean hasWritePermission() {
         return Build.VERSION.SDK_INT < 23 || getContextSafe().checkSelfPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
+
     private void grantWritePermission() {
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         // checkPermissions(Manifest.permission.DUMP);
     }
 
+
     @Override
-    protected boolean checkPermissions(String... needPermissions) {
-        boolean okay = true;
+    protected boolean checkPermissions(String ... needPermissions) {
+        boolean havePermissions = true;
         if (Build.VERSION.SDK_INT >= 23) {
-            if (getContextSafe().checkSelfPermission(needPermissions[0]) != PackageManager.PERMISSION_GRANTED) {
-                okay = false;
-                m_writeGrantedCb.setChecked(false);
-            //    m_writeGrantedCb.setText("Grant Write [Failed]");
-                requestPermissions(new String[]{ needPermissions[0] }, MY_PERMISSIONS_REQUEST);
-            } else {
-            //    m_writeGrantedCb.setText("Grant Write");
-                m_writeGrantedCb.setChecked(true);
+            for (String needPermission : needPermissions) {
+                boolean gotThisPermission = getContextSafe()
+                        .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED;
+                havePermissions &= gotThisPermission;
+                if (needPermission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    m_writeGrantedCb.setChecked(gotThisPermission);
+                }
+            }
+            if (havePermissions) {
                 updateList(true);
+            } else {
+                requestPermissions(needPermissions, MY_PERMISSIONS_REQUEST);
             }
         }
 
-        return okay;
+        return havePermissions;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+            @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -295,9 +382,6 @@ public class DiskFragment extends DevFragment {
         }
     }
 
-    // ============================================================================================
-    // Internal methods
-
     /**
      * Populate list with 'Disk' information.
      */
@@ -306,7 +390,7 @@ public class DiskFragment extends DevFragment {
     void updateList(boolean force) {
         // if (!m_list.isEmpty() && !force)
         //     return;
-        
+
         // Time today = new Time(Time.getCurrentTimezone());
         // today.setToNow();
         // today.format(" %H:%M:%S")
@@ -326,7 +410,8 @@ public class DiskFragment extends DevFragment {
                 }
                 try {
                     //noinspection deprecation
-                    addFile("getDir(null)", getContextSafe().getDir(null, Context.MODE_WORLD_READABLE));
+                    addFile("getDir(null)",
+                            getContextSafe().getDir(null, Context.MODE_WORLD_READABLE));
                 } catch (Exception ignored) {
                 }
                 try {
@@ -344,7 +429,8 @@ public class DiskFragment extends DevFragment {
                         String FILENAME = "test.txt";
                         String string = "hello world!";
 
-                        FileOutputStream fos = getContextSafe().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+                        FileOutputStream fos =
+                                getContextSafe().openFileOutput(FILENAME, Context.MODE_PRIVATE);
                         fos.write(string.getBytes());
                         addString("openFileOutput", fos.toString());
                         fos.close();
@@ -353,7 +439,7 @@ public class DiskFragment extends DevFragment {
                 }
 
                 addString("External State", Environment.getExternalStorageState());
-                
+
                 try {
                     addFile("getExternalCacheDir", getActivitySafe().getExternalCacheDir());
                 } catch (Exception ignored) {
@@ -366,8 +452,10 @@ public class DiskFragment extends DevFragment {
                 }
 
                 addFile("getExternalStorageDirectory", Environment.getExternalStorageDirectory());
-                m_javaDirList.put("isExternalStorageEmulated", (Environment.isExternalStorageEmulated() ? "yes" : "no"));
-                m_javaDirList.put("isExternalStorageRemovable", (Environment.isExternalStorageRemovable() ? "yes" : "no"));
+                m_javaDirList.put("isExternalStorageEmulated",
+                        (Environment.isExternalStorageEmulated() ? "yes" : "no"));
+                m_javaDirList.put("isExternalStorageRemovable",
+                        (Environment.isExternalStorageRemovable() ? "yes" : "no"));
                 addFile("external downloads", Environment.getExternalStoragePublicDirectory(
                         DIRECTORY_DOWNLOADS));
                 addFile("getRootDirectory", Environment.getRootDirectory());
@@ -386,20 +474,14 @@ public class DiskFragment extends DevFragment {
                 addString("ls -l", m_lsList);
             }
             if (false) {
-                m_duList = getFileList(new String[] {"du", "-ks", "/"}, "[^ ]+ ([^:]+).*", "$1", ".*/(proc|acct|dev)/.*");
+                m_duList = getFileList(new String[]{"du", "-ks", "/"}, "[^ ]+ ([^:]+).*", "$1",
+                        ".*/(proc|acct|dev)/.*");
                 addString("du -ks /", m_duList);
             }
 
-            if (m_fileSystemCb.isChecked()) {
-                m_dfList = getShellCmd(new String[] { "df" });
-                addString("df", m_dfList);
-
-                m_mntList = getShellCmd(new String[] {"mount"});
-                addString("mount", m_mntList);
-            }
 
             if (m_diskUsageCb.isChecked()) {
-                m_duStorageList = getShellCmd(new String[]{"ls", "-l",  "/storage"});
+                m_duStorageList = getShellCmd(new String[]{"ls", "-l", "/storage"});
                 addString("ls -l /storage", m_duStorageList);
                 m_duStorageList = getShellCmd(new String[]{"du", "-chHLd", "2", "/storage"});
                 addString("du -chHLd 2 /storage", m_duStorageList);
@@ -410,16 +492,37 @@ public class DiskFragment extends DevFragment {
                 addString("du -chHLs /mnt", m_duMntList);
 
                 String sdCard = Environment.getExternalStorageDirectory().getPath();
-                m_duSdcardList = getShellCmd(new String[] { "ls", "-l", sdCard });
+                m_duSdcardList = getShellCmd(new String[]{"ls", "-l", sdCard});
                 addString("ls -l " + sdCard, m_duSdcardList);
-                m_duSdcardList = getShellCmd(new String[] { "du", "-chHL", sdCard });
+                m_duSdcardList = getShellCmd(new String[]{"du", "-chHL", sdCard});
                 // m_duSdcardList = getShellCmd(new String[] { "du", "-chHL", "/sdcard/" });
                 addString("du -chHL /sdcard", m_duSdcardList);
             }
 
+            if (m_fileSystemCb.isChecked()) {
+                m_dfList = getShellCmd(new String[]{"df"});
+                addString("df", m_dfList);
+
+                m_mntList = getShellCmd(new String[]{"mount"});
+                addString("mount", m_mntList);
+            }
+
+
             if (m_diskStatsCb.isChecked()) {
                 // m_diskDumpStats = getShellCmd(new String[]{"dumpsys", "diskstats"});
                 // addString("dumpsys diskstats", m_diskDumpStats);
+
+                /*
+                    // Readable on Oreo
+                    m_diskProcStats = readFile("/proc/cpuinfo", " ", 1);
+                    m_diskProcStats = readFile("/proc/meminfo", " ", 1);
+
+                    // Not readavble
+                    m_diskProcStats = readFile("/proc/devices", " ", 1);
+                    m_diskProcStats = readFile("/proc/filesystems", " ", 1);
+                */
+
+                // Oreo does not allow access
                 m_diskProcStats = readFile("/proc/diskstats", " ", 1);
                 Map<String, String> diskProcStatsMap = new LinkedHashMap<>();
                 int rowCnt = 0;
@@ -451,8 +554,9 @@ public class DiskFragment extends DevFragment {
         */
 
         if (firstTime ||
-                !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
-            final DiskFragment.DiskArrayAdapter adapter = new DiskFragment.DiskArrayAdapter(this.getActivitySafe());
+                !(m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter)) {
+            final DiskFragment.DiskArrayAdapter adapter =
+                    new DiskFragment.DiskArrayAdapter(this.getActivitySafe());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -461,12 +565,11 @@ public class DiskFragment extends DevFragment {
         }
 
         // m_listView.invalidate();
-        if (m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter ) {
+        if (m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter) {
             ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter())
                     .notifyDataSetChanged();
         }
     }
-
 
     @SuppressWarnings("OctalInteger")
     @SuppressLint({"SetWorldReadable", "SetWorldWritable"})
@@ -495,7 +598,7 @@ public class DiskFragment extends DevFragment {
                     x = isBit(world, 0001) ? 'X' : x;
                 }
 
-                String rwStr = String.format("[%c%c%c] ", r,w, x);
+                String rwStr = String.format("[%c%c%c] ", r, w, x);
                 m_javaDirList.put(name, rwStr + file.getAbsolutePath());
             } catch (VerifyError ex) {
                 m_javaDirList.put(name, ex.getMessage() + " " + file.getAbsolutePath());
@@ -503,16 +606,19 @@ public class DiskFragment extends DevFragment {
         }
     }
 
-
     void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
             m_list.add(new GroupInfo(name, value.trim()));
     }
 
     void addString(String name, Map<String, String> value) {
-        if (!value.isEmpty())
+        if (!value.isEmpty()) {
             m_list.add(new GroupInfo(name, value));
+            m_listView.expandGroup(m_list.size());
+        }
     }
+
+    // =============================================================================================
 
     private Map<String, String> getShellCmd(String[] shellCmd) {
         Map<String, String> mapList = new LinkedHashMap<>();
@@ -529,40 +635,12 @@ public class DiskFragment extends DevFragment {
         return mapList;
     }
 
-    public static String expandTabs(String str, int tabSize) {
-        if (str == null)
-            return null;
-        StringBuilder buf = new StringBuilder(str.length()+tabSize);
-        int col = 0;
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            switch (c) {
-                case '\n' :
-                    col = 0;
-                    buf.append(c);
-                    break;
-                case '\t' :
-                    buf.append(spaces(tabSize - col % tabSize));
-                    col += tabSize - col % tabSize;
-                    break;
-                default :
-                    col++;
-                    buf.append(c);
-                    break;
-            }
-        }
-        return buf.toString();
-    }
 
-    public static StringBuilder spaces(int n) {
-        StringBuilder buf = new StringBuilder(n);
-        for (int sp = 0; sp < n; sp++)
-            buf.append(" ");
-        return buf;
-    }
+    // =============================================================================================
 
     @SuppressWarnings("SameParameterValue")
-    private Map<String, String> getFileList(String[] shellCmd, String regStr, String repStr, String excPat) {
+    private Map<String, String> getFileList(String[] shellCmd, String regStr, String repStr,
+            String excPat) {
         Map<String, String> mapList = new LinkedHashMap<>();
         ArrayList<String> responseList = runShellCmd(shellCmd);
         for (String line : responseList) {
@@ -581,34 +659,45 @@ public class DiskFragment extends DevFragment {
         return mapList;
     }
 
-
-
-    /**
-     *
-     * @param diskFileName example /proc/cpuinfo
-     * @param splitPat Ex  " " or ": "
-     * @param splitMinCnt   Ex 1
-     */
-    @SuppressWarnings("SameParameterValue")
-    private static ArrayList<String> readFile(String diskFileName, String splitPat, int splitMinCnt) {
-        ArrayList<String> list = new ArrayList<>();
+    void fireIntentOn(String value) {
         try {
-            Scanner scan = new Scanner(new File(diskFileName));
-            while (scan.hasNextLine()) {
-                String line = scan.nextLine();
-                String[] vals = line.split(splitPat);
-                if (vals.length > splitMinCnt) {
-                    list.add(line);
-                    // map.put(vals[0].trim(), vals[1].trim());
-                }
+            File root = new File(value);
+            if (root.exists()) {
+                /*
+                Uri uri = Uri.fromFile(root);
+                Intent intent = new Intent();
+                intent.setAction(android.content.Intent.ACTION_VIEW);
+                // intent.setAction(android.content.Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                // intent.setDataAndType(uri, "file/*");
+                // intent.setDataAndType(uri, "directory/*");
+                // intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+                intent.setData(uri);
+                // startActivityForResult(intent, 1);
+                startActivity(intent);
+
+                // intent.setAction(android.content.Intent.ACTION_GET_CONTENT);
+                // intent.setDataAndType(uri, "*");
+                // startActivity(Intent.createChooser(intent, "Open folder"));
+
+                */
+                m_fileOpenDialog = new FileBrowseDialog(this.getActivitySafe(), "Browse",
+                        this.getActivitySafe().getWindow().getDecorView().getHeight(), null);
+
+                m_fileOpenDialog.DefaultFileName = root.getPath();
+                m_fileOpenDialog.choose(root.getPath());
+            } else {
+                ArrayList<String> responseList = runShellCmd(new String[]{"ls", "-l", value});
+                Toast.makeText(getActivitySafe(), TextUtils.join("\n", responseList),
+                        Toast.LENGTH_LONG).show();
             }
-        } catch (Exception e) {
-            Log.e("readFile",Log.getStackTraceString(e));}
-        return list;
+        } catch (Exception ex) {
+            Toast.makeText(getActivitySafe(), ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     // =============================================================================================
-
+    // TODO move thsi into common code and share with PackageFragment (and others)
 
     @SuppressWarnings("unused")
     class GroupInfo {
@@ -653,11 +742,6 @@ public class DiskFragment extends DevFragment {
             return (m_valueList == null) ? 0 : m_valueList.size();
         }
     }
-
-
-    // =============================================================================================
-
-    final static int SUMMARY_LAYOUT = R.layout.disk_list_row;
 
     /**
      * ExpandableLis UI 'data model' class
@@ -772,46 +856,6 @@ public class DiskFragment extends DevFragment {
         @Override
         public boolean isChildSelectable(int groupPosition, int childPosition) {
             return true;
-        }
-    }
-
-    // =============================================================================================
-    // TODO move thsi into common code and share with PackageFragment (and others)
-
-    FileBrowseDialog m_fileOpenDialog;
-    void fireIntentOn(String value) {
-        try {
-            File root = new File(value);
-            if (root.exists()) {
-                /*
-                Uri uri = Uri.fromFile(root);
-                Intent intent = new Intent();
-                intent.setAction(android.content.Intent.ACTION_VIEW);
-                // intent.setAction(android.content.Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                // intent.setDataAndType(uri, "file/*");
-                // intent.setDataAndType(uri, "directory/*");
-                // intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-                intent.setData(uri);
-                // startActivityForResult(intent, 1);
-                startActivity(intent);
-
-                // intent.setAction(android.content.Intent.ACTION_GET_CONTENT);
-                // intent.setDataAndType(uri, "*");
-                // startActivity(Intent.createChooser(intent, "Open folder"));
-
-                */
-                m_fileOpenDialog = new FileBrowseDialog(this.getActivitySafe(), "Browse",
-                        this.getActivitySafe().getWindow().getDecorView().getHeight(),null);
-
-                m_fileOpenDialog.DefaultFileName = root.getPath();
-                m_fileOpenDialog.choose(root.getPath());
-            } else {
-                ArrayList<String> responseList = runShellCmd(new String[]{"ls", "-l", value });
-                Toast.makeText(getActivitySafe(), TextUtils.join("\n", responseList), Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception ex) {
-            Toast.makeText(getActivitySafe(), ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

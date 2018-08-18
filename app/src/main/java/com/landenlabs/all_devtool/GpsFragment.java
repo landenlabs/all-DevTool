@@ -797,7 +797,6 @@ public class GpsFragment extends DevFragment implements
         }
     }
 
-
     @SuppressWarnings("UnusedReturnValue")
     private int addLocToDetailRow(LocInfo locInfo) {
        

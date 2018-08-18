@@ -5,6 +5,12 @@ File javaDocDstDir = file('../javadoc')
 android {
     signingConfigs {
         release
+        config {
+            keyAlias 'all_devtool'
+            keyPassword 'Salem2nh-k'
+            storeFile file('/Users/ldennis/Dropbox/android/keystores/all_devtool.jks')
+            storePassword 'Salem2nh-d'
+        }
     }
     compileSdkVersion 27
 
@@ -39,11 +45,11 @@ android {
             debuggable false
             jniDebuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            /*
+
             applicationVariants.all { variant ->
                 appendVersionNameVersionCode(variant, defaultConfig)
             }
-            */
+
 
             signingConfig signingConfigs.release
         }
@@ -103,15 +109,13 @@ ext {
 dependencies {
     implementation "com.android.support:support-v4:$supportLibVersion"
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
-
     // Standard flavor
     standardImplementation "com.google.android.gms:play-services-ads-identifier:15.0.1"
     standardImplementation "com.google.android.gms:play-services-gcm:15.0.1"
-    standardImplementation "com.google.android.gms:play-services-auth:15.0.1"
+    standardImplementation "com.google.android.gms:play-services-auth:16.0.0"
     standardImplementation "com.google.android.gms:play-services-analytics:16.0.1"
     standardImplementation "com.google.android.gms:play-services-location:15.0.1"
     standardImplementation "com.google.android.gms:play-services-drive:15.0.1"
-
     // Legacy flavor
     legacyImplementation "com.google.android.gms:play-services-ads-identifier:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-gcm:$legacyPlayServiceVersion"
@@ -119,25 +123,22 @@ dependencies {
     legacyImplementation "com.google.android.gms:play-services-analytics:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-location:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-drive:$legacyPlayServiceVersion"
-
     // Firebase
     standardImplementation "com.google.firebase:firebase-core:16.0.1"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
-
     // HockeyApp crash reporting
     implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
-
     // 3rdparty libraries
     // Memory leaks tool - see main activity to see LeakCanary.install(this.getApplication());
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
     //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
-
     implementation 'com.androidplot:androidplot-core:1.5.4'
     implementation 'net.danlew:android.joda:2.9.9.2'
 }
 
-/*
+
 def appendVersionNameVersionCode(variant, defaultConfig) {
+    /*
     variant.outputs.each { output ->
         def file = output.packageApplication.outputFile
         def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
@@ -145,14 +146,20 @@ def appendVersionNameVersionCode(variant, defaultConfig) {
         fileName = fileName.replace("app-", "$ourname-")
         output.packageApplication.outputFile = new File(file.parent, fileName)
     }
+    */
+    variant.outputs.all { output ->
+        def ourname = project.parent.name
+        outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
+        println "out name= $outputFileName"
+    }
 }
-*/
+
 
 // Rename app
 android.applicationVariants.all { variant ->
     variant.outputs.all {
         def ourname = project.parent.name
-        outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
+        // outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
         println "out name= $outputFileName"
     }
 }

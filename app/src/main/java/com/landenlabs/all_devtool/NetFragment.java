@@ -908,7 +908,7 @@ public class NetFragment extends DevFragment {
                             } else {
                                 sb.append("Can't remove:\n  ")
                                     .append(wifiCfg.SSID)
-                                    .append("\n"); 
+                                    .append("\n");
                             }
                         }
                     }
