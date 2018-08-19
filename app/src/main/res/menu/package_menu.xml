@@ -70,6 +70,13 @@
         android:title=" " />
 
     <item
+        android:checkable="true"
+        android:checked="false"
+        android:id="@id/package_uninstall_all"
+        app:showAsAction="always"
+        android:title="@string/package_menu_uninstall_all" />
+
+    <item
         android:id="@id/package_collapseAll"
         app:showAsAction="always"
         android:title="@string/package_menu_collapseAll" />

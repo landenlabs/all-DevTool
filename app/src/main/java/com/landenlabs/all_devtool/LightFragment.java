@@ -101,13 +101,18 @@ public class LightFragment extends DevFragment
         }
         m_cameraLightTb.setOnClickListener(this);
 
+        SeekBar m_lightBrightnessSB = Ui.viewById(m_rootView, R.id.lightCameraSB);
+        m_lightBrightnessSB.setOnSeekBarChangeListener(this);
+
+
+
 
         Ui.viewById(m_rootView, R.id.screenSettings).setVisibility(checkSystemWritePermission() ? View.VISIBLE : View.GONE);
         Ui.viewById(m_rootView, R.id.screenOnTB).setOnClickListener(this);
         m_screenBrightnessTB = Ui.viewById(m_rootView, R.id.screenBrightnesTB);
         m_screenBrightnessTB.setOnClickListener(this);
 
-        SeekBar m_screenBrightnessSB = Ui.viewById(m_rootView, R.id.lightCameraSB);
+        SeekBar m_screenBrightnessSB = Ui.viewById(m_rootView, R.id.screenBrightnessSB);
         m_screenBrightnessSB.setOnSeekBarChangeListener(this);
 
         return m_rootView;
@@ -171,7 +176,7 @@ public class LightFragment extends DevFragment
                 setScreenBrightnessAuto(((ToggleButton)view).isChecked());
                 break;
             case R.id.screenOnTB:
-                setScreenOnAuto(((ToggleButton)view).isChecked()) ;
+                setKeepScreenOn(((ToggleButton)view).isChecked()) ;
                 break;
         }
     }
@@ -250,8 +255,8 @@ public class LightFragment extends DevFragment
     // =============================================================================================
 
 
-    private void setScreenOnAuto(boolean onAuto) {
-        if (onAuto) {
+    private void setKeepScreenOn(boolean keepOn) {
+        if (keepOn) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

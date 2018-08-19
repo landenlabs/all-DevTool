@@ -37,6 +37,8 @@ public class UninstallDialog extends DialogFragment {
     Context m_context;
     ArrayList<PackageInfo> m_pkgInfoList;
     int m_idx;
+    boolean m_allUsers;
+
     LinearLayout m_installGroup;
     View m_dialogLayout;
     View m_uninstallBtn;
@@ -59,18 +61,25 @@ public class UninstallDialog extends DialogFragment {
         m_idx = -1;
     }
 
-    public static UninstallDialog create(DevFragment devFragment,  final ArrayList<PackageInfo> pkgInfoList, final int idx) {
+    public static UninstallDialog create(DevFragment devFragment,
+            final ArrayList<PackageInfo> pkgInfoList,
+            final int idx,
+            final boolean allUsers) {
         UninstallDialog uninstallDialog = new UninstallDialog();
         uninstallDialog.m_context = devFragment.getActivity();
         uninstallDialog.m_pkgInfoList = pkgInfoList;
         uninstallDialog.m_idx = idx;
+        uninstallDialog.m_allUsers = allUsers;
 
         GoogleAnalyticsHelper.event(uninstallDialog.getActivity(), "", "dialog", uninstallDialog.getClass().getName());
         return uninstallDialog;
     }
 
-    public static void showDialog(DevFragment devFragment, final ArrayList<PackageInfo> pkgInfoList, final int idx) {
-        DialogFragment newFragment =  UninstallDialog.create(devFragment, pkgInfoList, idx);
+    public static void showDialog(DevFragment devFragment,
+            final ArrayList<PackageInfo> pkgInfoList,
+            final int idx,
+            boolean allUsers) {
+        DialogFragment newFragment =  UninstallDialog.create(devFragment, pkgInfoList, idx, allUsers);
         newFragment.show(devFragment.getActivitySafe().getFragmentManager(), "dialog");
     }
 
@@ -83,8 +92,30 @@ public class UninstallDialog extends DialogFragment {
         {
             try
             {
+                /*
+                    public static final String ACTION_UNINSTALL_PACKAGE
+                      = "android.intent.action.UNINSTALL_PACKAGE";
+
+                 // Specify whether the package should be uninstalled for all users.
+                 //  @hide because these should not be part of normal application flow.
+                    public static final String EXTRA_UNINSTALL_ALL_USERS
+                      = "android.intent.extra.UNINSTALL_ALL_USERS";
+                */
+
+                Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
+                intent.setData(Uri.parse("package:" + pkgName));
+                if (m_allUsers) {
+                    intent.putExtra("android.intent.extra.UNINSTALL_ALL_USERS", true);
+                }
+
+                /*
                 Intent intent = new Intent(Intent.ACTION_DELETE);
                 intent.setData(Uri.parse("package:" + pkgName));
+                if (Build.VERSION.SDK_INT >= 23) {
+                    getContext().getPackageManager().deletePackage(packageName, deleteObserver,
+                            PackageManager.DELETE_ALL_USERS);
+                }
+                */
                 startActivity(intent);
             }
             catch (Exception e)
@@ -93,6 +124,32 @@ public class UninstallDialog extends DialogFragment {
             }
         }
     }
+
+    /*
+      only works if owner of app.
+
+    public boolean uninstallPackage(Context context, String packageName) {
+        PackageManager packageManger = context.getPackageManager();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            PackageInstaller packageInstaller = packageManger.getPackageInstaller();
+            PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                    PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            params.setAppPackageName(packageName);
+            int sessionId;
+            try {
+                sessionId = packageInstaller.createSession(params);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+            packageInstaller.uninstall(packageName, PendingIntent.getBroadcast(context, sessionId,
+                    new Intent("android.intent.action.MAIN"), 0).getIntentSender());
+            return true;
+        }
+        System.err.println("old sdk");
+        return false;
+    }
+    */
 
     static final String PKGINFO_LIST = "pkg_list";
     static final String PKG_IDX = "pkg_idx";

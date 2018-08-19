@@ -190,24 +190,28 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
      */
     private boolean deleteFile(String fileName, boolean recurse)
     {
+        boolean deleted = false;
         File fileInfo = new File(fileName);
         if (fileInfo.exists()) {
             try  {
                 //noinspection ResultOfMethodCallIgnored
-                fileInfo.delete();
+                deleted = fileInfo.delete();
+                if (!deleted) {
+                    Toast.makeText(this.getActivity(), "Failed to delete\n" + fileInfo.getName(), Toast.LENGTH_SHORT).show();
+                }
             }
-            catch (Exception e)  {
+            catch (Exception ex)  {
                 if (fileInfo.isDirectory() && recurse) {
                     for (File item : fileInfo.listFiles()) {
-                        deleteFile(item.getAbsolutePath(), true);
+                        deleted |= deleteFile(item.getAbsolutePath(), true);
                     }
-                    return deleteFile(fileInfo.getAbsolutePath(), false);
+                    return deleteFile(fileInfo.getAbsolutePath(), false) || deleted;
                 }
-                Toast.makeText(this.getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getActivity(), ex.getMessage(), Toast.LENGTH_LONG).show();
                 // e.printStackTrace();
                 return false;
             }
         }
-        return true;
+        return deleted;
     }
 }

@@ -209,7 +209,7 @@ public class PackageFragment extends DevFragment
                                             if (pkgItem1 == null || pkgItem2 == null) {
                                                 return pkgItem1 == null ? -1 : 1;
                                             }
-                                            return pkgItem1.m_appName.compareTo(pkgItem2.m_appName);
+                                            return pkgItem1.m_appName.compareToIgnoreCase(pkgItem2.m_appName);
                                         }
                                     });
                                     break;
@@ -224,7 +224,7 @@ public class PackageFragment extends DevFragment
                                                 return pkgItem1 == null ? -1 : 1;
                                             }
                                             return pkgItem1.m_packInfo.packageName
-                                                    .compareTo(pkgItem2.m_packInfo.packageName);
+                                                    .compareToIgnoreCase(pkgItem2.m_packInfo.packageName);
                                         }
                                     });
                                     break;
@@ -647,6 +647,9 @@ public class PackageFragment extends DevFragment
                 expandAll();
                 m_expand_collapse_toggle.setChecked(true);
                 break;
+            case R.id.package_uninstall_all:
+                item.setChecked(!item.isChecked());
+                break;
             case 0:
                 break;
             default:
@@ -1063,7 +1066,8 @@ public class PackageFragment extends DevFragment
             }
         }
 
-        UninstallDialog.showDialog(this, uninstallList, 0);
+        UninstallDialog.showDialog(this, uninstallList, 0,
+                m_menu.findItem(R.id.package_uninstall_all).isChecked());
         // m_checkCnt = 0;
         updateUninstallBtn();
     }
@@ -1394,6 +1398,7 @@ public class PackageFragment extends DevFragment
     void loadInstalledPackages() {
         try {
             m_workList = new ArrayList<>();
+            // PackageManager.MATCH_ALL
             int flags1 = PackageManager.GET_PERMISSIONS
                     | PackageManager.GET_PROVIDERS           // use hides some app, may require permissions
                     | PackageManager.GET_ACTIVITIES

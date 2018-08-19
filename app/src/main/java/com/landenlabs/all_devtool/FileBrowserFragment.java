@@ -32,7 +32,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.media.Ringtone;
@@ -43,8 +45,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -217,8 +221,9 @@ public class FileBrowserFragment extends DevFragment
 
     public static String s_name = "Files";
     private static final int MB = 1 << 20;
-    private static int s_rowColor1 = 0;
-    private static int s_rowColor2 = 0x80d0ffe0;
+    private static @ColorInt int s_rowColor1 = 0;
+    private static @ColorInt int s_rowColor2 = 0x80d0ffe0;
+    private static @ColorInt int s_checkColor = 0x8090bfa0;
     private static SimpleDateFormat s_timeFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm");
 
     // --------------------------------------------------------------------------------------------
@@ -318,6 +323,16 @@ public class FileBrowserFragment extends DevFragment
         });
         */
 
+        m_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getContextSafe(), String.format("Item click pos=%d", position),
+                        Toast.LENGTH_LONG).show();
+                m_list.get(position).isChecked = !m_list.get(position).isChecked;
+                m_listView.invalidateViews();
+            }
+        });
+
         adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
                 // Toast.makeText(getActivitySafe(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
@@ -377,8 +392,18 @@ public class FileBrowserFragment extends DevFragment
                             public void onClick(View view) {
                                 Intent viewIntent = new Intent(Intent.ACTION_VIEW);
                             //    viewIntent.setData(Uri.fromFile(fileInfo));
+
+                                // Old way - pre Oreo
                                 viewIntent.setDataAndType(Uri.fromFile(fileInfo),
                                         getMimeType(fileInfo.getAbsolutePath()));
+
+                                // New way - use file provider
+                                Uri apkURI = FileProvider.getUriForFile(
+                                        getContextSafe(),
+                                        getContextSafe().getApplicationContext()
+                                                .getPackageName() + ".provider", fileInfo);
+                                viewIntent.setDataAndType(apkURI, getMimeType(fileInfo.getAbsolutePath()));
+                                viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                                 // TODO - need to use file provider to pass file name !!
                                 Intent openIntent = Intent.createChooser(viewIntent,
@@ -435,7 +460,7 @@ public class FileBrowserFragment extends DevFragment
         m_title = Ui.viewById(m_rootView, R.id.fb_title);
         m_fbDeletelBtn = Ui.viewById(m_rootView, R.id.fb_delete);
         m_fbDeletelBtn.setOnClickListener(this);
-        m_fbDeletelBtn.setEnabled(false);
+        m_fbDeletelBtn.setEnabled(m_checkCnt != 0);
 
         m_loadSpinner = Ui.viewById(m_rootView, R.id.fb_load_spinner);
         m_loadSpinner.addOnLayoutChangeListener(this);
@@ -922,7 +947,7 @@ public class FileBrowserFragment extends DevFragment
         s_rowColor1 = s_rowColor2;
         s_rowColor2 = color;
         
-        m_fbDeletelBtn.setEnabled(false);
+        m_fbDeletelBtn.setEnabled(m_checkCnt != 0);
 
         if (!m_dir.isDirectory() || !m_dir.exists())
             m_dir = File.listRoots()[0];
@@ -1094,8 +1119,12 @@ public class FileBrowserFragment extends DevFragment
             // TODO - map extension to icons
             //    .mp4, .avi => movie
             //    .png, .jpg => image
-
-            imageView.setBackgroundResource(R.drawable.file);
+            Bitmap fileBitmap = BitmapFactory.decodeFile(fileInfo.getAbsolutePath());
+            if (fileBitmap != null) {
+                imageView.setBackground(new BitmapDrawable(getResources(), fileBitmap));
+            } else {
+                imageView.setBackgroundResource(R.drawable.file);
+            }
         }
 
     }
@@ -1280,10 +1309,13 @@ public class FileBrowserFragment extends DevFragment
             checkBox.setTag(groupPosition);
             checkBox.setOnClickListener(this);
 
-            if ((groupPosition & 1) == 1)
+            if (fileItem.isChecked) {
+                summaryView.setBackgroundColor(s_checkColor);
+            } else if ((groupPosition & 1) == 1) {
                 summaryView.setBackgroundColor(s_rowColor1);
-            else
+            } else {
                 summaryView.setBackgroundColor(s_rowColor2);
+            }
 
             return summaryView;
         }
@@ -1311,6 +1343,11 @@ public class FileBrowserFragment extends DevFragment
                     playNotificationSound();
                 }
             } else {
+                FileUtil.FileInfo fileInfo =  m_list.get(grpPos);
+                fileInfo.isChecked = !fileInfo.isChecked;
+                m_checkCnt += (fileInfo.isChecked ? 1 : -1);
+                m_listView.invalidateViews();
+
                 if (m_listView.isGroupExpanded(grpPos))
                     m_listView.collapseGroup(grpPos);
                 else

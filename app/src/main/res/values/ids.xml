@@ -21,6 +21,7 @@
 
     <item type="id" name="package_uninstall" />
     <item type="id" name="package_uncheck_all" />
+    <item type="id" name="package_uninstall_all" />
 
     <item type="id" name="package_collapseAll" />
     <item type="id" name="package_expandAll" />

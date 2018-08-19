@@ -106,8 +106,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:checked="true"
-                android:textOff="Screen On Always"
-                android:textOn="Screen On Auto" />
+                android:textOff="Keep screen On"
+                android:textOn="Auto screen Off" />
 
             <ToggleButton
                 android:id="@+id/screenBrightnesTB"
