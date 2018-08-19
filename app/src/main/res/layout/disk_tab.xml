@@ -32,43 +32,46 @@
         android:visibility="gone" />
 
     <!-- TODO - add button to open and close settings layout -->
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:orientation="vertical"
-       android:layout_height="wrap_content">
-
-    <CheckBox
-        android:id="@+id/diskGrantCb"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/title_size"
-        android:text="Write Granted"
-        />
+        android:orientation="vertical">
 
-    <CheckBox
-        android:id="@+id/diskUsageCb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/title_size"
-        android:text="Disk Usage"
-        />
+        <CheckBox
+            android:id="@+id/diskGrantCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Write Granted"
+            android:textSize="@dimen/title_size" />
 
-    <CheckBox
-        android:id="@+id/fileSystemCb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/title_size"
-        android:text="File System"
-        />
+        <CheckBox
+            android:id="@+id/diskUsageCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disk Usage"
+            android:textSize="@dimen/title_size" />
 
-    <CheckBox
-        android:id="@+id/diskStatsCb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/title_size"
-        android:text="Disk Stats"
-        />
-   </LinearLayout>
+        <CheckBox
+            android:id="@+id/fileSystemCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="File System"
+            android:textSize="@dimen/title_size" />
+
+        <CheckBox
+            android:id="@+id/diskStatsCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disk Stats"
+            android:textSize="@dimen/title_size" />
+
+        <CheckBox
+            android:id="@+id/mountsCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mounts"
+            android:textSize="@dimen/title_size" />
+    </LinearLayout>
 
 
     <com.landenlabs.all_devtool.dialogs.BounceExpandableListView

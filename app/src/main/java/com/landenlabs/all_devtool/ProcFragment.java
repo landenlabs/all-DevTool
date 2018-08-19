@@ -277,11 +277,10 @@ public class ProcFragment extends DevFragment {
             m_list.add(new ProcInfo(name, value.trim()));
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings("SameParameterValue")
     void addMap(String name, String value, Map<String, String> map) {
         m_list.add(new ProcInfo(name, value, map));
     }
-
 
     @SuppressWarnings("SameParameterValue")
     private static ArrayList<ArrayList<String>> readFile(String filename, String sectionPat, String splitPat, int  minSplitCnt) {

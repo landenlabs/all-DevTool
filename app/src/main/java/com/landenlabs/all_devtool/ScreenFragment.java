@@ -245,7 +245,7 @@ public class ScreenFragment extends DevFragment {
                 (float) heightPx / m_displayMetrics.densityDpi);
         screenSizeText.setText(sizeStr);
 
-        String densityStr = "Low";
+        String densityStr;
         if (m_displayMetrics.densityDpi <= DisplayMetrics.DENSITY_MEDIUM)
             densityStr = "Medium";
         else if (m_displayMetrics.densityDpi <= DisplayMetrics.DENSITY_HIGH)

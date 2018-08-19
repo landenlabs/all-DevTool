@@ -96,7 +96,7 @@ import static com.landenlabs.all_devtool.R.id.plot;
  * @author Dennis Lang
  *
  */
-@SuppressWarnings("UnnecessaryLocalVariable")
+@SuppressWarnings({"UnnecessaryLocalVariable", "PointlessArithmeticExpression"})
 public class SensorFragment extends DevFragment
         implements SensorEventListener, View.OnLayoutChangeListener, AdapterView.OnItemSelectedListener {
 
@@ -126,12 +126,13 @@ public class SensorFragment extends DevFragment
     private static final String PROCESSES_STR = "#Processes";
     private static final String MEMORY_STR = "Free Memory";
 
-    private static final String ACCELEROMETER_STR = "Accelerometer";
+
     private static final String MAGNETOMETER_STR = "Magnet";
-    private static final String GYROSCOPE_STR = "Gyroscope";
     private static final String PRESSURE_STR = "Pressure";
     private static final String GRAVITY_STR = "Gravity";
-    private static final String STEP_COUNTER_STR = "Step Counter";
+    // private static final String ACCELEROMETER_STR = "Accelerometer";
+    // private static final String GYROSCOPE_STR = "Gyroscope";
+    // private static final String STEP_COUNTER_STR = "Step Counter";
 
     private static final String[] SENSOR_NAMES =
             {
@@ -621,6 +622,7 @@ public class SensorFragment extends DevFragment
                     m_seriesChg = createChgSeries();
                 }
 
+                //noinspection ConstantIfStatement,ConstantConditions
                 if (true) {
                     m_plot.setRangeBoundaries(990, 1020, BoundaryMode.AUTO);
                 } else {
@@ -695,6 +697,7 @@ public class SensorFragment extends DevFragment
         //    m_plot.setLayerType(View.LAYER_TYPE_NONE, null);
     }
 
+    @SuppressWarnings("SameParameterValue")
     LineAndPointFormatter makeFormatter(int width, int color1, int color2, float x2, float y2, boolean fill) {
         //2 LineAndPointFormatter formatter = new FastLineAndPointRenderer.Formatter(color1, null, color2, null);
         LineAndPointFormatter formatter = new LineAndPointFormatter(color1, null, color2, null);
@@ -726,6 +729,7 @@ public class SensorFragment extends DevFragment
         m_sensorEvents.put(sensorEvent.sensor.getName(), sensorEvent);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void add(SimpleXYSeries series, Number x, Number y) {
         if (series != null) {
             if (series.size() > HISTORY_SIZE)
@@ -889,8 +893,8 @@ public class SensorFragment extends DevFragment
 
             final int NO_VALUE = 0;
             double currentAmps = batteryIntent.getIntExtra("current_now", NO_VALUE);
-            int voltage = batteryIntent.getIntExtra("voltage", NO_VALUE);
-            int chargeCounter = batteryIntent.getIntExtra("charge_counter", -1);
+            // int voltage = batteryIntent.getIntExtra("voltage", NO_VALUE);
+            // int chargeCounter = batteryIntent.getIntExtra("charge_counter", -1);
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 BatteryManager batteryManager = getServiceSafe(Context.BATTERY_SERVICE);
@@ -943,7 +947,7 @@ public class SensorFragment extends DevFragment
                     setChangeSeries(m_seriesProcCnt);
                     setRange(m_plot, m_seriesProcCnt);
                 }
-            } catch (Exception ex) {
+            } catch (Exception ignore) {
             }
         }
 

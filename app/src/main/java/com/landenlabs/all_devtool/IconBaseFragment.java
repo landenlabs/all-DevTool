@@ -132,8 +132,6 @@ public abstract class IconBaseFragment extends DevFragment {
             }
         });
 
-        // TODO - remove duplicates.
-
         final IconArrayAdapter adapter = new IconArrayAdapter(
                 this.getActivity(), R.layout.icon_list_row, R.id.iconName,
                 m_list);

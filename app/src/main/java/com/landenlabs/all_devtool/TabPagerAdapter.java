@@ -281,6 +281,17 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                     return NumAttrFragment.s_name;
                 }
             },
+
+            // Num Dime
+            new Creator() {
+                public DevFragment creator() {
+                    return NumDimenFragment.create();
+                }
+
+                public String name() {
+                    return NumDimenFragment.s_name;
+                }
+            },
     };
 
     TabPagerAdapter(FragmentManager fm, ViewPager viewPager, ActionBar actionBar) {

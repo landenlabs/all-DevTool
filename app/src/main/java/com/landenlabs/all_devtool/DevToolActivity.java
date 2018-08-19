@@ -84,9 +84,9 @@ public class DevToolActivity extends FragmentActivity {
     protected String m_startFrag;
 
 
-    @SuppressWarnings("FieldCanBeLocal")
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private UncaughtExceptionHandler m_uncaughtExceptionHandler;
-    @SuppressWarnings("FieldCanBeLocal")
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @SuppressLint("DefaultLocale")

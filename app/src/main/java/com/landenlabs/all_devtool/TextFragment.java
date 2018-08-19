@@ -26,8 +26,6 @@ package com.landenlabs.all_devtool;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.TypedValue;
@@ -66,12 +64,12 @@ public class TextFragment extends DevFragment {
     TableLayout m_tableLayout;
     final ArrayList<TextInfo> m_textInfoList = new ArrayList<>();
 
+    /*
     public static final int s_MSG_SHARE_PATH_KEY = 1;
     public static final String s_MSG_SHARE_PATH = "path";
+
     public final Handler m_handler = new Handler() {
-
         public void handleMessage(Message msg) {
-
             switch (msg.what) {
                 case s_MSG_SHARE_PATH_KEY:
                     TabPagerAdapter.sharePage(msg.getData().getString(s_MSG_SHARE_PATH));
@@ -79,6 +77,7 @@ public class TextFragment extends DevFragment {
             }
         }
     };
+    */
 
     public TextFragment() {
     }

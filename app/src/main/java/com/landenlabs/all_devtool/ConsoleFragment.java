@@ -179,8 +179,8 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
         View rootView = inflater.inflate(R.layout.console_tab, container, false);
 
-        rootView.findViewById(R.id.consoleSnap).setOnClickListener(ConsoleFragment.this);
-        rootView.findViewById(R.id.consoleRefresh).setOnClickListener(ConsoleFragment.this);
+        rootView.findViewById(R.id.consoleSnap).setOnClickListener(this);
+        rootView.findViewById(R.id.consoleRefresh).setOnClickListener(this);
 
         m_refreshCb = Ui.viewById(rootView, R.id.consoleRefresh);
 

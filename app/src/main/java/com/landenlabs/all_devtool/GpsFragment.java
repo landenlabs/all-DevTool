@@ -318,7 +318,6 @@ public class GpsFragment extends DevFragment implements
         m_intentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
 
         showProviders();
-        // TODO - get available providers
         getCheckBox(rootView, R.id.gpsFuseCb, FUSED_PROVIDER);
         m_gpsCb = getCheckBox(rootView, R.id.gpsGPSCb, LocationManager.GPS_PROVIDER);
         getCheckBox(rootView, R.id.gpsNetwkCb, LocationManager.NETWORK_PROVIDER);
@@ -700,7 +699,7 @@ public class GpsFragment extends DevFragment implements
             }
         }
 
-        //noinspection ConstantConditions
+        //noinspection ConstantConditions,ConstantIfStatement
         if (false) {
             FusedLocationProviderClient fusedLocationProviderClient =
                     LocationServices.getFusedLocationProviderClient(getActivitySafe());
@@ -724,7 +723,8 @@ public class GpsFragment extends DevFragment implements
                 == PackageManager.PERMISSION_GRANTED
             || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
+                //noinspection deprecation
+                LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
         }
     }
 

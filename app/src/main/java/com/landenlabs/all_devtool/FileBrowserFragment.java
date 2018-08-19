@@ -102,7 +102,7 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings({"Convert2Lambda", "OctalInteger"})
+@SuppressWarnings({"Convert2Lambda", "OctalInteger", "FieldCanBeLocal"})
 public class FileBrowserFragment extends DevFragment
         implements  View.OnClickListener
         , View.OnLayoutChangeListener
@@ -405,7 +405,6 @@ public class FileBrowserFragment extends DevFragment
                                 viewIntent.setDataAndType(apkURI, getMimeType(fileInfo.getAbsolutePath()));
                                 viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                                // TODO - need to use file provider to pass file name !!
                                 Intent openIntent = Intent.createChooser(viewIntent,
                                         "Choose an application to open with:");
                                 try {
@@ -487,7 +486,7 @@ public class FileBrowserFragment extends DevFragment
             MenuItem sortBy = m_menu.findItem(m_sortBy);
             if (sortBy != null) {
                 int pos = Arrays.asList(getResources().getStringArray(R.array.fb_sort_array))
-                        .indexOf(sortBy.getTitle());
+                        .indexOf(sortBy.getTitle().toString());
                 if (pos != -1)
                     m_sortSpinner.setSelection(pos);
             }
@@ -497,7 +496,6 @@ public class FileBrowserFragment extends DevFragment
         m_expand_collapse_toggle.setOnClickListener(this);
 
         setShowDir();
-        // TODO - request permission
         updateList();
         return m_rootView;
     }
@@ -671,7 +669,7 @@ public class FileBrowserFragment extends DevFragment
                 break;
             default:
                 item.setChecked(true);
-                pos = Arrays.asList(getResources().getStringArray(R.array.fb_sort_array)).indexOf(item.getTitle());
+                pos = Arrays.asList(getResources().getStringArray(R.array.fb_sort_array)).indexOf(item.getTitle().toString());
                 m_sortSpinner.setSelection(pos);
                 this.m_sortBy = id;
                 Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
@@ -984,6 +982,7 @@ public class FileBrowserFragment extends DevFragment
                     if (fileInfo.isDirectory()) {
                         File[] subList = fileInfo.listFiles();
                         fileInfo.setFileCnt((subList == null ? 0 : subList.length));
+                        //noinspection ResultOfMethodCallIgnored
                         fileInfo.findDepthSize(0, 100);
                     }
                     m_workList.add(fileInfo);
@@ -1116,7 +1115,7 @@ public class FileBrowserFragment extends DevFragment
         if (fileInfo.isDirectory()) {
             imageView.setBackgroundResource(folderRes);
         } else {
-            // TODO - map extension to icons
+            // Get icons from fies.  NOTE - this is very slow for some files.
             //    .mp4, .avi => movie
             //    .png, .jpg => image
             Bitmap fileBitmap = BitmapFactory.decodeFile(fileInfo.getAbsolutePath());

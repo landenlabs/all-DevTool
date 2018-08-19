@@ -50,6 +50,7 @@ public class NumDimenFragment extends NumBaseFragment {
 
     @Override
     public void addToList() {
+        // TODO - get this to work.
         addNum("app_icon_size", android.R.dimen.app_icon_size);
         addNum("dialog_min_width_major", android.R.dimen.dialog_min_width_major);
         addNum("dialog_min_width_minor", android.R.dimen.dialog_min_width_minor);

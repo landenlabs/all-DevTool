@@ -36,6 +36,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -87,6 +88,8 @@ public class DiskFragment extends DevFragment {
     CheckBox m_diskUsageCb;
     CheckBox m_fileSystemCb;
     CheckBox m_diskStatsCb;
+    CheckBox m_mountsCb;
+
     Map<String, String> m_javaDirList;
     Map<String, String> m_duList;
     Map<String, String> m_lsList;
@@ -97,6 +100,7 @@ public class DiskFragment extends DevFragment {
     Map<String, String> m_dfList;
     // Map<String, String> m_diskDumpStats;
     ArrayList<String> m_diskProcStats;
+    ArrayList<String> m_mounts;
     FileBrowseDialog m_fileOpenDialog;
 
     // ============================================================================================
@@ -253,19 +257,29 @@ public class DiskFragment extends DevFragment {
             public void onClick(View view) {
 
                 if (Build.VERSION.SDK_INT > 19) {
-                    AppOpsManager appOps = (AppOpsManager) getContextSafe()
-                            .getSystemService(Context.APP_OPS_SERVICE);
+                    AppOpsManager appOps = getServiceSafe(Context.APP_OPS_SERVICE);
                     int mode = appOps.checkOpNoThrow("android:get_usage_stats",
-                            android.os.Process.myUid(), getContextSafe().getPackageName());
+                            Process.myUid(), getContextSafe().getPackageName());
                     boolean granted = (mode == AppOpsManager.MODE_ALLOWED);
                     if (!granted)
                         Toast.makeText(getContextSafe(), "Don't have Usage Stat Access",
                             Toast.LENGTH_LONG).show();
                 }
 
-                // CheckPermissions calls updateList if permission granted.
-                checkPermissions(Manifest.permission.PACKAGE_USAGE_STATS, Manifest.permission.READ_EXTERNAL_STORAGE);
-                // updateList(true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // CheckPermissions calls updateList if permission granted.
+                    checkPermissions(Manifest.permission.PACKAGE_USAGE_STATS, Manifest.permission.READ_EXTERNAL_STORAGE);
+                } else {
+                    updateList(true);
+                }
+            }
+        });
+
+        m_mountsCb = Ui.viewById(rootView, R.id.mountsCb);
+        m_mountsCb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateList(true);
             }
         });
 
@@ -533,25 +547,17 @@ public class DiskFragment extends DevFragment {
                 addString("/proc/diskstats/", diskProcStatsMap);
             }
 
-            /*
-            TODO
-
-            readFile("/proc/partitions");  // grep for ext4
-            readFile("/proc/mounts");      // assocuated partions with mounts to get disk layout
-            */
+            if (m_mountsCb.isChecked()) {
+                m_mounts = readFile("/proc/mounts", " ", 1);
+                Map<String, String> mountsMap = new LinkedHashMap<>();
+                int rowCnt = 0;
+                for (String rowStr : m_mounts) {
+                    mountsMap.put(String.format("%3d", rowCnt), rowStr);
+                    rowCnt++;
+                }
+                addString("/proc/mounts/", mountsMap);
+            }
         }
-
-
-        /*
-        final DiskArrayAdapter adapter = new DiskArrayAdapter(this.getActivitySafe());
-        m_listView.setAdapter(adapter);
-
-        int count = adapter.getGroupCount();
-        for (int position = 0; position < count; position++)
-            m_listView.expandGroup(position);
-
-        m_listView.invalidate();
-        */
 
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter)) {

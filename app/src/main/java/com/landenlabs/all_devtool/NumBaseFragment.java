@@ -278,15 +278,6 @@ public abstract class NumBaseFragment extends DevFragment {
                 defSizePx = numField.getTextSize();
             }
 
-            if (false) {
-                ViewGroup.LayoutParams lp = view.getLayoutParams();
-                lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                if (numInfo.m_zoom && defHeight != 0) {
-                    lp.height = Math.round(defHeight * 1.5f);
-                }
-                view.setLayoutParams(lp);
-            }
-
             if (defSizePx > 0) {
                 float textSizePx = numInfo.m_zoom ? (defSizePx * 1.5f) : defSizePx;
                 if (setTextSizePx(textSizePx, numField, numType, numValue)) {
