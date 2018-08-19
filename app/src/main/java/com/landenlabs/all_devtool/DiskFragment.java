@@ -614,7 +614,9 @@ public class DiskFragment extends DevFragment {
     void addString(String name, Map<String, String> value) {
         if (!value.isEmpty()) {
             m_list.add(new GroupInfo(name, value));
-            m_listView.expandGroup(m_list.size());
+            
+            // This call crashes.
+            // m_listView.expandGroup(m_list.size());
         }
     }
 
