@@ -71,6 +71,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -192,6 +193,20 @@ public class SystemFragment extends DevFragment {
                 return false; // pass on to other listeners.
             }
         });
+
+
+        final ToggleButton expandTb = Ui.viewById(rootView, R.id.list_collapse_tb);
+        expandTb.setVisibility(View.VISIBLE);
+        expandTb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (expandTb.isChecked())
+                    expandAll();
+                else
+                    collapseAll();
+            }
+        });
+
 
         m_refresh = Ui.viewById(rootView, R.id.list_refresh);
         m_refresh.setOnClickListener(new View.OnClickListener() {
@@ -623,6 +638,20 @@ public class SystemFragment extends DevFragment {
 
     void addBuild(String name, String value) {
         addBuildIf(name, value, !TextUtils.isEmpty(value));
+    }
+
+    private void collapseAll() {
+        int count = m_listView.getAdapter().getCount(); // m_list.size();
+        for (int position = 0; position < count; position++) {
+            // m_log.d("Collapse " + position);
+            m_listView.collapseGroup(position);
+        }
+    }
+
+    private void expandAll() {
+        int count = m_listView.getAdapter().getCount(); // m_list.size();
+        for (int position = 0; position < count; position++)
+            m_listView.expandGroup(position);
     }
 
     // ============================================================================================

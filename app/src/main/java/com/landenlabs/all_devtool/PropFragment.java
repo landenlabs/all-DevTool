@@ -19,6 +19,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -127,6 +128,18 @@ public class PropFragment extends DevFragment {
                     return true; // consume.
                 }
                 return false; // pass on to other listeners.
+            }
+        });
+
+        final ToggleButton expandTb = Ui.viewById(rootView, R.id.list_collapse_tb);
+        expandTb.setVisibility(View.VISIBLE);
+        expandTb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (expandTb.isChecked())
+                    expandAll();
+                else
+                    collapseAll();
             }
         });
 
@@ -265,6 +278,19 @@ public class PropFragment extends DevFragment {
         return mapList;
     }
 
+    private void collapseAll() {
+        int count = m_listView.getAdapter().getCount(); // m_list.size();
+        for (int position = 0; position < count; position++) {
+            // m_log.d("Collapse " + position);
+            m_listView.collapseGroup(position);
+        }
+    }
+
+    private void expandAll() {
+        int count = m_listView.getAdapter().getCount(); // m_list.size();
+        for (int position = 0; position < count; position++)
+            m_listView.expandGroup(position);
+    }
 
     // =============================================================================================
 

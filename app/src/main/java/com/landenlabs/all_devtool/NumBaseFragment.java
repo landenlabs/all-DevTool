@@ -164,6 +164,21 @@ public abstract class NumBaseFragment extends DevFragment {
         }
     }
 
+    /*
+    final TypedValue value = obtainTempTypedValue();
+        try {
+        final ResourcesImpl impl = mResourcesImpl;
+        impl.getValue(id, value, true);
+        if (value.type == TypedValue.TYPE_DIMENSION) {
+            return TypedValue.complexToDimension(value.data, impl.getDisplayMetrics());
+        }
+        throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+    } finally {
+        releaseTempTypedValue(value);
+    }
+    */
+
     protected void addNum(String name, int attrId, String numType) {
         int[] attrs = {attrId};
         TypedArray typedArray = m_context.getTheme().obtainStyledAttributes(attrs);
@@ -195,6 +210,9 @@ public abstract class NumBaseFragment extends DevFragment {
                     if (m_context.getTheme().resolveAttribute(attrId, typedValue, true)) {
                         str = (String) typedValue.coerceToString();
                         m_list.add(new NumInfo(name, str, numType));
+                    } else {
+                        float fValue = getResources().getDimension(attrId);
+                        m_list.add(new NumInfo(name, String.valueOf(fValue), numType));
                     }
                 }
             } catch (Exception ex) {
