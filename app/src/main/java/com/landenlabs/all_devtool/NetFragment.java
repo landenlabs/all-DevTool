@@ -694,7 +694,7 @@ public class NetFragment extends DevFragment {
             }
 
             if (wifiMgr.getScanResults() == null || wifiMgr.getScanResults().isEmpty() ) {
-                checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+                // checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
                 checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
                 wifiMgr.startScan();
             }

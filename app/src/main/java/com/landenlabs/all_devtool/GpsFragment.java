@@ -677,7 +677,7 @@ public class GpsFragment extends DevFragment implements
 
             if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
                 // PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
@@ -687,9 +687,15 @@ public class GpsFragment extends DevFragment implements
                             m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
                     addMsgToDetailRow(s_colorMsg, "GPS request made");
                 } else {
-                    // Disable GPS provider by setting a very long update cycle.
-                    m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                            Long.MAX_VALUE, Long.MAX_VALUE, this);
+                    try {
+                        // Disable GPS provider by setting a very long update cycle.
+                        m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                                Long.MAX_VALUE, Long.MAX_VALUE, this);
+                    } catch (Exception ex) {
+                        String errMsg = "Unable to access gps\n" + ex.getMessage() + "\n" + ex.getCause();
+                        Ui.ShowMessage(this.getActivitySafe(), errMsg);
+                        addMsgToDetailRow(s_colorMsg, errMsg);
+                    }
                 }
             } else {
                 String errMsg = "start GPS ignore, missing permissions";
