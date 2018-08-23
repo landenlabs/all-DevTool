@@ -41,6 +41,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -258,6 +259,15 @@ public class GpsFragment extends DevFragment implements
 
         // ---- Setup GPS ----
         m_locMgr = getServiceSafe(Context.LOCATION_SERVICE);
+
+        Ui.viewById(rootView, R.id.gpsIcon).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getLocation();
+                    }
+                }
+        );
 
         m_gpsTv = Ui.viewById(rootView, R.id.gps);
         if (isGooglePlayServicesAvailable()) {
@@ -592,6 +602,23 @@ public class GpsFragment extends DevFragment implements
 
     // ============================================================================================
     // GpsFragment
+
+    private void getLocation() {
+        checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            final LocationManager locMgr = getServiceSafe(Context.LOCATION_SERVICE);
+            // Criteria criteria = new Criteria();
+            // criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            // criteria.setPowerRequirement(Criteria.POWER_HIGH);
+            Looper looper = getContextSafe().getMainLooper();
+            locMgr.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, looper);
+            addMsgToDetailRow(s_colorMsg, "GPS location requested");
+        } else {
+            addMsgToDetailRow(s_colorMsg, "GPS permission not enabled");
+        }
+    }
+
     private CheckBox getCheckBox(View rootView, int resId, String provider) {
         CheckBox cb = Ui.viewById(rootView, resId);
         m_providersCb.put(provider, cb);
