@@ -45,6 +45,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -1246,6 +1248,13 @@ public class FileBrowserFragment extends DevFragment
             FileUtil.FileInfo fileItem = m_list.get(groupPosition);
             // long sizeMB = fileItem.getSizeMB();
             long freeMB = fileItem.getDevFreeMB();
+
+            // TODO - use this in file browser class
+            if (Build.VERSION.SDK_INT >= 24) {
+                StorageManager storageManager = getServiceSafe(Context.STORAGE_SERVICE);
+                StorageVolume  storageVolume = storageManager.getStorageVolume(fileItem);
+                boolean isEncrypted = storageManager.isEncrypted(fileItem);
+            }
 
             View summaryView = convertView;
             if (null == summaryView) {

@@ -37,6 +37,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -61,22 +63,24 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.UUID;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static com.landenlabs.all_devtool.FileBrowserFragment.isBit;
 import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
 /**
- * Display "Build" system information.
+ * Display "Disk" system information.
  *
  * @author Dennis Lang
  */
 @SuppressWarnings("Convert2Lambda")
-public class DiskFragment extends DevFragment {
+public class DiskFragment extends DevFragment implements View.OnClickListener {
 
     final static int SUMMARY_LAYOUT = R.layout.disk_list_row;
     public static String s_name = "Disk";
@@ -89,6 +93,7 @@ public class DiskFragment extends DevFragment {
     CheckBox m_fileSystemCb;
     CheckBox m_diskStatsCb;
     CheckBox m_mountsCb;
+    CheckBox m_storageCb;
 
     Map<String, String> m_javaDirList;
     Map<String, String> m_duList;
@@ -98,7 +103,7 @@ public class DiskFragment extends DevFragment {
     Map<String, String> m_duStorageList;
     Map<String, String> m_duSdcardList;
     Map<String, String> m_dfList;
-    // Map<String, String> m_diskDumpStats;
+
     ArrayList<String> m_diskProcStats;
     ArrayList<String> m_mounts;
     FileBrowseDialog m_fileOpenDialog;
@@ -208,48 +213,17 @@ public class DiskFragment extends DevFragment {
 
         m_titleTime = Ui.viewById(rootView, R.id.disklist_time);
         m_titleTime.setVisibility(View.VISIBLE);
-        m_titleTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateList(true);
-                m_listView.invalidateViews();
-            }
-        });
+        m_titleTime.setOnClickListener(this);
 
         m_writeGrantedCb = Ui.viewById(rootView, R.id.diskGrantCb);
-        m_writeGrantedCb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (m_writeGrantedCb.isChecked()) {
-                    grantWritePermission();
-                    updateList(true);
-                } else {
-                    Intent intent = new Intent(
-                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
-                    startActivity(intent);
-                }
-            }
-        });
-
+        m_writeGrantedCb.setOnClickListener(this);
         m_writeGrantedCb.setChecked(hasWritePermission());
 
-
         m_diskUsageCb = Ui.viewById(rootView, R.id.diskUsageCb);
-        m_diskUsageCb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateList(true);
-            }
-        });
+        m_diskUsageCb.setOnClickListener(this);
 
         m_fileSystemCb = Ui.viewById(rootView, R.id.fileSystemCb);
-        m_fileSystemCb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateList(true);
-            }
-        });
+        m_fileSystemCb.setOnClickListener(this);
 
         m_diskStatsCb = Ui.viewById(rootView, R.id.diskStatsCb);
         m_diskStatsCb.setOnClickListener(new View.OnClickListener() {
@@ -276,12 +250,10 @@ public class DiskFragment extends DevFragment {
         });
 
         m_mountsCb = Ui.viewById(rootView, R.id.mountsCb);
-        m_mountsCb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateList(true);
-            }
-        });
+        m_mountsCb.setOnClickListener(this);
+
+        m_storageCb = Ui.viewById(rootView, R.id.storageCb);
+        m_storageCb.setOnClickListener(this);
 
         m_listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -356,7 +328,6 @@ public class DiskFragment extends DevFragment {
         // checkPermissions(Manifest.permission.DUMP);
     }
 
-
     @Override
     protected boolean checkPermissions(String ... needPermissions) {
         boolean havePermissions = true;
@@ -396,6 +367,40 @@ public class DiskFragment extends DevFragment {
         }
     }
 
+
+    // =============================================================================================
+    // onClickListener
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id) {
+            case R.id.disklist_time:
+                updateList(true);
+                m_listView.invalidateViews();
+                break;
+
+            case R.id.diskGrantCb:
+                if (m_writeGrantedCb.isChecked()) {
+                    grantWritePermission();
+                    updateList(true);
+                } else {
+                    Intent intent = new Intent(
+                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
+                    startActivity(intent);
+                }
+                break;
+
+            case R.id.diskUsageCb:
+            case R.id.fileSystemCb:
+            case R.id.mountsCb:
+            case R.id.storageCb:
+                updateList(true);
+                break;
+        }
+    }
+
     /**
      * Populate list with 'Disk' information.
      */
@@ -422,12 +427,14 @@ public class DiskFragment extends DevFragment {
                 if (Build.VERSION.SDK_INT >= 24) {
                     addFile("getFilesDir", getActivitySafe().getApplicationContext().getDataDir());
                 }
+
                 try {
                     //noinspection deprecation
                     addFile("getDir(null)",
                             getContextSafe().getDir(null, Context.MODE_WORLD_READABLE));
                 } catch (Exception ignored) {
                 }
+
                 try {
                     addFile("getFilesDir", getActivitySafe().getFilesDir());
                 } catch (Exception ignored) {
@@ -474,7 +481,6 @@ public class DiskFragment extends DevFragment {
                         DIRECTORY_DOWNLOADS));
                 addFile("getRootDirectory", Environment.getRootDirectory());
 
-
             } catch (Exception ex) {
                 addString("Exception", ex.getMessage());
             }
@@ -482,6 +488,56 @@ public class DiskFragment extends DevFragment {
             addString("java dir\n[rwx]=owner [RWX]=world", m_javaDirList);
         }
 
+        if (true) {
+            if (m_storageCb.isChecked()) {
+                try {
+                    StorageManager storageManager = getServiceSafe(Context.STORAGE_SERVICE);
+                    if (storageManager != null) {
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            List<StorageVolume> volumes = storageManager.getStorageVolumes();
+                            StorageVolume storageVolume = storageManager.getPrimaryStorageVolume();
+                            // UUID volumeId = storageManager.getUuidForPath(file);
+                            // UUID storageUuid;
+                            // long bytes = storageManager.getCacheQuotaBytes(storageUuid);
+                            int idx = 0;
+                            for (StorageVolume volume : volumes) {
+                                Map<String, String> volumeList = new HashMap<>();
+
+                                volumeList.put("Description",
+                                        volume.getDescription(getContextSafe()));
+                                volumeList.put("State", volume.getState());
+                                volumeList.put("Primary", String.valueOf(volume.isPrimary()));
+                                volumeList.put("Removable", String.valueOf(volume.isRemovable()));
+                                volumeList.put("Emulated", String.valueOf(volume.isEmulated()));
+                                String uuidStr = volume.getUuid();
+                                volumeList.put("UUID", uuidStr);
+
+                                // storageManager.getAllocatableBytes()
+                                addString("volumne " + idx++, volumeList);
+                            }
+
+                            UUID uuid = storageManager.getUuidForPath(Environment.getDataDirectory());
+                            if (uuid != null) {
+                                Map<String, String> volumeList = new HashMap<>();
+
+                                volumeList.put("vol path",
+                                        Environment.getDataDirectory().getAbsolutePath());
+                                volumeList.put("vol size ",
+                                        String.format("%,d", storageManager.getAllocatableBytes(uuid)));
+                                volumeList.put("vol cache quota",
+                                        String.format("%,d", storageManager.getCacheQuotaBytes(uuid)));
+                                volumeList.put("vol cache  size ",
+                                        String.format("%,d", storageManager.getCacheSizeBytes(uuid)));
+
+                                addString("vol Data Dir ", volumeList);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    addString("Exception", ex.getMessage());
+                }
+            }
+        }
         if (true) {
             if (false) {
                 m_lsList = getShellCmd(new String[]{"ls", "-l"});
@@ -492,7 +548,6 @@ public class DiskFragment extends DevFragment {
                         ".*/(proc|acct|dev)/.*");
                 addString("du -ks /", m_duList);
             }
-
 
             if (m_diskUsageCb.isChecked()) {
                 m_duStorageList = getShellCmd(new String[]{"ls", "-l", "/storage"});
@@ -703,6 +758,7 @@ public class DiskFragment extends DevFragment {
             Toast.makeText(getActivitySafe(), ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
+
 
     // =============================================================================================
     // TODO move thsi into common code and share with PackageFragment (and others)

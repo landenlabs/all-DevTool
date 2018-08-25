@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Looper;
+import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -40,13 +41,17 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         this.context = context;
-        prefs = context.getSharedPreferences(CRASH_REPORT, Context.MODE_PRIVATE);
 
+        StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
+        StrictMode.allowThreadDiskWrites();
+        prefs = context.getSharedPreferences(CRASH_REPORT, Context.MODE_PRIVATE);
         String msg = prefs.getString(CRASH_REPORT, "");
+
         if (!TextUtils.isEmpty(msg)) {
             prefs.edit().remove(CRASH_REPORT).apply();
             showCrashDialog(msg);
         }
+        StrictMode.setThreadPolicy(policy);
     }
 
     @Override
@@ -86,7 +91,10 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
             report.append(result.toString());
             printWriter.close();
             report.append('\n');
+
+            StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskWrites();
             prefs.edit().putString(CRASH_REPORT, report.toString()).apply();
+            StrictMode.setThreadPolicy(policy);
         } catch (Throwable ignore) {
         }
     }

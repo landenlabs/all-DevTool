@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -148,6 +149,18 @@ public class DevToolActivity extends FragmentActivity {
 
         if (!TextUtils.isEmpty(m_startFrag)) {
             viewPager.setCurrentItem(GlobalInfo.s_globalInfo.tabAdapter.findFragPos(m_startFrag, 0));
+        }
+
+        // In debug build - enable full StrictMode
+        if (DEBUG) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    // .detectDiskReads()
+                    // .detectDiskWrites()
+                    // .detectNetwork()
+                    .detectAll()
+                    .penaltyLog()
+                    // .penaltyDeath()
+                    .build());
         }
     }
 

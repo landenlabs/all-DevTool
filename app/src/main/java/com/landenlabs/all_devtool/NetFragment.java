@@ -699,6 +699,7 @@ public class NetFragment extends DevFragment {
                 wifiMgr.startScan();
             }
 
+            String wifiKey = "Wifi...";
             Map<String, String> wifiListStr = new LinkedHashMap<>();
             try {
                 DhcpInfo dhcpInfo = wifiMgr.getDhcpInfo();
@@ -714,7 +715,10 @@ public class NetFragment extends DevFragment {
 
                 WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
                 if (wifiInfo != null) {
+                    wifiListStr.put( "SSID", wifiInfo.getSSID());
                     wifiListStr.put("LinkSpeed Mbps", String.valueOf(wifiInfo.getLinkSpeed()));
+                    wifiKey = String.format("Wifi %s %,dMB ", wifiInfo.getSSID(), wifiInfo.getLinkSpeed());
+
                     int numberOfLevels = 10;
                     int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), numberOfLevels + 1);
                     wifiListStr.put("Signal%", String.valueOf(100 * level / numberOfLevels));
@@ -748,7 +752,7 @@ public class NetFragment extends DevFragment {
             }
 
             if (!wifiListStr.isEmpty()) {
-                addBuild("WiFi...", wifiListStr);
+                addBuild(wifiKey, wifiListStr);
             }
 
             long bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime();
@@ -850,7 +854,7 @@ public class NetFragment extends DevFragment {
                 wifiCfgListStr.put(" Status", netStatus);
                 wifiCfgListStr.put(" Priority", String.valueOf(wifiCfg.priority));
                 if (null != wifiCfg.wepKeys) {
-                    //               wifiCfgListStr.put(" wepKeys", TextUtils.join(",", wifiCfg.wepKeys));
+                     // wifiCfgListStr.put(" wepKeys", TextUtils.join(",", wifiCfg.wepKeys));
                 }
                 String protocols = "";
                 if (wifiCfg.allowedProtocols.get(WifiConfiguration.Protocol.RSN))
@@ -872,6 +876,12 @@ public class NetFragment extends DevFragment {
                     // Remove network connections with no Password.
                     // wifiMgr.removeNetwork(wifiCfg.networkId);
                 }
+
+                String wifiCfgStr = wifiCfg.toString().replace("\n", " ");
+                // " cuid=" + creatorUid);
+                // " cname=" + creatorName);
+                String creator =  wifiCfgStr.replaceAll(".* cname=([^ ]+) .*", "$1");
+                wifiCfgListStr.put(" Creator", creator);
 
                 addBuild(String.format("WiFiCfg#%s %s",
                         wifiCfg.networkId, wifiCfg.SSID), wifiCfgListStr);
