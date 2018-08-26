@@ -82,6 +82,7 @@ import com.landenlabs.all_devtool.util.Utils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -617,6 +618,7 @@ public class SystemFragment extends DevFragment {
                 int adb = Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED);
                 strList.put("AdbEnabled", String.valueOf(adb));
             }
+            strList.put("ByteOrder", ByteOrder.nativeOrder().toString());
             addBuild("Settings...", strList);
         } catch (Exception ignore) {
         }

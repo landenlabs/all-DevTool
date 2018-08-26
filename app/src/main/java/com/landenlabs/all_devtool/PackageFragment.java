@@ -2114,8 +2114,8 @@ public class PackageFragment extends DevFragment
          * Generate summary (row) presentation view object.
          */
         @Override
-        public View getGroupView(int groupPosition, boolean isExpanded,
-                                 View convertView, ViewGroup parent) {
+        public View getGroupView(
+                int groupPosition, boolean isExpanded,  View convertView, ViewGroup parent) {
 
             if (m_list == null || groupPosition >= m_list.size() || groupPosition < 0)
                 return convertView; // Should never get here.

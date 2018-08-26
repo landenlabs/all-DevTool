@@ -116,6 +116,17 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 }
             },
 
+            // Netstat
+            new Creator() {
+                public DevFragment creator() {
+                    return NetstatFragment.create();
+                }
+
+                public String name() {
+                    return NetstatFragment.s_name;
+                }
+            },
+
             // Network
             new Creator() {
                 public DevFragment creator() {
@@ -126,6 +137,7 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                     return NetFragment.s_name;
                 }
             },
+
 
 
             // System

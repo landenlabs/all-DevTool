@@ -233,8 +233,8 @@ public class NetFragment extends DevFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
@@ -1044,9 +1044,8 @@ public class NetFragment extends DevFragment {
 
     // =============================================================================================
 
-    // final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
-
+    final static int SUMMARY_LAYOUT_WIDE = R.layout.build_list_rows_wide;
     /**
      * ExpandableLis UI 'data model' class
      */
@@ -1071,14 +1070,16 @@ public class NetFragment extends DevFragment {
             NetInfo netInfo = m_list.get(groupPosition);
 
             View expandView = convertView;
-            if (null == expandView) {
-                expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
-            }
 
             if (childPosition < netInfo.valueListStr().keySet().size()) {
                 String key = (String) netInfo.valueListStr().keySet().toArray()[childPosition];
-                String val = netInfo.valueListStr().get(key);
+                String val = "" + netInfo.valueListStr().get(key);
 
+                if (key.length() + val.length() > 40) {
+                    expandView = m_inflater.inflate(SUMMARY_LAYOUT_WIDE, parent, false);
+                } else {
+                    expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
+                }
                 TextView textView = Ui.viewById(expandView, R.id.buildField);
                 textView.setText(key);
                 textView.setPadding(40, 0, 0, 0);
@@ -1097,6 +1098,10 @@ public class NetFragment extends DevFragment {
                         expandView.setBackgroundColor(m_rowColor1);
                     else
                         expandView.setBackgroundColor(m_rowColor2);
+                }
+            }  else {
+                if (null == expandView) {
+                    expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
                 }
             }
 
