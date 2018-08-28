@@ -3,11 +3,11 @@
 
     <color name="textBlack">#000000</color>
     <color name="textBlue">#0000c0</color>
-    <color name="sizeRed">#c00000</color>
-    <color name="red">#ff0000</color>
-    <color name="gray">#808080</color>
-    <color name="alphaGray">#80808080</color>
+    <color name="sizeRed">#c00</color>
+    <color name="red">#f00</color>
+    <color name="gray">#888</color>
+    <color name="alphaGray">#8888</color>
     <color name="alphaPink">#80ff8080</color>
-    <color name="alphaBlack">#80000000</color>
+    <color name="alphaBlack">#8000</color>
     <color name="rounded_btn_background_pressed">#ff2c6834</color> <!-- #ff3C4C56 -->
 </resources>

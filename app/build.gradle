@@ -22,8 +22,8 @@ android {
         minSdkVersion 17
         targetSdkVersion 27
 
-        versionCode 2010
-        versionName '2.0.10'
+        versionCode 2011
+        versionName '2.0.11'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString

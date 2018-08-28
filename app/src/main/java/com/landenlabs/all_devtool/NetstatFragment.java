@@ -403,7 +403,8 @@ public class NetstatFragment extends DevFragment {
                 }
             }
 
-            m_adapter.notifyDataSetChanged();
+            m_adapter.notifyDataSetChanged();   // Does nothing ?
+            m_listView.invalidate();            // Force UI to rebuild.
         }
     }
 
