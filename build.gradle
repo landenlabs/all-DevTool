@@ -7,15 +7,11 @@ File zipDstDir= file('zip')
 buildscript {
     repositories {
         // println "==== Gradle version " + GradleVersion.current().getVersion()
-        if (GradleVersion.current() >= GradleVersion.version('4.0')) {
-            google() // Gradle 4.0+
-        } else {
-            maven { url "https://maven.google.com" } // Gradle < 4.0
-        }
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.0'
 
         // Firebase
         classpath 'com.google.gms:google-services:3.3.0'
@@ -25,12 +21,7 @@ buildscript {
 // Provide configuration to build Android projects.
 allprojects {
     repositories {
-        // println "==== Gradle version " + GradleVersion.current().getVersion()
-        if (GradleVersion.current() >= GradleVersion.version('4.0')) {
-            google() // Gradle 4.0+
-        } else {
-            maven { url "https://maven.google.com" } // Gradle < 4.0
-        }
+        google()
         jcenter()
     }
 }

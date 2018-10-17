@@ -153,6 +153,9 @@ public class BuildFragment extends DevFragment {
             listStr.put("SDK", Build.VERSION.SDK);
 
             addBuild("VERSION...", listStr);
+
+
+
         }
         final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
