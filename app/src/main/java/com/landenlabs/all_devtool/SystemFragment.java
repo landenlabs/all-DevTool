@@ -30,6 +30,7 @@ import android.accounts.AccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.ActivityManager.ProcessErrorStateInfo;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -623,6 +624,34 @@ public class SystemFragment extends DevFragment {
         } catch (Exception ignore) {
         }
 
+        if (Build.VERSION.SDK_INT >= 23) {
+            try {
+                Map<String, String> strList = new LinkedHashMap<>();
+                NotificationManager notificationManager =  getServiceSafe(Context.NOTIFICATION_SERVICE);
+                int filter = notificationManager.getCurrentInterruptionFilter();
+                String distStr = "none";
+                switch (filter) {
+                    case NotificationManager.INTERRUPTION_FILTER_ALL:
+                        distStr = "all";
+                        break;
+                    case NotificationManager.INTERRUPTION_FILTER_ALARMS:
+                        distStr = "alarms";
+                        break;
+                    case NotificationManager.INTERRUPTION_FILTER_PRIORITY:
+                        distStr = "priority";
+                        break;
+                    case NotificationManager.INTERRUPTION_FILTER_UNKNOWN:
+                        distStr = "unknown";
+                        break;
+                    case NotificationManager.INTERRUPTION_FILTER_NONE:
+                        distStr = "none";
+                        break;
+                }
+                strList.put("Interrupts allowed", distStr);
+                addBuild("Notification...", strList);
+            } catch (Exception ignore) {
+            }
+        }
         if (expandAll) {
             // updateList();
             int count = m_list.size();
