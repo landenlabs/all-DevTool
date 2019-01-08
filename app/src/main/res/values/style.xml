@@ -66,9 +66,9 @@
     <style name="AlertDialogStyle_6" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
 
     <style name="AlertDialogStyle" parent="@android:style/Theme.Dialog"/>
-     
-     
-     
+
+
+
     <!--  =========================================================== -->
     <!--
    	<style name="Theme.TranslucentActionBar" parent="@android:style/Theme.Holo.Light.DarkActionBar">

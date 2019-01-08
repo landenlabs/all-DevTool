@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:drawable="@drawable/group_indicator_open" android:state_empty="false" android:state_expanded="true"/>
-    <item android:drawable="@drawable/group_indicator_closed"  android:state_empty="false" android:state_expanded="false" />
-	<item android:drawable="@drawable/group_indicator_none" />
-
-</selector>

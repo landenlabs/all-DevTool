@@ -34,7 +34,12 @@ android {
 
         // Limit languages to following list.
         resConfigs "en", "es"
+
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+        }
     }
+
     buildTypes {
         release {
             shrinkResources true
@@ -54,6 +59,10 @@ android {
             minifyEnabled false
             jniDebuggable true
             debuggable true
+
+            aaptOptions.cruncherEnabled = false
+            splits.abi.enable = false
+            splits.density.enable = false
         }
     }
 
@@ -75,6 +84,7 @@ android {
     productFlavors {
         legacy {
             dimension = "std"
+            resConfigs('en', 'xhdpi')
         }
         standard {
             dimension = "std"

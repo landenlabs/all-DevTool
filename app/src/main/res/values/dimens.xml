@@ -6,12 +6,6 @@
     <dimen name="dlg_share_size">40dp</dimen>
     <dimen name="rounded_btn_radius">10dp</dimen>
     <!-- Graph -->
-    <dimen name="title_font_size">16sp</dimen>
-    <dimen name="range_tick_label_font_size">12sp</dimen>
-    <dimen name="domain_tick_label_font_size">12sp</dimen>
-    <dimen name="domain_label_font_size">14sp</dimen>
-    <dimen name="range_label_font_size">14sp</dimen>
-    <dimen name="legend_text_font_size">12sp</dimen>
 
     <!-- Includes padding of 10 -->
     <dimen name="console_col1Width">80dp</dimen>
