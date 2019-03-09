@@ -20,5 +20,6 @@
 
 # -keep class com.google.android.gms.** { *; }
 -dontwarn com.google.android.gms.**
+-dontwarn com.firebase.ui.auth.data.remote.**
 -keep class com.androidplot.** { *; }
 
