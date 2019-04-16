@@ -19,8 +19,8 @@ android {
         minSdkVersion 17
         targetSdkVersion 28
 
-        versionCode 2014
-        versionName '2.0.14'
+        versionCode 2015
+        versionName '2.0.15'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -33,7 +33,7 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         // Limit languages to following list.
-        resConfigs "en", "es"
+        // resConfigs "en", "es"
 
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
@@ -117,12 +117,12 @@ dependencies {
     implementation "com.android.support:support-v4:$supportLibVersion"
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
     // Standard flavor
-    standardImplementation "com.google.android.gms:play-services-ads-identifier:15.0.1"
-    standardImplementation "com.google.android.gms:play-services-gcm:15.0.1"
-    standardImplementation "com.google.android.gms:play-services-auth:16.0.0"
-    standardImplementation "com.google.android.gms:play-services-analytics:16.0.1"
-    standardImplementation "com.google.android.gms:play-services-location:15.0.1"
-    standardImplementation "com.google.android.gms:play-services-drive:15.0.1"
+    standardImplementation "com.google.android.gms:play-services-ads-identifier:16.0.0"
+    standardImplementation "com.google.android.gms:play-services-gcm:16.1.0"
+    standardImplementation "com.google.android.gms:play-services-auth:16.0.1"
+    standardImplementation "com.google.android.gms:play-services-analytics:16.0.8"
+    standardImplementation "com.google.android.gms:play-services-location:16.0.0"
+    standardImplementation "com.google.android.gms:play-services-drive:16.1.0"
     // Legacy flavor
     legacyImplementation "com.google.android.gms:play-services-ads-identifier:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-gcm:$legacyPlayServiceVersion"
@@ -132,7 +132,7 @@ dependencies {
     legacyImplementation "com.google.android.gms:play-services-drive:$legacyPlayServiceVersion"
     implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
     // Firebase
-    standardImplementation "com.google.firebase:firebase-core:16.0.1"
+    standardImplementation "com.google.firebase:firebase-core:16.0.8"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
     // HockeyApp crash reporting
     implementation 'net.hockeyapp.android:HockeySDK:5.1.1'

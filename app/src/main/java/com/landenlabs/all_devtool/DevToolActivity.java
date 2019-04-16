@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.os.ConfigurationCompat;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -52,6 +53,8 @@ import com.landenlabs.all_devtool.util.UncaughtExceptionHandler;
 import com.landenlabs.all_devtool.util.Utils;
 
 import net.danlew.android.joda.JodaTimeAndroid;
+
+import java.util.Locale;
 
 
 /**
@@ -226,6 +229,8 @@ public class DevToolActivity extends FragmentActivity {
             Toast.makeText(this, "Portrait", Toast.LENGTH_SHORT).show();
             // GlobalInfo.s_globalInfo.tabAdapter.m_actionBar.show();
         }
+
+        Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
     }
 
     @Override
@@ -233,6 +238,7 @@ public class DevToolActivity extends FragmentActivity {
         super.onStart();
         GlobalInfo.s_globalInfo.mainFragActivity = this;
         m_uncaughtExceptionHandler = new UncaughtExceptionHandler(this);
+        Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
     }
 
     @Override

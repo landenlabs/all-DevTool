@@ -52,7 +52,7 @@ public class LLog {
     }
 
     public final boolean isOn() {
-        return this == ON;
+        return mEnabled;
     }
 
     public static String getTag() {

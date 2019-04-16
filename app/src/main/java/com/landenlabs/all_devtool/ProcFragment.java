@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.HardwarePropertiesManager;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -56,6 +57,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import static android.content.Context.HARDWARE_PROPERTIES_SERVICE;
+import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_BATTERY;
+import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU;
+import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_GPU;
+import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
 import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
 /**
@@ -222,6 +228,32 @@ public class ProcFragment extends DevFragment {
                 addString("PRODUCT", Build.PRODUCT);
             }
 
+            /*
+                HardwarePropertiesManager hwpm = (HardwarePropertiesManager) getSystemService(this.HARDWARE_PROPERTIES_SERVICE);
+                CpuUsageInfo cpuUsage[] = hwpm.getCpuUsages();
+
+                PowerManager pm = getServiceSafe(Context.POWER_SERVICE);
+                pm.isSustainedPerformanceModeSupported()
+                activity.getWindow().setSustainedPerformanceMode(true)
+             */
+            if (true) {
+                HardwarePropertiesManager hwpm =  getServiceSafe(HARDWARE_PROPERTIES_SERVICE);
+
+                if (Build.VERSION.SDK_INT >= 24) {
+                    try {
+                        Map<String, String> temperatureItems = new HashMap<>();
+                        float[] tcpu = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_CPU, TEMPERATURE_CURRENT);
+                        float[] tgpu = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_GPU, TEMPERATURE_CURRENT);
+                        float[] tbat = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_BATTERY, TEMPERATURE_CURRENT);
+                        temperatureItems.put(" CPU", String.format("%.1f", tcpu[0]));
+                        temperatureItems.put(" GPU", String.format("%.1f", tgpu[0]));
+                        temperatureItems.put(" Battery", String.format("%.1f", tbat[0]));
+                        addMap("Temperaures", "", temperatureItems);
+                    } catch (Throwable tr) {
+                        Log.e("Hardware properties", "access failed", tr);
+                    }
+                }
+            }
             if (true) {
                 ArrayList<ArrayList<String>> cpuInfoLists = readFile("/proc/cpuinfo", "",": ", 2);
                 for (ArrayList<String> cpuInfoList : cpuInfoLists) {

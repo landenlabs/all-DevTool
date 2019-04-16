@@ -522,6 +522,13 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
     /**
      * Gets total system cpu usage (not just this app)
+     *
+     * cat /proc/stat
+     *   cpu  61151 32373 58883 146271 807 8851 5433 0 0 0
+     *   cpu0 29204 16178 25474 144639 799 4623 2833 0 0 0
+     *   cpu1 14639 5341 15343 492 3 1831 1862 0 0 0
+     *   cpu2 12124 8966 11712 522 3 1345 455 0 0 0
+     *   cpu3 5182 1887 6352 615 0 1051 282 0 0 0
      */
     private float getCpuUsage() {
         try {

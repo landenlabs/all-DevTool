@@ -56,6 +56,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.os.ConfigurationCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -392,6 +393,15 @@ public class SystemFragment extends DevFragment {
             localeListStr.put(" In DLS", tz.inDaylightTime(m_date) ? "Yes" : "No");
             localeListStr.put(" Short Name", tz.getDisplayName(false, TimeZone.SHORT, ourLocale));
             localeListStr.put(" Long Name", tz.getDisplayName(false, TimeZone.LONG, ourLocale));
+
+            Locale locale0 = ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0);
+            if (locale0 != null
+                && (!locale0.getLanguage().equals(ourLocale.getLanguage())
+                || !locale0.getCountry().equals(ourLocale.getCountry()))) {
+                localeListStr.put("Locale[0] Name", locale0.getDisplayName());
+                localeListStr.put(" Country", locale0.getCountry());
+                localeListStr.put(" Language", locale0.getLanguage());
+            }
 
             addBuild("Locale TZ...", localeListStr);
         } catch (Exception ex) {

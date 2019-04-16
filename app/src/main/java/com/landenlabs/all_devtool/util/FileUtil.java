@@ -17,7 +17,7 @@ import static android.content.ContentValues.TAG;
 /**
  * Created by Dennis Lang on 7/13/16.
  */
-@SuppressWarnings("UnnecessaryLocalVariable")
+@SuppressWarnings({"UnnecessaryLocalVariable", "unused"})
 public class FileUtil {
     public static final int KB = 1 << 10;
     public static final int MB = 1 << 20;

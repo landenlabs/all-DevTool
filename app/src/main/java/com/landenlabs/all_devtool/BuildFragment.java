@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -154,7 +155,16 @@ public class BuildFragment extends DevFragment {
 
             addBuild("VERSION...", listStr);
 
-
+            PowerManager pm = getServiceSafe(Context.POWER_SERVICE);
+            if (Build.VERSION.SDK_INT >= 21)
+                addBuild("Power Save Mode",
+                        pm.isPowerSaveMode() ? "yes" : "no");
+            if (Build.VERSION.SDK_INT >= 23)
+                addBuild("Is Idel Mode", pm.isDeviceIdleMode() ? "yes" : "no");
+            if (Build.VERSION.SDK_INT >= 24)
+                addBuild("Has Sustained Pwr Mode",
+                        pm.isSustainedPerformanceModeSupported() ? "yes" : "no");
+            // activity.getWindow().setSustainedPerformanceMode(true)
 
         }
         final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
@@ -201,19 +211,20 @@ public class BuildFragment extends DevFragment {
             m_valueList = list2;
         }
 
+        @NonNull
         public String toString() {
-            return m_fieldStr;
+            return (m_fieldStr != null) ? m_fieldStr : "";
         }
 
         public String fieldStr() {
             return m_fieldStr;
         }
 
-        public String valueStr() {
+        String valueStr() {
             return m_valueStr;
         }
 
-        public Map<String, String> valueListStr() {
+        Map<String, String> valueListStr() {
             return m_valueList;
         }
 

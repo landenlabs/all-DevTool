@@ -21,10 +21,10 @@ import com.landenlabs.all_devtool.GlobalInfo;
 @SuppressWarnings({"Convert2Lambda", "UnnecessaryLocalVariable"})
 public class GoogleAnalyticsHelper {
 
-    static String GOOGLE_ANALYTICS_KEY = "none";
-    static String sScreen = "";
-    static boolean sGAC_enabled = false;
-    static boolean sGA_tracking = false;
+    private static String GOOGLE_ANALYTICS_KEY = "none";
+    private static String sScreen = "";
+    private static boolean sGAC_enabled = false;
+    private static boolean sGA_tracking = false;
 
     private static GoogleAnalytics getAnalytics(Activity activity) {
         GoogleAnalytics analytics = GoogleAnalytics.getInstance(activity);

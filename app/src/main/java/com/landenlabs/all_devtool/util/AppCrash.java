@@ -90,7 +90,7 @@ public class AppCrash extends CrashManagerListener {
      */
     public String getDescription() {
         String description = "";
-        String eol = System.getProperty("line.separator");
+        // String eol = System.getProperty("line.separator");
 
         description = addRes(description, "TargetSDK=", "targetSdkVersion");
         description = addRes(description, "CompilerSDK=", "compileSdkVersion");
