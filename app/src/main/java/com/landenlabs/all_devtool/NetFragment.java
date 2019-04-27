@@ -656,6 +656,7 @@ public class NetFragment extends DevFragment {
 
                     btListStr.put("Enabled", bluetoothAdapter.isEnabled() ? "yes" : "no");
                     btListStr.put("Name", bluetoothAdapter.getName());
+                    btListStr.put("Address", bluetoothAdapter.getAddress());
                     btListStr.put("ScanMode", String.valueOf(bluetoothAdapter.getScanMode()));
                     btListStr.put("State", String.valueOf(bluetoothAdapter.getState()));
                     Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
@@ -668,7 +669,19 @@ public class NetFragment extends DevFragment {
                         }
                     }
 
+                    PackageManager pm = getActivity().getPackageManager();
+                    boolean isBT = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+                    boolean isBLE = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+                    btListStr.put("BLE", isBLE  ? "yes" : "no");
+
                     // BluetoothManager btMgr = getServiceSafe(Context.BLUETOOTH_SERVICE);
+                    // BluetoothGattServer mGattServer = btMgr.openGattServer(getContext(), null);
+
+                    // BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
+                    // BluetoothConfigManager manager = BluetoothConfigManager.getInstance();
+                    // BluetoothProfileManager manager = BluetoothProfileManager.getInstance();
+
+
                     // btMgr.getAdapter().
                     addBuild("Bluetooth", btListStr);
                 }

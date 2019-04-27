@@ -66,6 +66,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseExpandableListAdapter;
@@ -408,6 +409,20 @@ public class SystemFragment extends DevFragment {
             m_log.e("Locale/TZ %s", ex.getMessage());
         }
 
+        // --------------- Caption Manager ---------
+        try {
+
+            if (Build.VERSION.SDK_INT >= 19) {
+                Map<String, String> listStr = new LinkedHashMap<>();
+                final CaptioningManager capMgr = getServiceSafe(Context.CAPTIONING_SERVICE);
+                listStr.put("Enabled", capMgr.isEnabled() ? "yes" : "no");
+                listStr.put("Font Size", String.valueOf(capMgr.getFontScale()));
+                listStr.put("Language", capMgr.getLocale().getLanguage());
+                addBuild("Caption...", listStr);
+            }
+        } catch (Exception ignore) {
+
+        }
         // --------------- Location Services -------------
         try {
             Map<String, String> listStr = new LinkedHashMap<>();

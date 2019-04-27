@@ -19,8 +19,8 @@ android {
         minSdkVersion 17
         targetSdkVersion 28
 
-        versionCode 2015
-        versionName '2.0.15'
+        versionCode 2017
+        versionName '2.0.17'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -157,8 +157,8 @@ def appendVersionNameVersionCode(variant, defaultConfig) {
     */
     variant.outputs.all { output ->
         def ourname = project.parent.name
-        outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
-        println "out name= $outputFileName"
+        // outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
+        // println "out name= $outputFileName"
     }
 }
 
@@ -168,7 +168,7 @@ android.applicationVariants.all { variant ->
     variant.outputs.all {
         def ourname = project.parent.name
         // outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
-        println "out name= $outputFileName"
+        // println "out name= $outputFileName"
     }
 }
 

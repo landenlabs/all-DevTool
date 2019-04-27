@@ -88,6 +88,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.dialogs.UninstallDialog;
 import com.landenlabs.all_devtool.receivers.UninstallIntentReceiver;
+import com.landenlabs.all_devtool.util.ArrayListPair;
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -835,16 +836,7 @@ public class PackageFragment extends DevFragment
     }
 
     // ============================================================================================
-    // Internal classes
-
-    class ArrayListPair<S, T> extends ArrayList<Pair<S, T>> {
-
-        public boolean add(S v1, T v2) {
-            return this.add(new Pair<>(v1, v2));
-        }
-    }
-
-    private class ArrayListPairString extends ArrayListPair<String, String> {
+    public class ArrayListPairString extends ArrayListPair<String, String> {
     }
 
     // ============================================================================================

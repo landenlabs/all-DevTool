@@ -54,7 +54,7 @@ public class NetUtils {
     // 2 = localPort
     // 3 = remoteAddress
     // 4 = remotePort
-    // 5 = status
+    // 5 = status  0A=listent
     // 6 = tx queue
     // 7 = rx quque
     // 8 = uid
@@ -64,6 +64,34 @@ public class NetUtils {
             "\\d+:\\s([0-9A-F]{8}):([0-9A-F]{4})\\s([0-9A-F]{8}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9A-F]{8}):([0-9A-F]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9A-F]{8}\\s+([0-9]+)";
 
 
+    public enum  NetStatus {
+        UNKNOWN(0),
+        ESTABLISHED(1),
+        SYN_SENT(2),
+        SYN_RECV(3),
+        FIN_WAIT1(4),
+        FIN_WAIT2(5),
+        TIME_WAIT(6),
+        CLOSE(7),
+        CLOSE_WAIT(8),
+        LAST_ACK(9),
+        LISTEN(10),
+        CLOSING(11),   /* Now a valid state */
+        NEW_SYN_RECV(12);
+
+        int value;
+        NetStatus(int value) {
+            this.value = value;
+        }
+        public static NetStatus getFor(int val) {
+            for (NetStatus netStatus : NetStatus.values()) {
+                if (netStatus.value == val) {
+                    return netStatus;
+                }
+            }
+            return UNKNOWN;
+        }
+    }
 
     @SuppressWarnings("WeakerAccess")
     public static class NetConnection {
@@ -79,6 +107,7 @@ public class NetUtils {
         public String remoteAddrHexStr;
         public int remotePort;
         public int status;
+        public NetStatus netStatus;
         public int txQueue;
         public int rxQueue;
         public int pidEntry;
@@ -86,6 +115,7 @@ public class NetUtils {
         public String appName;
         public String appVersion;
     }
+
     public  static class NetConnections extends ArrayList<NetConnection> {
         public String typeErr;
     }
@@ -149,6 +179,7 @@ public class NetUtils {
         netConnection.remotePort = Integer.parseInt(m6.group(4), 16);
 
         netConnection.status = Integer.parseInt(m6.group(5), 16);
+        netConnection.netStatus = NetStatus.getFor(netConnection.status & 0xf);
 
         netConnection.txQueue = Integer.parseInt(m6.group(6), 16);
         netConnection.rxQueue = Integer.parseInt(m6.group(7), 16);

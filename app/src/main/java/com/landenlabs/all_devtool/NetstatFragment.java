@@ -32,9 +32,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -53,6 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.landenlabs.all_devtool.util.ArrayListPair;
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.NetUtils;
 import com.landenlabs.all_devtool.util.Ui;
@@ -208,9 +209,11 @@ public class NetstatFragment extends DevFragment {
                 // int grpPos = (Integer) view.getTag();
                 if (pos >= 0 && pos < m_list.size()) {
                     NetInfo netInfo = m_list.get(pos);
-                    String packName = netInfo.valueListStr().keySet().iterator().next().trim();
-                    openPackageInfo(packName);
-                    return true;
+                    String packName = netInfo.valueListStr().get(0).first.trim();
+                    if (!TextUtils.isEmpty(packName) && packName.contains(".")) {
+                        openPackageInfo(packName);
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -227,7 +230,7 @@ public class NetstatFragment extends DevFragment {
                     final String LATITUDE = "Latitude:";
                     final String LONGITUDE = "Longitude:";
 
-                    String netLines = netInfo.valueListStr().valueAt(childPosition);
+                    String netLines = netInfo.valueListStr().get(childPosition).second;
                     if (netLines != null && netLines.contains(LATITUDE)) {
                         String[] lines = netLines.split("\n");
                         String lat="", lng="";
@@ -335,12 +338,15 @@ public class NetstatFragment extends DevFragment {
 
                     NetInfo buildInfo = m_list.get(grpPos);
 
-                    String key = TextUtils.join(",", buildInfo.valueListStr().keySet().toArray());
-                    String val = TextUtils.join(",", buildInfo.valueListStr().values().toArray());
+                    boolean isMatch = false;
+                    for (Pair<String,String> strPair : buildInfo.valueListStr()) {
+                        isMatch = strPair.first.matches(m_filter)
+                                || strPair.second.matches(m_filter)
+                                || Utils.containsIgnoreCase(strPair.first, m_filter)
+                                || Utils.containsIgnoreCase(strPair.second, m_filter);
+                    }
 
-                    String text = key + val;
-
-                    if (text.matches(m_filter) || Utils.containsIgnoreCase(text, m_filter)) {
+                    if (isMatch) {
                         m_listView.expandGroup(grpPos);
                     } else {
                         m_listView.collapseGroup(grpPos);
@@ -368,31 +374,39 @@ public class NetstatFragment extends DevFragment {
             NetUtils.NetConnections netConnections =
                     NetUtils.getConnetions(getContextSafe());
             if (netConnections.size() > 0) {
-                Map<String, ArrayMap<String, String>> pkgConnections = new TreeMap<>();
+                Map<String, ArrayListPairString> pkgConnections = new TreeMap<>();
 
                 for (NetUtils.NetConnection netConnection : netConnections) {
-                    if (!TextUtils.isEmpty(netConnection.appName)) {
-                        ArrayMap<String, String> netConnectionListStr =
-                                pkgConnections.get(netConnection.appName);
+                    String appName = netConnection.appName == null ? "unknown" : netConnection.appName;
+                    // if (!TextUtils.isEmpty(netConnection.appName)) {
+                    ArrayListPairString netConnectionListStr =
+                                pkgConnections.get(appName);
                         if (netConnectionListStr == null) {
-                            netConnectionListStr = new ArrayMap<>();
-                            pkgConnections.put(netConnection.appName, netConnectionListStr);
-                            netConnectionListStr.put(" " + netConnection.packageName,
+                            netConnectionListStr = new ArrayListPairString();
+                            pkgConnections.put(appName, netConnectionListStr);
+                            netConnectionListStr.add(" " + netConnection.packageName,
                                     "v" + netConnection.appVersion);
                         }
 
-                        netConnectionListStr.put(String
-                                        .format("#%d %s", netConnectionListStr.size(), netConnection.type)
-                                ,
-                                netConnection.remoteAddr
-                                        .getHostAddress() + " : " + netConnection.remotePort
-                                        + getIpGeoLocation(netConnection.remoteAddr)
-                        );
-                    }
+                        String netVal;
+                        if ( netConnection.netStatus == NetUtils.NetStatus.LISTEN) {
+                            netVal = "Local: " + netConnection.localAddr
+                                    .getHostAddress() + " : " + netConnection.localPort
+                                    + getIpGeoLocation(netConnection.remoteAddr);
+                        } else {
+                            netVal =  "Remote: " + netConnection.remoteAddr
+                                    .getHostAddress() + " : " + netConnection.remotePort
+                                    + getIpGeoLocation(netConnection.remoteAddr);
+                        }
+                        netConnectionListStr.add(String
+                                        .format("#%d %s %s", netConnectionListStr.size(),
+                                                netConnection.type, netConnection.netStatus.name())
+                                , netVal);
+                    // }
                 }
                 for (String appName : pkgConnections.keySet()) {
-                    ArrayMap<String, String> netConnList = pkgConnections.get(appName);
-                    addNetInfo(appName + " #" + (netConnList.size()-1), netConnList);
+                    ArrayListPairString netConnList = pkgConnections.get(appName);
+                    m_list.add(new NetInfo(appName, netConnList));
                 }
             }
 
@@ -409,10 +423,6 @@ public class NetstatFragment extends DevFragment {
     }
 
 
-    void addNetInfo(String name, ArrayMap<String, String> value) {
-        if (!value.isEmpty())
-            m_list.add(new NetInfo(name, value));
-    }
 
     /**
      * Open Application Detail Info dialog for package.
@@ -450,20 +460,20 @@ public class NetstatFragment extends DevFragment {
 
     GetGeoLocation getGeoLocation = null;
 
+    private void appendIf(StringBuilder sb, Map<String, String> mapStr, String key) {
+        if (mapStr.containsKey(key) && !TextUtils.isEmpty(mapStr.get(key)) )
+            sb.append("\n").append(key).append(":").append(mapStr.get(key));
+    }
     String getIpGeoLocation(InetAddress addr) {
         if (ipGeoLocations.containsKey(addr)) {
             Map<String, String> ipInfo = ipGeoLocations.get(addr);
-            String city = ipInfo.get("city");
-            String region = ipInfo.get("region");
-            String country = ipInfo.get("country_name");
-            String latitude = ipInfo.get("latitude");
-            String longitude = ipInfo.get("longitude");
-            return "\nCity:" + city
-                    + "\nRegion:" + region
-                    + "\nCountry:" + country
-                    + "\nLatitude:" + latitude
-                    + "\nLongitude:" + longitude
-                    ;
+            StringBuilder sb = new StringBuilder();
+            appendIf(sb, ipInfo, "city");
+            appendIf(sb, ipInfo,"region");
+            appendIf(sb, ipInfo,"country_name");
+            appendIf(sb, ipInfo,"latitude");
+            appendIf(sb, ipInfo,"longitude");
+            return sb.toString();
         } else {
             if (!ipAddressQueue.contains(addr)) {
                 ipAddressQueue.add(addr);
@@ -488,23 +498,31 @@ public class NetstatFragment extends DevFragment {
     }
 
 
+    // ============================================================================================
+    private class ArrayListPairString extends ArrayListPair<String, String> {
+    }
+
     // =============================================================================================
     @SuppressWarnings("unused")
     class NetInfo {
         final String m_fieldStr;
         final String m_valueStr;
-        final ArrayMap<String, String> m_valueList;
+        final ArrayListPairString  m_valueList;    // key order added maintained.
+        final String m_appName;
 
+        /*
         NetInfo(String str1, String str2) {
             m_fieldStr = str1;
             m_valueStr = str2;
             m_valueList = null;
         }
+        */
 
-        NetInfo(String str1, ArrayMap<String, String> list2) {
-            m_fieldStr = str1;
+        NetInfo(String appName, ArrayListPairString connections) {
+            m_appName = appName;
+            m_fieldStr = appName + " #" + (connections.size()-1);
             m_valueStr = null;
-            m_valueList = list2;
+            m_valueList = connections;
         }
 
         public String toString() {
@@ -519,7 +537,7 @@ public class NetstatFragment extends DevFragment {
             return m_valueStr;
         }
 
-        public ArrayMap<String, String> valueListStr() {
+        public  ArrayListPairString valueListStr() {
             return m_valueList;
         }
 
@@ -549,7 +567,6 @@ public class NetstatFragment extends DevFragment {
             m_onItemLongClickListener = longClickList;
         }
 
-        
         /**
          * Generated expanded detail view object.
          */
@@ -563,9 +580,9 @@ public class NetstatFragment extends DevFragment {
 
             View expandView = convertView;
 
-            if (childPosition < netInfo.valueListStr().keySet().size()) {
-                String key = (String) netInfo.valueListStr().keySet().toArray()[childPosition];
-                String val = "" + netInfo.valueListStr().get(key);
+            if (childPosition < netInfo.valueListStr().size()) {
+                String key = netInfo.valueListStr().get(childPosition).first;
+                String val = netInfo.valueListStr().get(childPosition).second;
 
                 if (key.length() + val.length() > 40) {
                     expandView = m_inflater.inflate(SUMMARY_LAYOUT_WIDE, parent, false);
@@ -597,6 +614,8 @@ public class NetstatFragment extends DevFragment {
                 }
             }
 
+            expandView.setTag(groupPosition);
+            expandView.setOnLongClickListener(this);
             return expandView;
         }
 
