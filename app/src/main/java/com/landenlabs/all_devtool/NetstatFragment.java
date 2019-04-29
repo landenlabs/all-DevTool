@@ -81,7 +81,7 @@ public class NetstatFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    final ArrayList<NetInfo> m_list = new ArrayList<>();
+    ArrayList<NetInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
     ImageButton m_search;
@@ -227,8 +227,8 @@ public class NetstatFragment extends DevFragment {
                 if (groupPosition >= 0 && groupPosition < m_list.size()) {
                     NetInfo netInfo = m_list.get(groupPosition);
 
-                    final String LATITUDE = "Latitude:";
-                    final String LONGITUDE = "Longitude:";
+                    final String LATITUDE = "latitude:";
+                    final String LONGITUDE = "longitude:";
 
                     String netLines = netInfo.valueListStr().get(childPosition).second;
                     if (netLines != null && netLines.contains(LATITUDE)) {
@@ -243,7 +243,10 @@ public class NetstatFragment extends DevFragment {
                         }
 
                         if (!TextUtils.isEmpty(lat) && !TextUtils.isEmpty(lng)) {
-                            Uri gmmIntentUri = Uri.parse("geo:" + lat + "," + lng);
+                            // Uri gmmIntentUri = Uri.parse("geo:" + lat + "," + lng);
+                            Uri gmmIntentUri = Uri.parse("geo:0,0?q="+lat+","+lng+"(Remote)");
+                            // Create a Uri from an intent string. Use the result to create an Intent.
+                            // Uri gmmIntentUri = Uri.parse("google.streetview:cbll="+ lat + "," + lng);
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                             mapIntent.setPackage("com.google.android.apps.maps");
                             if (mapIntent
@@ -318,9 +321,11 @@ public class NetstatFragment extends DevFragment {
     private void expandAll() {
         updateListIf();
         synchronized (m_listView) {
-            int count = m_listView.getAdapter().getCount(); // m_list.size();
-            for (int position = 0; position < count; position++)
+            int count = m_listView.getAdapter().getCount();
+            for (int position = 0; position < count; position++) {
                 m_listView.expandGroup(position);
+                count = m_listView.getAdapter().getCount();
+            }
         }
     }
 
@@ -367,7 +372,7 @@ public class NetstatFragment extends DevFragment {
 
         synchronized (m_listView) {
             boolean firstTime = m_list.isEmpty();
-            m_list.clear();
+            ArrayList<NetInfo> newList = new ArrayList<>();
 
             // --------------- Network connections ------------
 
@@ -406,19 +411,27 @@ public class NetstatFragment extends DevFragment {
                 }
                 for (String appName : pkgConnections.keySet()) {
                     ArrayListPairString netConnList = pkgConnections.get(appName);
-                    m_list.add(new NetInfo(appName, netConnList));
+                    newList.add(new NetInfo(appName, netConnList));
                 }
             }
 
-            if (firstTime) {
-                int count = m_list.size();
-                for (int position = 0; position < count; position++) {
-                    m_listView.expandGroup(position);
-                }
-            }
+            m_listView.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (m_listView) {
+                        m_list = newList;
+                        m_adapter.notifyDataSetChanged();   // Does nothing ?
+                        m_listView.invalidate();            // Force UI to rebuild.
 
-            m_adapter.notifyDataSetChanged();   // Does nothing ?
-            m_listView.invalidate();            // Force UI to rebuild.
+                        if (firstTime) {
+                            int count = m_list.size();
+                            for (int position = 0; position < count; position++) {
+                                m_listView.expandGroup(position);
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -461,7 +474,7 @@ public class NetstatFragment extends DevFragment {
     GetGeoLocation getGeoLocation = null;
 
     private void appendIf(StringBuilder sb, Map<String, String> mapStr, String key) {
-        if (mapStr.containsKey(key) && !TextUtils.isEmpty(mapStr.get(key)) )
+        if (mapStr != null && mapStr.containsKey(key) && !TextUtils.isEmpty(mapStr.get(key)) )
             sb.append("\n").append(key).append(":").append(mapStr.get(key));
     }
     String getIpGeoLocation(InetAddress addr) {
@@ -614,8 +627,8 @@ public class NetstatFragment extends DevFragment {
                 }
             }
 
-            expandView.setTag(groupPosition);
-            expandView.setOnLongClickListener(this);
+            // expandView.setTag(groupPosition);
+            // expandView.setOnLongClickListener(this);
             return expandView;
         }
 

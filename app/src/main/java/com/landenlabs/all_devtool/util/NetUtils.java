@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,9 +48,6 @@ public class NetUtils {
      * 	- PID
      */
 
-    // sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
-    // 99: 00000000000000000000000000000000:C383 00000000000000000000000000000000:0000 8A 00000000:00000000 00:00000000 00000000     0        0 38022 1 0000000000000000 99 0 0 10 -1
-    //
     // 1 = localAddress
     // 2 = localPort
     // 3 = remoteAddress
@@ -58,11 +56,69 @@ public class NetUtils {
     // 6 = tx queue
     // 7 = rx quque
     // 8 = uid
-    private static final String TCP_6_PATTERN =
-            "\\d+:\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9]{8}):([0-9]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9]{8}\\s+([0-9]+)";
+    //
+    //
+    // tcp (tcp4)
+    // sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+    // 4: 00000000:830D 00000000:0000 8A 00000000:00000000 00:00000000 00000000     0        0 28420 1 0000000000000000 99 0 0 10 0
+    // 5: 6501A8C0:BF3B 2E0BD9AC:01BB 08 00000000:0000026D 00:00000000 00000000 10087        0 1008831 1 0000000000000000 55 3 28 10 -1
+    // 6: 6501A8C0:A84B 820CD9AC:01BB 08 00000000:0000026D 00:00000000 00000000 10087        0 1008818 1 0000000000000000 34 3 28 10 -1
+    //
+    // tcp6
+    // sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+    // 8: 0000000000000000FFFF00006501A8C0:AE02 0000000000000000FFFF000063D21968:01BB 01 00000000:00000000 00:00000000 00000000 10327        0 1009652 1 0000000000000000 21 3 29 10 -1
+    // 9: 0000000000000000FFFF00006501A8C0:B459 0000000000000000FFFF00005C1C1168:01BB 01 00000000:00000000 00:00000000 00000000 10320        0 1009378 1 0000000000000000 73 3 24 10 -1
+
+    // --------------
+    //     This document describes the interfaces /proc/net/tcp and /proc/net/tcp6.
+    //     Note that these interfaces are deprecated in favor
+    //     of tcp_diag.
+    //
+    //     These /proc interfaces provide information about currently active TCP
+    //     connections, and are implemented by tcp4_seq_show() in
+    //     net/ipv4/tcp_ipv4.c and tcp6_seq_show() in net/ipv6/tcp_ipv6.c,
+    //     respectively.
+    //
+    //     It will first list all listening TCP sockets, and next list all
+    //     established TCP connections. A typical entry of /proc/net/tcp would
+    //     look like this (split up into 3 parts because of the length of the
+    //     line):
+    //
+    //  46: 010310AC:9C4C 030310AC:1770 01
+    //   |      |      |      |      |   |--> connection state
+    //   |      |      |      |      |------> remote TCP port number
+    //   |      |      |      |-------------> remote IPv4 address
+    //   |      |      |--------------------> local TCP port number
+    //   |      |---------------------------> local IPv4 address
+    //   |----------------------------------> number of entry
+    //
+    // 00000150:00000000 01:00000019 00000000
+    //   |        |     |     |       |--> number of unrecovered RTO timeouts
+    //   |        |     |     |----------> number of jiffies until timer expires
+    //   |        |     |----------------> timer_active (see below)
+    //   |        |----------------------> receive-queue
+    //   |-------------------------------> transmit-queue
+    //
+    // 1000        0 54165785 4 cd1e6040 25 4 27 3 -1
+    // |          |    |     |    |     |  | |  | |--> slow start size threshold,
+    // |          |    |     |    |     |  | |  |      or -1 if the threshold
+    // |          |    |     |    |     |  | |  |      is >= 0xFFFF
+    // |          |    |     |    |     |  | |  |----> sending congestion window
+    // |          |    |     |    |     |  | |-------> (ack.quick<<1)|ack.pingpong
+    // |          |    |     |    |     |  |---------> Predicted tick of soft clock
+    // |          |    |     |    |     |              (delayed ACK control data)
+    // |          |    |     |    |     |------------> retransmit timeout
+    // |          |    |     |    |------------------> location of socket in memory
+    // |          |    |     |-----------------------> socket reference count
+    // |          |    |-----------------------------> inode
+    // |          |----------------------------------> unanswered 0-window probes
+    // |---------------------------------------------> uid
+    // --------------
     private static final String TCP_4_PATTERN =
             "\\d+:\\s([0-9A-F]{8}):([0-9A-F]{4})\\s([0-9A-F]{8}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9A-F]{8}):([0-9A-F]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9A-F]{8}\\s+([0-9]+)";
 
+    private static final String TCP_6_PATTERN =
+            "\\d+:\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9]{8}):([0-9]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9]{8}\\s+([0-9]+)";
 
     public enum  NetStatus {
         UNKNOWN(0),
@@ -193,19 +249,24 @@ public class NetUtils {
     private static InetAddress parseHexAddrStr(String hexStr, String type) {
         InetAddress addr = null;
         byte[] bytes = hexStringToByteArray(hexStr);
-        htonb(bytes);
 
         switch (type.toLowerCase()) {
             case "tcp":
             case "tcp4":
                 try {
+                    htonb(bytes);
                     addr = Inet4Address.getByAddress(bytes);
                 } catch (Exception ignore) {
                 }
                 break;
             case "tcp6":
                 try {
+                    // if (hexStr.startsWith("fe80") || hexStr.startsWith("FE80")) // skipping link-local addresses
+                    //    continue;
+                    flipHex4(bytes);
                     addr = Inet6Address.getByAddress(bytes);
+                    Log.d("ipv6 ", hexStr+" " + addr.getHostAddress());
+                    // addr = Inet6Address.getByAddress(null, bytes, 0);
                 } catch (Exception ignore) {
                 }
                 break;
@@ -213,6 +274,8 @@ public class NetUtils {
 
         return addr;
     }
+
+
 
     @NonNull
     public String formatIp(int ipAddrss) {
@@ -249,6 +312,21 @@ public class NetUtils {
         return bytes;
     }
 
+    private static byte[] flipHex4(byte[] bytes) {
+        int len = bytes.length;
+        for (int idx = 0; idx < len; idx +=4) {
+            swab(bytes, idx, idx+3);
+            swab(bytes, idx+1, idx+2);
+        }
+        return bytes;
+    }
+
+    private static void swab(byte[] bytes, int fromIdx, int toIdx) {
+        byte bTemp = bytes[fromIdx];
+        bytes[fromIdx] = bytes[toIdx];
+        bytes[toIdx] = bTemp;
+    }
+
     private static byte[] htoni(int x)
     {
         byte[] res = new byte[4];
@@ -269,9 +347,6 @@ public class NetUtils {
         }
         return data;
     }
-
-
-
 
     @NonNull
     private static String readFile(String filePath) {
@@ -360,6 +435,7 @@ public class NetUtils {
                 Map<String, String> ipLocation = new HashMap<>();
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    line = line.replaceAll(",$", "");
                     String[] parts = line.split(":");
                     if (parts.length == 2) {
                         ipLocation.put(
