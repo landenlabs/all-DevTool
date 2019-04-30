@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -265,7 +264,7 @@ public class NetUtils {
                     //    continue;
                     flipHex4(bytes);
                     addr = Inet6Address.getByAddress(bytes);
-                    Log.d("ipv6 ", hexStr+" " + addr.getHostAddress());
+                    // Log.d("ipv6 ", hexStr+" " + addr.getHostAddress());
                     // addr = Inet6Address.getByAddress(null, bytes, 0);
                 } catch (Exception ignore) {
                 }

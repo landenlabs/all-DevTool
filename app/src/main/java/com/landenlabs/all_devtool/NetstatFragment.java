@@ -321,10 +321,10 @@ public class NetstatFragment extends DevFragment {
     private void expandAll() {
         updateListIf();
         synchronized (m_listView) {
-            int count = m_listView.getAdapter().getCount();
+            // Keeps crashing in this code, not sure why listview and list would be different.
+            int count = Math.min(m_listView.getAdapter().getCount(), m_list.size());
             for (int position = 0; position < count; position++) {
                 m_listView.expandGroup(position);
-                count = m_listView.getAdapter().getCount();
             }
         }
     }
