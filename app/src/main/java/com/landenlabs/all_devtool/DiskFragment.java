@@ -54,6 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
+import com.landenlabs.all_devtool.util.ListInfo;
 import com.landenlabs.all_devtool.util.OsUtils;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -85,7 +86,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
     final static int SUMMARY_LAYOUT = R.layout.disk_list_row;
     public static String s_name = "Disk";
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
-    final ArrayList<GroupInfo> m_list = new ArrayList<>();
+    final ArrayList<ListInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
     CheckBox m_writeGrantedCb;
@@ -669,12 +670,12 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
 
     void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
-            m_list.add(new GroupInfo(name, value.trim()));
+            m_list.add(new ListInfo(name, value.trim()));
     }
 
     void addString(String name, Map<String, String> value) {
         if (!value.isEmpty()) {
-            m_list.add(new GroupInfo(name, value));
+            m_list.add(new ListInfo(name, value));
             
             // This call crashes.
             // m_listView.expandGroup(m_list.size());
@@ -759,54 +760,6 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
         }
     }
 
-
-    // =============================================================================================
-    // TODO move thsi into common code and share with PackageFragment (and others)
-
-    @SuppressWarnings("unused")
-    class GroupInfo {
-        final String m_fieldStr;
-        final String m_valueStr;
-        final Map<String, String> m_valueList;
-
-        GroupInfo() {
-            m_fieldStr = m_valueStr = null;
-            m_valueList = null;
-        }
-
-        GroupInfo(String str1, String str2) {
-            m_fieldStr = str1;
-            m_valueStr = str2;
-            m_valueList = null;
-        }
-
-        GroupInfo(String str1, Map<String, String> list2) {
-            m_fieldStr = str1;
-            m_valueStr = null;
-            m_valueList = list2;
-        }
-
-        public String toString() {
-            return m_fieldStr;
-        }
-
-        public String fieldStr() {
-            return m_fieldStr;
-        }
-
-        public String valueStr() {
-            return m_valueStr;
-        }
-
-        public Map<String, String> valueListStr() {
-            return m_valueList;
-        }
-
-        public int getCount() {
-            return (m_valueList == null) ? 0 : m_valueList.size();
-        }
-    }
-
     /**
      * ExpandableLis UI 'data model' class
      */
@@ -826,7 +779,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
                 final int groupPosition, final int childPosition, boolean isLastChild,
                 View convertView, ViewGroup parent) {
 
-            GroupInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View expandView; // = convertView;
             // if (null == expandView) {
@@ -894,7 +847,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
         public View getGroupView(
                 int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-            GroupInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {

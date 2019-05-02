@@ -21,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.landenlabs.all_devtool.util.ListInfo;
+import com.landenlabs.all_devtool.util.SearchList;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
@@ -45,12 +47,13 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 @SuppressWarnings("Convert2Lambda")
 public class PropFragment extends DevFragment {
 
-    final ArrayList<GroupInfo> m_list = new ArrayList<>();
+    final ArrayList<ListInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     EditText m_titleTime;
     ImageButton m_search;
     View m_refresh;
     String m_filter;
+    SearchList m_searchList = new SearchList();
 
     Map<String, String> m_propList;
 
@@ -124,7 +127,16 @@ public class PropFragment extends DevFragment {
 
                     Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
                     m_filter = edView.getText().toString();
-                    updateList();
+                    m_searchList.search(m_list, m_filter);
+                    // updateList();
+                    if (m_searchList.matchCnt == 0) {
+                        Toast.makeText(getContext(), "No match", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), String.format("%d matches", m_searchList.matchCnt), Toast.LENGTH_SHORT).show();
+                        // m_listView.scrollTo(m_filterGroup, 0);
+                        m_listView.setSelectedChild(m_searchList.groupIdx, m_searchList.childIdx, true);
+                    }
+
                     return true; // consume.
                 }
                 return false; // pass on to other listeners.
@@ -256,12 +268,12 @@ public class PropFragment extends DevFragment {
     @SuppressWarnings("unused")
     void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
-            m_list.add(new GroupInfo(name, value.trim()));
+            m_list.add(new ListInfo(name, value.trim()));
     }
 
     void addString(String name, Map<String, String> value) {
         if (!value.isEmpty())
-            m_list.add(new GroupInfo(name, value));
+            m_list.add(new ListInfo(name, value));
     }
 
     private Map<String, String> getShellCmd(String[] shellCmd) {
@@ -294,48 +306,6 @@ public class PropFragment extends DevFragment {
 
     // =============================================================================================
 
-
-    class GroupInfo {
-        final String m_fieldStr;
-        final String m_valueStr;
-        final Map<String, String> m_valueList;
-
-        GroupInfo(String str1, String str2) {
-            m_fieldStr = str1;
-            m_valueStr = str2;
-            m_valueList = null;
-        }
-
-        GroupInfo(String str1, Map<String, String> list2) {
-            m_fieldStr = str1;
-            m_valueStr = null;
-            m_valueList = list2;
-        }
-
-        public String toString() {
-            return m_fieldStr;
-        }
-
-        public String fieldStr() {
-            return m_fieldStr;
-        }
-
-        public String valueStr() {
-            return m_valueStr;
-        }
-
-        public Map<String, String> valueListStr() {
-            return m_valueList;
-        }
-
-        public int getCount() {
-            return (m_valueList == null) ? 0 : m_valueList.size();
-        }
-    }
-
-
-    // =============================================================================================
-
     // final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
@@ -359,7 +329,7 @@ public class PropFragment extends DevFragment {
                 final int groupPosition, final int childPosition, boolean isLastChild,
                 View convertView, ViewGroup parent) {
 
-            GroupInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View expandView; // = convertView;
             // if (null == expandView) {
@@ -436,7 +406,7 @@ public class PropFragment extends DevFragment {
         public View getGroupView(
                 int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-            GroupInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {

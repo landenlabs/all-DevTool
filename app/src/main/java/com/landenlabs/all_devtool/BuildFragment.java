@@ -37,6 +37,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import com.landenlabs.all_devtool.util.ListInfo;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
@@ -53,7 +54,7 @@ import java.util.Map;
  */
 public class BuildFragment extends DevFragment {
 
-    final ArrayList<BuildInfo> m_list = new ArrayList<>();
+    final ArrayList<ListInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
 
     public static String s_name = "Build";
@@ -179,58 +180,13 @@ public class BuildFragment extends DevFragment {
 
     void addBuild(String name, String value) {
         if (!TextUtils.isEmpty(value))
-            m_list.add(new BuildInfo(name, value.trim()));
+            m_list.add(new ListInfo(name, value.trim()));
     }
 
     @SuppressWarnings("SameParameterValue")
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
-            m_list.add(new BuildInfo(name, value));
-    }
-
-    @SuppressWarnings("unused")
-    class BuildInfo {
-        final String m_fieldStr;
-        final String m_valueStr;
-        final Map<String, String> m_valueList;
-
-        BuildInfo() {
-            m_fieldStr = m_valueStr = null;
-            m_valueList = null;
-        }
-
-        BuildInfo(String str1, String str2) {
-            m_fieldStr = str1;
-            m_valueStr = str2;
-            m_valueList = null;
-        }
-
-        BuildInfo(String str1, Map<String, String> list2) {
-            m_fieldStr = str1;
-            m_valueStr = null;
-            m_valueList = list2;
-        }
-
-        @NonNull
-        public String toString() {
-            return (m_fieldStr != null) ? m_fieldStr : "";
-        }
-
-        public String fieldStr() {
-            return m_fieldStr;
-        }
-
-        String valueStr() {
-            return m_valueStr;
-        }
-
-        Map<String, String> valueListStr() {
-            return m_valueList;
-        }
-
-        public int getCount() {
-            return (m_valueList == null) ? 0 : m_valueList.size();
-        }
+            m_list.add(new ListInfo(name, value));
     }
 
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
@@ -255,7 +211,7 @@ public class BuildFragment extends DevFragment {
                      final int childPosition, boolean isLastChild, View convertView,
                      ViewGroup parent) {
 
-            BuildInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View expandView; // = convertView;
             // if (null == expandView) {
@@ -325,7 +281,7 @@ public class BuildFragment extends DevFragment {
         public View getGroupView(int groupPosition, boolean isExpanded,
                      View convertView, ViewGroup parent) {
 
-            BuildInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {

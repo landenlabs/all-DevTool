@@ -74,6 +74,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.util.ListInfo;
+import com.landenlabs.all_devtool.util.SearchList;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
@@ -118,12 +120,13 @@ public class NetFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    final ArrayList<NetInfo> m_list = new ArrayList<>();
+    final ArrayList<ListInfo> m_list = new ArrayList<>();
     ExpandableListView m_listView;
     TextView m_titleTime;
     ImageButton m_search;
     View m_refresh;
     String m_filter;
+    SearchList m_searchList = new SearchList();
 
     BuildArrayAdapter m_adapter;
     SubMenu m_menu;
@@ -269,11 +272,19 @@ public class NetFragment extends DevFragment {
                     // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
                     imm.toggleSoftInput(0, 0);
 
+                    Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
                     m_filter = edView.getText().toString();
-                    Toast.makeText(getContext(), "Searching for " + m_filter , Toast.LENGTH_SHORT).show();
+                    m_searchList.search(m_list, m_filter);
                     // updateList();
-                    expandFiltered();
-                    m_listView.invalidate();
+                    if (m_searchList.matchCnt == 0) {
+                        Toast.makeText(getContext(), "No match", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), String.format("%d matches", m_searchList.matchCnt), Toast.LENGTH_SHORT).show();
+                        // m_listView.scrollTo(m_filterGroup, 0);
+                        m_listView.setSelectedChild(m_searchList.groupIdx, m_searchList.childIdx, true);
+                    }
+
+                    // m_listView.invalidate();
                     m_updateTime = true;
                     return true; // consume.
                 }
@@ -367,7 +378,7 @@ public class NetFragment extends DevFragment {
         if (!TextUtils.isEmpty(m_filter) && !m_filter.equals("*")) {
             for (int grpPos = 0; grpPos < m_list.size(); grpPos++) {
 
-                NetInfo buildInfo = m_list.get(grpPos);
+                ListInfo buildInfo = m_list.get(grpPos);
 
                 String key = TextUtils.join(",", buildInfo.valueListStr().keySet().toArray());
                 String val = TextUtils.join(",", buildInfo.valueListStr().values().toArray());
@@ -525,19 +536,19 @@ public class NetFragment extends DevFragment {
         // --------------- Connection Services -------------
         try {
             ConnectivityManager connMgr = getServiceSafe(Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-            if (netInfo != null) {
+            final NetworkInfo listInfo = connMgr.getActiveNetworkInfo();
+            if (listInfo != null) {
                 Map<String, String> netListStr = new LinkedHashMap<>();
 
-                putIf(netListStr, "Available", "Yes", netInfo.isAvailable());
-                putIf(netListStr, "Connected", "Yes", netInfo.isConnected());
-                putIf(netListStr, "Connecting", "Yes", !netInfo.isConnected() && netInfo.isConnectedOrConnecting());
-                putIf(netListStr, "Roaming", "Yes", netInfo.isRoaming());
-                putIf(netListStr, "Extra", netInfo.getExtraInfo(), !TextUtils.isEmpty(netInfo.getExtraInfo()));
-                putIf(netListStr, "WhyFailed", netInfo.getReason(), !TextUtils.isEmpty(netInfo.getReason()));
+                putIf(netListStr, "Available", "Yes", listInfo.isAvailable());
+                putIf(netListStr, "Connected", "Yes", listInfo.isConnected());
+                putIf(netListStr, "Connecting", "Yes", !listInfo.isConnected() && listInfo.isConnectedOrConnecting());
+                putIf(netListStr, "Roaming", "Yes", listInfo.isRoaming());
+                putIf(netListStr, "Extra", listInfo.getExtraInfo(), !TextUtils.isEmpty(listInfo.getExtraInfo()));
+                putIf(netListStr, "WhyFailed", listInfo.getReason(), !TextUtils.isEmpty(listInfo.getReason()));
                 putIf(netListStr, "Metered", "Avoid heavy use", connMgr.isActiveNetworkMetered());
 
-                netListStr.put("NetworkType", netInfo.getTypeName());
+                netListStr.put("NetworkType", listInfo.getTypeName());
                 if (connMgr.getAllNetworkInfo().length > 1) {
                     netListStr.put("Available Networks:", " ");
                     for (NetworkInfo netI : connMgr.getAllNetworkInfo()) {
@@ -577,7 +588,7 @@ public class NetFragment extends DevFragment {
                     }
                 }
 
-                if (netInfo.isConnected()) {
+                if (listInfo.isConnected()) {
                     try {
                         for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                             NetworkInterface intf = en.nextElement();
@@ -907,7 +918,7 @@ public class NetFragment extends DevFragment {
 
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
-            m_list.add(new NetInfo(name, value));
+            m_list.add(new ListInfo(name, value));
     }
 
     private void clearNetworks() {
@@ -1016,46 +1027,6 @@ public class NetFragment extends DevFragment {
     }
 
     // =============================================================================================
-    @SuppressWarnings("unused")
-    class NetInfo {
-        final String m_fieldStr;
-        final String m_valueStr;
-        final Map<String, String> m_valueList;
-
-        NetInfo(String str1, String str2) {
-            m_fieldStr = str1;
-            m_valueStr = str2;
-            m_valueList = null;
-        }
-
-        NetInfo(String str1, Map<String, String> list2) {
-            m_fieldStr = str1;
-            m_valueStr = null;
-            m_valueList = list2;
-        }
-
-        public String toString() {
-            return m_fieldStr;
-        }
-
-        public String fieldStr() {
-            return m_fieldStr;
-        }
-
-        public String valueStr() {
-            return m_valueStr;
-        }
-
-        public Map<String, String> valueListStr() {
-            return m_valueList;
-        }
-
-        public int getCount() {
-            return (m_valueList == null) ? 0 : m_valueList.size();
-        }
-    }
-
-    // =============================================================================================
 
     final static int SUMMARY_LAYOUT = R.layout.build_list_row;
     final static int SUMMARY_LAYOUT_WIDE = R.layout.build_list_rows_wide;
@@ -1080,13 +1051,13 @@ public class NetFragment extends DevFragment {
             final int childPosition, boolean isLastChild, View convertView,
             ViewGroup parent) {
 
-            NetInfo netInfo = m_list.get(groupPosition);
+            ListInfo listInfo = m_list.get(groupPosition);
 
             View expandView = convertView;
 
-            if (childPosition < netInfo.valueListStr().keySet().size()) {
-                String key = (String) netInfo.valueListStr().keySet().toArray()[childPosition];
-                String val = "" + netInfo.valueListStr().get(key);
+            if (childPosition < listInfo.valueListStr().keySet().size()) {
+                String key = (String) listInfo.valueListStr().keySet().toArray()[childPosition];
+                String val = "" + listInfo.valueListStr().get(key);
 
                 if (key.length() + val.length() > 40) {
                     expandView = m_inflater.inflate(SUMMARY_LAYOUT_WIDE, parent, false);
@@ -1164,7 +1135,7 @@ public class NetFragment extends DevFragment {
                 int groupPosition, boolean isExpanded,
                 View convertView, ViewGroup parent) {
 
-            NetInfo netInfo = m_list.get(groupPosition);
+            ListInfo listInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {
@@ -1173,11 +1144,11 @@ public class NetFragment extends DevFragment {
 
             TextView textView;
             textView = Ui.viewById(summaryView, R.id.buildField);
-            textView.setText("" + groupPosition + " " + netInfo.fieldStr());
+            textView.setText("" + groupPosition + " " + listInfo.fieldStr());
             textView.setPadding(10, 0, 0, 0);
 
             textView = Ui.viewById(summaryView, R.id.buildValue);
-            textView.setText(netInfo.valueStr());
+            textView.setText(listInfo.valueStr());
 
             if ((groupPosition & 1) == 1)
                 summaryView.setBackgroundColor(m_rowColor1);

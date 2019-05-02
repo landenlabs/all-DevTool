@@ -44,6 +44,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.landenlabs.all_devtool.util.ListInfo;
+import com.landenlabs.all_devtool.util.SearchList;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
@@ -72,12 +74,13 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 @SuppressWarnings({"Convert2Lambda", "UnnecessaryLocalVariable"})
 public class ProcFragment extends DevFragment {
 
-    private final ArrayList<ProcInfo> m_list = new ArrayList<>();
+    private final ArrayList<ListInfo> m_list = new ArrayList<>();
     private ExpandableListView m_listView;
     private TextView m_titleTime;
     ImageButton m_search;
     View m_refresh;
     String m_filter;
+    SearchList m_searchList = new SearchList();
 
     private static final SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
 
@@ -148,9 +151,17 @@ public class ProcFragment extends DevFragment {
                     // imm.showSoftInput(m_titleTime, InputMethodManager.HIDE_IMPLICIT_ONLY);
                     imm.toggleSoftInput(0, 0);
 
+                    Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
                     m_filter = edView.getText().toString();
-                    Toast.makeText(getContext(), "Searching..." + m_filter, Toast.LENGTH_SHORT).show();
-                    updateList();
+                    m_searchList.search(m_list, m_filter);
+                    // updateList();
+                    if (m_searchList.matchCnt == 0) {
+                        Toast.makeText(getContext(), "No match", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), String.format("%d matches", m_searchList.matchCnt), Toast.LENGTH_SHORT).show();
+                        // m_listView.scrollTo(m_filterGroup, 0);
+                        m_listView.setSelectedChild(m_searchList.groupIdx, m_searchList.childIdx, true);
+                    }
                     return true; // consume.
                 }
                 return false; // pass on to other listeners.
@@ -248,7 +259,7 @@ public class ProcFragment extends DevFragment {
                         temperatureItems.put(" CPU", String.format("%.1f", tcpu[0]));
                         temperatureItems.put(" GPU", String.format("%.1f", tgpu[0]));
                         temperatureItems.put(" Battery", String.format("%.1f", tbat[0]));
-                        addMap("Temperaures", "", temperatureItems);
+                        addMap("Temperaures",  temperatureItems);
                     } catch (Throwable tr) {
                         Log.e("Hardware properties", "access failed", tr);
                     }
@@ -262,13 +273,13 @@ public class ProcFragment extends DevFragment {
                         String[] vals = line.split(": ");
                         cpuItems.put(vals[0], vals[1]);
                     }
-                    addMap("CPU " + cpuInfoList.get(0), "", cpuItems);
+                    addMap("CPU " + cpuInfoList.get(0), cpuItems);
                 }
             }
 
             if (true) {
-                ArrayList<String> procInfo = readFile("/proc/100/stat", " ", 2);
-                for (String line : procInfo) {
+                ArrayList<String> listInfo = readFile("/proc/100/stat", " ", 2);
+                for (String line : listInfo) {
                     String[] vals = line.split(" ");
                     int rowCnt = 0;
                     for (String val : vals) {
@@ -319,12 +330,12 @@ public class ProcFragment extends DevFragment {
 
     private void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
-            m_list.add(new ProcInfo(name, value.trim()));
+            m_list.add(new ListInfo(name, value.trim()));
     }
 
     @SuppressWarnings("SameParameterValue")
-    void addMap(String name, String value, Map<String, String> map) {
-        m_list.add(new ProcInfo(name, value, map));
+    void addMap(String name, Map<String, String> map) {
+        m_list.add(new ListInfo(name, map));
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -399,48 +410,6 @@ public class ProcFragment extends DevFragment {
 
     // =============================================================================================
 
-
-    class ProcInfo {
-        final String m_fieldStr;
-        final String m_valueStr;
-        final Map<String, String> m_valueList;
-
-        ProcInfo(String str1, String str2) {
-            m_fieldStr = str1;
-            m_valueStr = str2;
-            m_valueList = null;
-        }
-
-        ProcInfo(String str, String value, Map<String, String> list) {
-            m_fieldStr = str;
-            m_valueStr = value;
-            m_valueList = list;
-        }
-
-        public String toString() {
-            return m_fieldStr;
-        }
-
-        public String fieldStr() {
-            return m_fieldStr;
-        }
-
-        public String valueStr() {
-            return m_valueStr;
-        }
-
-        public Map<String, String> valueListStr() {
-            return m_valueList;
-        }
-
-        public int getCount() {
-            return (m_valueList == null) ? 0 : m_valueList.size();
-        }
-    }
-
-
-    // =============================================================================================
-
     // final static int EXPANDED_LAYOUT = R.layout.build_list_row;
     private final static int SUMMARY_LAYOUT = R.layout.build_list_row;
 
@@ -464,15 +433,15 @@ public class ProcFragment extends DevFragment {
                  final int childPosition, boolean isLastChild, View convertView,
                  ViewGroup parent) {
 
-            ProcInfo procInfo = m_list.get(groupPosition);
+            ListInfo listInfo = m_list.get(groupPosition);
 
             View expandView; // = convertView;
             // if (null == expandView) {
             expandView = m_inflater.inflate(SUMMARY_LAYOUT, parent, false);
             // }
 
-            String key = (String) procInfo.valueListStr().keySet().toArray()[childPosition];
-            String val = procInfo.valueListStr().get(key);
+            String key = (String) listInfo.valueListStr().keySet().toArray()[childPosition];
+            String val = listInfo.valueListStr().get(key);
 
             TextView textView = Ui.viewById(expandView, R.id.buildField);
             textView.setText(key);
@@ -539,7 +508,7 @@ public class ProcFragment extends DevFragment {
         public View getGroupView(int groupPosition, boolean isExpanded,
                                  View convertView, ViewGroup parent) {
 
-            ProcInfo procInfo = m_list.get(groupPosition);
+            ListInfo listInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {
@@ -547,15 +516,15 @@ public class ProcFragment extends DevFragment {
             }
 
             TextView textView = Ui.viewById(summaryView, R.id.buildField);
-            textView.setText(procInfo.fieldStr());
+            textView.setText(listInfo.fieldStr());
             textView.setPadding(10, 0, 0, 0);
 
             textView = Ui.viewById(summaryView, R.id.buildValue);
-            textView.setText(procInfo.valueStr());
+            textView.setText(listInfo.valueStr());
 
-            String text = procInfo.fieldStr();
-            if (procInfo.valueStr() != null) {
-                text += procInfo.valueStr();
+            String text = listInfo.fieldStr();
+            if (listInfo.valueStr() != null) {
+                text += listInfo.valueStr();
             }
 
 

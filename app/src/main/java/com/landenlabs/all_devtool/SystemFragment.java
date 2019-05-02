@@ -79,6 +79,8 @@ import android.widget.ToggleButton;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.util.ListInfo;
+import com.landenlabs.all_devtool.util.SearchList;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
@@ -110,7 +112,7 @@ public class SystemFragment extends DevFragment {
     private static int m_rowColor1 = 0;
     private static int m_rowColor2 = 0x80d0ffe0;
     private static SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
-    final ArrayList<BuildInfo> m_list = new ArrayList<>();
+    final ArrayList<ListInfo> m_list = new ArrayList<>();
 
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
@@ -119,6 +121,7 @@ public class SystemFragment extends DevFragment {
     ImageButton m_search;
     View m_refresh;
     String m_filter;
+    SearchList m_searchList = new SearchList();
 
     BuildArrayAdapter m_adapter;
     SubMenu m_menu;
@@ -191,7 +194,15 @@ public class SystemFragment extends DevFragment {
 
                     Toast.makeText(getContext(), "Searching...", Toast.LENGTH_SHORT).show();
                     m_filter = edView.getText().toString();
-                    updateList();
+                    m_searchList.search(m_list, m_filter);
+                    // updateList();
+                    if (m_searchList.matchCnt == 0) {
+                        Toast.makeText(getContext(), "No match", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), String.format("%d matches", m_searchList.matchCnt), Toast.LENGTH_SHORT).show();
+                        // m_listView.scrollTo(m_filterGroup, 0);
+                        m_listView.setSelectedChild(m_searchList.groupIdx, m_searchList.childIdx, true);
+                    }
                     return true; // consume.
                 }
                 return false; // pass on to other listeners.
@@ -689,7 +700,7 @@ public class SystemFragment extends DevFragment {
 
     void addBuildIf(String name, String value, boolean ifValue) {
         if (ifValue)
-            m_list.add(new BuildInfo(name, value));
+            m_list.add(new ListInfo(name, value));
     }
 
     void addBuild(String name, String value) {
@@ -715,7 +726,7 @@ public class SystemFragment extends DevFragment {
 
     void addBuild(String name, Map<String, String> value) {
         if (!value.isEmpty())
-            m_list.add(new BuildInfo(name, value));
+            m_list.add(new ListInfo(name, value));
     }
 
     // ============================================================================================
@@ -753,45 +764,6 @@ public class SystemFragment extends DevFragment {
         super.onStop();
     }
 
-    class BuildInfo {
-        final String m_fieldStr;
-        final String m_valueStr;
-        final Map<String, String> m_valueList;
-
-
-        BuildInfo(String str1, String str2) {
-            m_fieldStr = str1;
-            m_valueStr = str2;
-            m_valueList = null;
-        }
-
-        BuildInfo(String str1, Map<String, String> list2) {
-            m_fieldStr = str1;
-            m_valueStr = null;
-            m_valueList = list2;
-        }
-
-        public String toString() {
-            return m_fieldStr;
-        }
-
-        public String fieldStr() {
-            return m_fieldStr;
-        }
-
-        public String valueStr() {
-            return m_valueStr;
-        }
-
-        public Map<String, String> valueListStr() {
-            return m_valueList;
-        }
-
-        public int getCount() {
-            return (m_valueList == null) ? 0 : m_valueList.size();
-        }
-    }
-
     // =============================================================================================
     /**
      * ExpandableLis UI 'data model' class
@@ -813,7 +785,7 @@ public class SystemFragment extends DevFragment {
                 final int childPosition, boolean isLastChild, View convertView,
                 ViewGroup parent) {
 
-            BuildInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View expandView = convertView;
             if (null == expandView) {
@@ -890,7 +862,7 @@ public class SystemFragment extends DevFragment {
         public View getGroupView(int groupPosition, boolean isExpanded,
                 View convertView, ViewGroup parent) {
 
-            BuildInfo buildInfo = m_list.get(groupPosition);
+            ListInfo buildInfo = m_list.get(groupPosition);
 
             View summaryView = convertView;
             if (null == summaryView) {
