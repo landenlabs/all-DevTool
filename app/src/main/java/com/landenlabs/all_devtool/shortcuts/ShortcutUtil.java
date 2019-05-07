@@ -14,9 +14,13 @@ import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.FileBrowserFragment;
 import com.landenlabs.all_devtool.GlobalInfo;
 import com.landenlabs.all_devtool.GpsFragment;
+import com.landenlabs.all_devtool.NetFragment;
+import com.landenlabs.all_devtool.NetstatFragment;
 import com.landenlabs.all_devtool.PackageFragment;
+import com.landenlabs.all_devtool.PropFragment;
 import com.landenlabs.all_devtool.R;
 import com.landenlabs.all_devtool.ScreenFragment;
+import com.landenlabs.all_devtool.SystemFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,28 +50,24 @@ public class ShortcutUtil {
 
     // TODO - need unique shortcut icons !!
     private static void updateShortcutNetStat(boolean makeIt) {
-        updateShortcut(makeIt, false, ScreenFragment.s_name, "NetStat", R.drawable.shortcut_scn);
+        updateShortcut(makeIt, false, NetstatFragment.s_name, "NetStat", R.drawable.shortcut_scn);
     }
     private static void updateShortcutNetwork(boolean makeIt) {
-        updateShortcut(makeIt, false, ScreenFragment.s_name, "Network", R.drawable.shortcut_scn);
+        updateShortcut(makeIt, false, NetFragment.s_name, "Network", R.drawable.shortcut_scn);
     }
     private static void updateShortcutSystem(boolean makeIt) {
-        updateShortcut(makeIt, false, ScreenFragment.s_name, "System", R.drawable.shortcut_scn);
+        updateShortcut(makeIt, false, SystemFragment.s_name, "System", R.drawable.shortcut_scn);
     }
     private static void updateShortcutProperties(boolean makeIt) {
-        updateShortcut(makeIt, false, ScreenFragment.s_name, "Properties", R.drawable.shortcut_scn);
+        updateShortcut(makeIt, false, PropFragment.s_name, "Properties", R.drawable.shortcut_scn);
     }
-    @SuppressWarnings("ConstantConditions")
+
     public static void makeShortcuts() {
-        boolean makeIt = true;
-        updateShortcuts(makeIt);
+        updateShortcuts(true);
     }
 
-
-    @SuppressWarnings("ConstantConditions")
     public static void removeShortcuts() {
-        boolean makeIt = false;
-        updateShortcuts(makeIt);
+        updateShortcuts(false);
     }
 
     private static void updateShortcuts(boolean makeIt) {
