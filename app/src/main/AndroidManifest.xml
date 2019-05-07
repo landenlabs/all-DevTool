@@ -32,6 +32,8 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
     <!--  System apps only.
     <uses-permission android:name="android.permission.DUMP" />
     -->
@@ -76,9 +78,15 @@
         </activity>
 
         <receiver android:name=".receivers.UninstallIntentReceiver">
-            <intent-filter android:priority="999">
+            <intent-filter android:priority="1">
+                <!--
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                -->
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED"  />
+
+                <action android:name="android.intent.action.DELETE" />
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
@@ -91,7 +99,7 @@
 
         <activity
             android:icon="@drawable/shortcut_fb"
-            android:label="ShortcutActivity"
+            android:label="File Browser"
             android:name=".shortcuts.ShortcutFileBrowser">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
@@ -101,7 +109,7 @@
 
         <activity
             android:icon="@drawable/shortcut_gps"
-            android:label="ShortcutActivity"
+            android:label="GPS"
             android:name=".shortcuts.ShortcutGPS">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
@@ -111,7 +119,7 @@
 
         <activity
             android:icon="@drawable/shortcut_pkg"
-            android:label="ShortcutActivity"
+            android:label="Packages"
             android:name=".shortcuts.ShortcutPackage">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
@@ -121,7 +129,7 @@
 
         <activity
             android:icon="@drawable/shortcut_scn"
-            android:label="ShortcutActivity"
+            android:label="Screen"
             android:name=".shortcuts.ShortcutScreen">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />

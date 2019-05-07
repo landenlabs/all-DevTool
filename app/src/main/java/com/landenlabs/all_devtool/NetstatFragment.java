@@ -249,8 +249,11 @@ public class NetstatFragment extends DevFragment {
                             // Uri gmmIntentUri = Uri.parse("google.streetview:cbll="+ lat + "," + lng);
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                             mapIntent.setPackage("com.google.android.apps.maps");
-                            if (mapIntent
-                                    .resolveActivity(
+
+                            // https://tools.keycdn.com/geo?host=<ip>
+                            // http://api.ipstack.com/<ip>?access_key=<apiKey>
+                            
+                            if (mapIntent.resolveActivity(
                                             getActivitySafe().getPackageManager()) != null) {
                                 startActivity(mapIntent);
                             }

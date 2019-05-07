@@ -20,59 +20,69 @@ import com.landenlabs.all_devtool.ScreenFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Dennis Lang on 6/13/2015.
  */
 public class ShortcutUtil {
 
-    public static void updateShortcutFileBrowser(boolean makeIt) {
-        updateShortcut(makeIt, false, FileBrowserFragment.s_name, "DS FileBrowser", R.drawable.shortcut_fb);
+    private static void updateShortcutFileBrowser(boolean makeIt) {
+        updateShortcut(makeIt, false, FileBrowserFragment.s_name, "FileBrowser", R.drawable.shortcut_fb);
     }
 
-    public static void updateShortcutGPS(boolean makeIt) {
-        updateShortcut(makeIt, false, GpsFragment.s_name, "DS GPS", R.drawable.shortcut_gps);
+    private static void updateShortcutGPS(boolean makeIt) {
+        updateShortcut(makeIt, false, GpsFragment.s_name, "GPS", R.drawable.shortcut_gps);
     }
 
-    public static void updateShortcutPackage(boolean makeIt) {
-        updateShortcut(makeIt, true, PackageFragment.s_name, "DS Package", R.drawable.shortcut_pkg);
+    private static void updateShortcutPackage(boolean makeIt) {
+        updateShortcut(makeIt, true, PackageFragment.s_name, "Package", R.drawable.shortcut_pkg);
     }
 
-    public static void updateShortcutScreen(boolean makeIt) {
-        updateShortcut(makeIt, false, ScreenFragment.s_name, "DS Screen", R.drawable.shortcut_scn);
+    private static void updateShortcutScreen(boolean makeIt) {
+        updateShortcut(makeIt, false, ScreenFragment.s_name, "Screen", R.drawable.shortcut_scn);
     }
 
+
+    // TODO - need unique shortcut icons !!
+    private static void updateShortcutNetStat(boolean makeIt) {
+        updateShortcut(makeIt, false, ScreenFragment.s_name, "NetStat", R.drawable.shortcut_scn);
+    }
+    private static void updateShortcutNetwork(boolean makeIt) {
+        updateShortcut(makeIt, false, ScreenFragment.s_name, "Network", R.drawable.shortcut_scn);
+    }
+    private static void updateShortcutSystem(boolean makeIt) {
+        updateShortcut(makeIt, false, ScreenFragment.s_name, "System", R.drawable.shortcut_scn);
+    }
+    private static void updateShortcutProperties(boolean makeIt) {
+        updateShortcut(makeIt, false, ScreenFragment.s_name, "Properties", R.drawable.shortcut_scn);
+    }
     @SuppressWarnings("ConstantConditions")
     public static void makeShortcuts() {
         boolean makeIt = true;
-    //     activeShortcutInfos = new ArrayList<>(4);
-        ShortcutUtil.updateShortcutFileBrowser(makeIt);
-        ShortcutUtil.updateShortcutGPS(makeIt);
-        ShortcutUtil.updateShortcutPackage(makeIt);
-        ShortcutUtil.updateShortcutScreen(makeIt);
-
-        /*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ShortcutManager shortcutManager = GlobalInfo.s_globalInfo.mainFragActivity
-                    .getSystemService(ShortcutManager.class);
-            shortcutManager.addDynamicShortcuts(activeShortcutInfos);
-        }
-        */
+        updateShortcuts(makeIt);
     }
+
 
     @SuppressWarnings("ConstantConditions")
     public static void removeShortcuts() {
         boolean makeIt = false;
+        updateShortcuts(makeIt);
+    }
+
+    private static void updateShortcuts(boolean makeIt) {
         ShortcutUtil.updateShortcutFileBrowser(makeIt);
         ShortcutUtil.updateShortcutGPS(makeIt);
         ShortcutUtil.updateShortcutPackage(makeIt);
         ShortcutUtil.updateShortcutScreen(makeIt);
+        ShortcutUtil.updateShortcutNetStat(makeIt);
+        ShortcutUtil.updateShortcutNetwork(makeIt);
+        ShortcutUtil.updateShortcutSystem(makeIt);
+        ShortcutUtil.updateShortcutProperties(makeIt);
     }
 
-    // static List<ShortcutInfo> activeShortcutInfos;
-
     // http://stackoverflow.com/questions/6424246/creating-shortcuts-in-android-via-intent
-    public static void updateShortcut(boolean makeIt, boolean pinShortcut, String fragName, String shortcutName, int iconResID) {
+    private static void updateShortcut(boolean makeIt, boolean pinShortcut, String fragName, String shortcutName, int iconResID) {
 
         FragmentActivity fragActivity = GlobalInfo.s_globalInfo.mainFragActivity;
 
@@ -131,7 +141,7 @@ public class ShortcutUtil {
                 List<ShortcutInfo> activeShortcutInfos = shortcutManager.getDynamicShortcuts();
                 List<String> removeIds = new ArrayList<>();
                 for (ShortcutInfo shortcutInfo : activeShortcutInfos) {
-                    if (shortcutInfo.getShortLabel().equals(fragName)) {
+                    if (Objects.equals(shortcutInfo.getShortLabel(), fragName)) {
                         removeIds.add(shortcutInfo.getId());
                         break;
                     }
@@ -144,6 +154,7 @@ public class ShortcutUtil {
     //    sharedPreferences.edit().commit();
     }
 
+    /*
     // http://stackoverflow.com/questions/6424246/creating-shortcuts-in-android-via-intent
     public static void installShortcut(Class<?> cls, String shortcutName, int iconResID) {
 
@@ -178,4 +189,5 @@ public class ShortcutUtil {
         putShortCutIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
         fragActivity.sendBroadcast(putShortCutIntent);
     }
+    */
 }
