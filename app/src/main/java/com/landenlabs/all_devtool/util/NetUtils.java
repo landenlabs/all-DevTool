@@ -420,6 +420,24 @@ public class NetUtils {
      * @return Map of geolocation values
      *
      * https://ipapi.co/api/?java#complete-location
+     *
+     * Example ipv6=2606:4700:20::6819:d163
+     *
+     * https://tools.keycdn.com/geo?host=2606%3A4700%3A20%3A%3A6819%3Ad163
+     * https://www.whtop.com/tools.ip/2606:4700:20::6819:d163
+     * http://api.antideo.com/ip/location/2606:4700:20::6819:d163
+     * http://ipv6.my-addr.com/ipv6-whois-lookup.php?ip=2606:4700:20::6819:d163
+     * https://ipgeolocation.io/ip-location/2606:4700:20::6819:d163
+     * http://api.db-ip.com/v2/free/2606:4700:20::6819:d163
+     *
+     * http://api.ipinfodb.com/v3/ip-country/?key=YOUR_API_KEY&ip=IP_V4_OR_IPV6_ADDRESS
+     * http://api.ipinfodb.com/v3/ip-city/?key=YOUR_API_KEY&ip=IP_V4_OR_IPV6_ADDRESS
+     *
+     * https://ipstack.com/
+     *
+
+     * https://geo.ipify.org/api/v1?apiKey=at_CuuoXZ5zzMc00Iao7i3c2SoPYbKG7&ipAddress=2606:4700:20::6819:d163
+     * https://geoipify.whoisxmlapi.com/api/v1?apiKey=at_teShvVcLkW0i1mA0Lf8KRLsyMXDh3&ipAddress=2606:4700:20::6819:d163
      */
     @Nullable
     public static Map<String, String> getIpLocation(@NonNull InetAddress addr) {
