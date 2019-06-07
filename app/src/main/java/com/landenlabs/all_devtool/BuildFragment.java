@@ -23,12 +23,15 @@ package com.landenlabs.all_devtool;
  *
  */
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -141,7 +144,17 @@ public class BuildFragment extends DevFragment {
             addBuild("MODEL", Build.MODEL);
             addBuild("PRODUCT", Build.PRODUCT);
             // addBuild("RADIO", Build.RADIO);
-            addBuild("SERIAL", Build.SERIAL);
+            if (Build.VERSION.SDK_INT >= 26) {
+                if (ActivityCompat.checkSelfPermission(getContext(),
+                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                    addBuild("SERIAL", Build.getSerial());
+                } else {
+                    requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUEST);
+                    addBuild("SERIAL", "Need READ Phone State permission");
+                }
+            } else {
+                addBuild("SERIAL", Build.SERIAL);
+            }
             addBuild("TAGS", Build.TAGS);
             addBuild("TYPE", Build.TYPE);
             addBuild("UNKNOWN", Build.UNKNOWN);
