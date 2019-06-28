@@ -167,7 +167,7 @@ public class BuildFragment extends DevFragment {
             //noinspection deprecation
             listStr.put("SDK", Build.VERSION.SDK);
 
-            addBuild("VERSION...", listStr); 
+            addBuild("VERSION...", listStr);
 
             PowerManager pm = getServiceSafe(Context.POWER_SERVICE);
             if (Build.VERSION.SDK_INT >= 21)

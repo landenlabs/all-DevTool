@@ -27,7 +27,7 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
-    <!-- System will prompt for permission -->
+    <!-- Only available to system apps -->
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />

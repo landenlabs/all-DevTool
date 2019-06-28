@@ -115,7 +115,6 @@ public class ProcFragment extends DevFragment {
 // ============================================================================================
     // Fragment methods
 
-    @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -248,20 +247,25 @@ public class ProcFragment extends DevFragment {
                 activity.getWindow().setSustainedPerformanceMode(true)
              */
             if (true) {
-                HardwarePropertiesManager hwpm =  getServiceSafe(HARDWARE_PROPERTIES_SERVICE);
-
                 if (Build.VERSION.SDK_INT >= 24) {
-                    try {
-                        Map<String, String> temperatureItems = new HashMap<>();
-                        float[] tcpu = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_CPU, TEMPERATURE_CURRENT);
-                        float[] tgpu = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_GPU, TEMPERATURE_CURRENT);
-                        float[] tbat = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_BATTERY, TEMPERATURE_CURRENT);
-                        temperatureItems.put(" CPU", String.format("%.1f", tcpu[0]));
-                        temperatureItems.put(" GPU", String.format("%.1f", tgpu[0]));
-                        temperatureItems.put(" Battery", String.format("%.1f", tbat[0]));
-                        addMap("Temperaures",  temperatureItems);
-                    } catch (Throwable tr) {
-                        Log.e("Hardware properties", "access failed", tr);
+                    HardwarePropertiesManager hwpm = getServiceSafe(HARDWARE_PROPERTIES_SERVICE);
+
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        try {
+                            Map<String, String> temperatureItems = new HashMap<>();
+                            float[] tcpu = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_CPU,
+                                    TEMPERATURE_CURRENT);
+                            float[] tgpu = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_GPU,
+                                    TEMPERATURE_CURRENT);
+                            float[] tbat = hwpm.getDeviceTemperatures(DEVICE_TEMPERATURE_BATTERY,
+                                    TEMPERATURE_CURRENT);
+                            temperatureItems.put(" CPU", String.format("%.1f", tcpu[0]));
+                            temperatureItems.put(" GPU", String.format("%.1f", tgpu[0]));
+                            temperatureItems.put(" Battery", String.format("%.1f", tbat[0]));
+                            addMap("Temperaures", temperatureItems);
+                        } catch (Throwable tr) {
+                            Log.e("Hardware properties", "access failed", tr);
+                        }
                     }
                 }
             }
