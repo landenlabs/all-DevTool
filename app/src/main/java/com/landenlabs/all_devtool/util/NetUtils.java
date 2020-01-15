@@ -3,8 +3,10 @@ package com.landenlabs.all_devtool.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -117,8 +119,8 @@ public class NetUtils {
             "\\d+:\\s([0-9A-F]{8}):([0-9A-F]{4})\\s([0-9A-F]{8}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9A-F]{8}):([0-9A-F]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9A-F]{8}\\s+([0-9]+)";
 
     private static final String TCP_6_PATTERN =
-            "\\d+:\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9]{8}):([0-9]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9]{8}\\s+([0-9]+)";
-
+           //  "\\d+:\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9]{8}):([0-9]{8})\\s[0-9]{2}:[0-9]{8}\\s[0-9]{8}\\s+([0-9]+)";
+            " *\\d+:\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{32}):([0-9A-F]{4})\\s([0-9A-F]{2})\\s([0-9]{8}):([0-9]{8})\\s([0-9]{2}):([0-9]{8})\\s([0-9]{8})\\s+([0-9]+)\\s.*";
     public enum  NetStatus {
         UNKNOWN(0),
         ESTABLISHED(1),
@@ -361,7 +363,10 @@ public class NetUtils {
                 }
                 return strBuf.toString();
             }
-        } catch (Exception ignore) {
+        } catch (Exception ex) {
+            // Android Q - privacy changes.
+            //  https://developer.android.com/about/versions/10/privacy/changes
+            Log.e("NetUtils", "Failed to read " + filePath + " ex=" + ex.getMessage());
         }
 
         return "";

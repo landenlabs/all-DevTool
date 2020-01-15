@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "753828537989",
+    "firebase_url": "https://all-apps-449a1.firebaseio.com",
+    "project_id": "all-apps-449a1",
+    "storage_bucket": "all-apps-449a1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753828537989:android:f9df9cd043640622fbabec",
+        "android_client_info": {
+          "package_name": "com.landenlabs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "753828537989-2kpcebqhuv8mnrvg64no0n33amss5sto.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2uin1DPBM6dKRKwT0a7n2HHCY3aFn74w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "753828537989-2kpcebqhuv8mnrvg64no0n33amss5sto.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -12,3 +12,4 @@ accounts.xml
 release.properties
 Keystore
 git-notes.txt
+*.txt

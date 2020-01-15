@@ -38,6 +38,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -54,9 +55,9 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.os.ConfigurationCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.os.ConfigurationCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -656,6 +657,21 @@ public class SystemFragment extends DevFragment {
                 strList.put("AdbEnabled", String.valueOf(adb));
             }
             strList.put("ByteOrder", ByteOrder.nativeOrder().toString());
+
+            int nightModeFlags = getContextSafe().getResources().getConfiguration().uiMode &
+                            Configuration.UI_MODE_NIGHT_MASK;
+            String nightMode = "unknown";
+            switch (nightModeFlags) {
+                case Configuration.UI_MODE_NIGHT_YES:
+                    nightMode = "on";
+                    break;
+
+                case Configuration.UI_MODE_NIGHT_NO:
+                    nightMode = "off";
+                    break;
+            }
+            strList.put("NightMode", nightMode);
+
             addBuild("Settings...", strList);
         } catch (Exception ignore) {
         }

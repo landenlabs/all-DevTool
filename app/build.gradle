@@ -3,24 +3,15 @@ apply plugin: 'com.android.application'
 File javaDocDstDir = file('../javadoc')
 
 android {
-    signingConfigs {
-        release
-        config {
-            keyAlias 'all_devtool'
-            keyPassword 'Salem2nh-k'
-            storeFile file('/Users/ldennis/Dropbox/android/keystores/all_devtool.jks')
-            storePassword 'Salem2nh-d'
-        }
-    }
-    compileSdkVersion 28
+
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 17
-        targetSdkVersion 28
-
-        versionCode 2101
-        versionName '2.1.01'
+        targetSdkVersion 29
+        versionCode 21222
+        versionName '2.12.22'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -29,15 +20,42 @@ android {
         resValue "string", "javaVersion", org.gradle.internal.jvm.Jvm.current().javaVersion.toString()
         // resValue "string", "gradleVersion", GradleVersion.current().getVersion()
 
-        // Disable creation of png for vector drawables.
-        vectorDrawables.useSupportLibrary = true
-
         // Limit languages to following list.
         // resConfigs "en", "es"
 
         ndk {
             // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
             abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.resValue "string", "versionName", "version " + variant.versionName
+    }
+
+    signingConfigs {
+        release
+    }
+
+    // Load signing config
+    if (file("release.properties").exists()) {
+        def props = new Properties()
+        props.load(new FileInputStream(rootProject.file("release.properties")))
+        android.signingConfigs.release.storeFile rootProject.file(props.keyStore)
+        android.signingConfigs.release.storePassword props.keyStorePassword
+        android.signingConfigs.release.keyAlias props.keyAlias
+        android.signingConfigs.release.keyPassword props.keyAliasPassword
+    }
+
+    // New value required with Gradle 3.x
+    flavorDimensions "std"
+
+    productFlavors {
+        legacy {
+            dimension = "std"
+            resConfigs('en', 'xhdpi')
+        }
+        standard {
+            dimension = "std"
         }
     }
 
@@ -49,12 +67,9 @@ android {
             jniDebuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
 
-            applicationVariants.all { variant ->
-                appendVersionNameVersionCode(variant, defaultConfig)
-            }
-
-
             signingConfig signingConfigs.release
+            // productFlavors.legacy.signingConfig signingConfigs.release
+            // productFlavors.standard.signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled false
@@ -84,18 +99,13 @@ android {
                 'HardcodedText'
     }
 
-    // New value required with Gradle 3.x
-    flavorDimensions "std"
-
-    productFlavors {
-        legacy {
-            dimension = "std"
-            resConfigs('en', 'xhdpi')
-        }
-        standard {
-            dimension = "std"
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            // Enable verbose lint reporting during build.
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
         }
     }
+
 
     // Generates build warning, but is required to use lamba Java 1.8 features.
     // "Jack is disabled, but one of the plugins you are using supports Java 8 language features."
@@ -103,32 +113,25 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    // Load signing config.
-    def props = new Properties()
-    props.load(new FileInputStream(rootProject.file("release.properties")))
-    android.signingConfigs.release.storeFile rootProject.file(props.keyStore)
-    android.signingConfigs.release.storePassword props.keyStorePassword
-    android.signingConfigs.release.keyAlias props.keyAlias
-    android.signingConfigs.release.keyPassword props.keyAliasPassword
 }
 
 ext {
-    legacyPlayServiceVersion = '15.0.0'
-    supportLibVersion = '28.0.0'    // 26.1.0
+    legacyPlayServiceVersion = '17.0.0'
+    supportLibVersion = '29.0.0'
     leakCanaryVersion = '1.6.1'
 }
 
 dependencies {
-    implementation "com.android.support:support-v4:$supportLibVersion"
-    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+
     // Standard flavor
-    standardImplementation "com.google.android.gms:play-services-ads-identifier:16.0.0"
-    standardImplementation "com.google.android.gms:play-services-gcm:16.1.0"
-    standardImplementation "com.google.android.gms:play-services-auth:16.0.1"
-    standardImplementation "com.google.android.gms:play-services-analytics:16.0.8"
-    standardImplementation "com.google.android.gms:play-services-location:16.0.0"
-    standardImplementation "com.google.android.gms:play-services-drive:16.1.0"
+    standardImplementation "com.google.android.gms:play-services-ads-identifier:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-gcm:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-auth:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-analytics:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-location:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-drive:17.0.0"
     // Legacy flavor
     legacyImplementation "com.google.android.gms:play-services-ads-identifier:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-gcm:$legacyPlayServiceVersion"
@@ -136,12 +139,16 @@ dependencies {
     legacyImplementation "com.google.android.gms:play-services-analytics:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-location:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-drive:$legacyPlayServiceVersion"
+
     implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
+
     // Firebase
-    standardImplementation "com.google.firebase:firebase-core:16.0.8"
+    standardImplementation "com.google.firebase:firebase-core:17.2.1"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
+
     // HockeyApp crash reporting
     implementation 'net.hockeyapp.android:HockeySDK:5.1.1'
+
     // 3rdparty libraries
     // Memory leaks tool - see main activity to see LeakCanary.install(this.getApplication());
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
@@ -150,31 +157,12 @@ dependencies {
     implementation 'net.danlew:android.joda:2.10.1'
 }
 
-
-def appendVersionNameVersionCode(variant, defaultConfig) {
-    /*
-    variant.outputs.each { output ->
-        def file = output.packageApplication.outputFile
-        def fileName = file.name.replace(".apk", "-v" + defaultConfig.versionCode + ".apk")
-        def ourname = project.parent.name
-        fileName = fileName.replace("app-", "$ourname-")
-        output.packageApplication.outputFile = new File(file.parent, fileName)
-    }
-    */
-    variant.outputs.all { output ->
-        def ourname = project.parent.name
-        // outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
-        // println "out name= $outputFileName"
-    }
-}
-
-
 // Rename app
 android.applicationVariants.all { variant ->
     variant.outputs.all {
         def ourname = project.parent.name
-        // outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
-        // println "out name= $outputFileName"
+        outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
+        println "out name= $outputFileName"
     }
 }
 

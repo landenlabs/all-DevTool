@@ -30,8 +30,8 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -145,12 +145,15 @@ public class BuildFragment extends DevFragment {
             addBuild("PRODUCT", Build.PRODUCT);
             // addBuild("RADIO", Build.RADIO);
             if (Build.VERSION.SDK_INT >= 26) {
-                if (ActivityCompat.checkSelfPermission(getContext(),
-                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                    addBuild("SERIAL", Build.getSerial());
-                } else {
-                    requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUEST);
-                    addBuild("SERIAL", "Need READ Phone State permission");
+                try {
+                    if (ActivityCompat.checkSelfPermission(getContextSafe(),
+                            Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                            addBuild("SERIAL", Build.getSerial());
+                    } else {
+                        requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUEST);
+                        addBuild("SERIAL", "Need READ Phone State permission");
+                    }
+                } catch (Exception ignore) {
                 }
             } else {
                 addBuild("SERIAL", Build.SERIAL);

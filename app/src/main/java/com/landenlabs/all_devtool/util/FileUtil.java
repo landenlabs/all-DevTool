@@ -177,7 +177,7 @@ public class FileUtil {
     }
 
     // android.support.v7.widget.AppCompatButton
-    public static class DirInfoButton extends android.support.v7.widget.AppCompatButton {
+    public static class DirInfoButton extends androidx.appcompat.widget.AppCompatButton {
 
         File m_dir;
         public DirInfoButton(Context context, File dir) {

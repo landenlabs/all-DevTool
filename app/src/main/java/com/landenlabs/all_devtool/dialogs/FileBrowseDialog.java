@@ -26,7 +26,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.view.Gravity;
 import android.view.View;

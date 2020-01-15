@@ -46,7 +46,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
@@ -644,11 +644,12 @@ public class NetFragment extends DevFragment {
                 }
             }
 
+            /*
             for (NeighboringCellInfo cellInfo : telephonyManager.getNeighboringCellInfo()) {
                 int level = cellInfo.getRssi();
                 cellListStr.put("Cell level%", String.valueOf(100 * level / 31));
             }
-
+            */
         } catch (Exception ex) {
             m_log.e("Cell %s", ex.getMessage());
         }

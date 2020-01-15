@@ -24,14 +24,13 @@ package com.landenlabs.all_devtool;
  */
 
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -76,20 +75,20 @@ import java.util.concurrent.BlockingQueue;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings({"StatementWithEmptyBody", "Convert2Lambda"})
+@SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal", "SynchronizeOnNonFinalField", "unused"})
 public class NetstatFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
 
-    ArrayList<NetInfo> m_list = new ArrayList<>();
-    ExpandableListView m_listView;
-    TextView m_titleTime;
-    ImageButton m_search;
-    View m_refresh;
-    String m_filter;
+    private ArrayList<NetInfo> m_list = new ArrayList<>();
+    private ExpandableListView m_listView;
+    private TextView m_titleTime;
+    private ImageButton m_search;
+    private View m_refresh;
+    private String m_filter;
 
-    NetArrayAdapter m_adapter;
-    SubMenu m_menu;
+    private NetArrayAdapter m_adapter;
+    private SubMenu m_menu;
 
     public static String s_name = "Netstat";
     private static final int m_rowColor1 = 0;
@@ -286,11 +285,11 @@ public class NetstatFragment extends DevFragment {
         }
     }
 
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-
             default:
                 break;
         }
@@ -299,13 +298,13 @@ public class NetstatFragment extends DevFragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
     }
 
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         m_menu = menu.addSubMenu("Netstat Options");
     }
@@ -366,8 +365,7 @@ public class NetstatFragment extends DevFragment {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    public void updateList() {
+    private void updateList() {
         Date dt = new Date();
         if (m_updateTime) {
             m_titleTime.setText(m_timeFormat.format(dt));
@@ -414,7 +412,9 @@ public class NetstatFragment extends DevFragment {
                 }
                 for (String appName : pkgConnections.keySet()) {
                     ArrayListPairString netConnList = pkgConnections.get(appName);
-                    newList.add(new NetInfo(appName, netConnList));
+                    if (netConnList != null) {
+                        newList.add(new NetInfo(appName, netConnList));
+                    }
                 }
             }
 
@@ -443,7 +443,7 @@ public class NetstatFragment extends DevFragment {
     /**
      * Open Application Detail Info dialog for package.
      */
-    void openPackageInfo(String packageName) {
+    private void openPackageInfo(String packageName) {
         //redirect user to app Settings
         Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
@@ -458,7 +458,7 @@ public class NetstatFragment extends DevFragment {
     private static final Map<InetAddress, Map<String, String>> ipGeoLocations = new HashMap<>();
     private static final BlockingQueue<InetAddress> ipAddressQueue = new ArrayBlockingQueue<>(100);
 
-    class GetGeoLocation extends Thread {
+    static class GetGeoLocation extends Thread {
         @Override
         public void run() {
             super.run();
@@ -468,19 +468,19 @@ public class NetstatFragment extends DevFragment {
                     ipGeoLocations.put(addr, NetUtils.getIpLocation(addr));
                     Log.d("netstat", "geoLoc size=" + ipGeoLocations.size());
                 }
-            } catch (InterruptedException ignore) {
-                Log.d("netstat", "geoLoc err=" + ignore.getMessage());
+            } catch (InterruptedException ex) {
+                Log.d("netstat", "geoLoc err=" + ex.getMessage());
             }
         }
     }
 
-    GetGeoLocation getGeoLocation = null;
+    private GetGeoLocation getGeoLocation = null;
 
     private void appendIf(StringBuilder sb, Map<String, String> mapStr, String key) {
         if (mapStr != null && mapStr.containsKey(key) && !TextUtils.isEmpty(mapStr.get(key)) )
             sb.append("\n").append(key).append(":").append(mapStr.get(key));
     }
-    String getIpGeoLocation(InetAddress addr) {
+    private String getIpGeoLocation(InetAddress addr) {
         if (ipGeoLocations.containsKey(addr)) {
             Map<String, String> ipInfo = ipGeoLocations.get(addr);
             StringBuilder sb = new StringBuilder();
@@ -507,7 +507,7 @@ public class NetstatFragment extends DevFragment {
     // DevFragment
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             updateList();
         }
@@ -515,11 +515,12 @@ public class NetstatFragment extends DevFragment {
 
 
     // ============================================================================================
-    private class ArrayListPairString extends ArrayListPair<String, String> {
+    private static class ArrayListPairString extends ArrayListPair<String, String> {
     }
 
     // =============================================================================================
     @SuppressWarnings("unused")
+    static
     class NetInfo {
         final String m_fieldStr;
         final String m_valueStr;
@@ -541,6 +542,7 @@ public class NetstatFragment extends DevFragment {
             m_valueList = connections;
         }
 
+        @NonNull
         public String toString() {
             return m_fieldStr;
         }
@@ -549,7 +551,7 @@ public class NetstatFragment extends DevFragment {
             return m_fieldStr;
         }
 
-        public String valueStr() {
+        String valueStr() {
             return m_valueStr;
         }
 
@@ -564,8 +566,8 @@ public class NetstatFragment extends DevFragment {
 
     // =============================================================================================
 
-    final static int SUMMARY_LAYOUT = R.layout.build_list_row;
-    final static int SUMMARY_LAYOUT_WIDE = R.layout.build_list_rows_wide;
+    private final static int SUMMARY_LAYOUT = R.layout.build_list_row;
+    private final static int SUMMARY_LAYOUT_WIDE = R.layout.build_list_rows_wide;
     /**
      * ExpandableLis UI 'data model' class
      */
