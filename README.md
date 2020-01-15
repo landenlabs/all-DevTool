@@ -1,7 +1,11 @@
 ### a LanDen Labs - DevTool
 Android Developer Tool
 
-***apk v1.9.13  available in app directory.***
+***apk v2.12.22  available in app directory.***
+<br>22-Dec-2019
+
+  [![Build status](https://travis-ci.org/landenlabs/all_DevTool.svg?branch=master)](https://travis-ci.org/landenlabs/all_DevTool)
+  
 
 WebSite
 [http://landenlabs.com/android/devstuff/index.html](http://landenlabs.com/android/devstuff/index.html)
