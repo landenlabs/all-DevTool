@@ -3,6 +3,7 @@ Android Developer Tool
 
 ***apk v2.12.22  available in app directory.***
 <br>22-Dec-2019
+<br>API 29  AndroidX
 
   [![Build status](https://travis-ci.org/landenlabs/all_DevTool.svg?branch=master)](https://travis-ci.org/landenlabs/all_DevTool)
   
