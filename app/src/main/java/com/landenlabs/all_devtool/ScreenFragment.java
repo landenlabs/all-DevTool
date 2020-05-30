@@ -1,7 +1,7 @@
 package com.landenlabs.all_devtool;
 
 /*
- * Copyright (c) 2016 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+ * Copyright (c) 2015 - 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction, including
@@ -64,22 +64,23 @@ public class ScreenFragment extends DevFragment {
 
     public static final String s_name = "Screen";
 
-    FragmentActivity m_context;
-    View m_rootView;
+    private FragmentActivity m_context;
+    private View m_rootView;
 
-    LinearLayout m_layout;
-    TextView m_screenDevice;
-    ImageView m_horzWindowArrow;
-    ImageView m_vertPanelArrow;
-    TextView m_horzWindowText;
-    TextView m_vertPanelText;
-    DrawView m_drawPoints;
+    private LinearLayout m_layout;
+    private TextView m_screenDevice;
+    private ImageView m_horzWindowArrow;
+    private ImageView m_vertPanelArrow;
+    private TextView m_horzWindowText;
+    private TextView m_vertPanelText;
+    private DrawView m_drawPoints;
 
-    DisplayMetrics m_displayMetrics;
+    private DisplayMetrics m_displayMetrics;
 
-    static final int MSG_GET_UI_SIZE = 1;
+    private static final int MSG_GET_UI_SIZE = 1;
     private final Handler m_handler = new Handler() {
 
+        @SuppressWarnings("SwitchStatementWithTooFewBranches")
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
@@ -118,7 +119,7 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         // Checks the orientation of the screen
@@ -163,30 +164,6 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-
-        /*
-        if (m_context != null) {
-            ActionBar actionBar = getActivity().getActionBar();
-            // actionBar.hide();
-            actionBar.setDisplayShowTitleEnabled(false);
-            if (isVisibleToUser) {
-                ColorDrawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
-                actionBar.setBackgroundDrawable(colorDrawable);
-            } else {
-                actionBar.setBackgroundDrawable(GlobalInfo.s_globalInfo.actionBarBackground);
-            }
-            actionBar.setDisplayShowTitleEnabled(true);
-            // actionBar.show();
-
-            // getActivity().invalidateOptionsMenu();
-        }
-        */
-    }
-
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
@@ -210,12 +187,12 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.screen_menu, menu.addSubMenu("Screen Options"));
 

@@ -163,6 +163,7 @@
     <string name="text">Text</string>
     <string name="bold">Bold</string>
     <string name="italic">Italic</string>
+    <string name="text_font_scale" formatted="true">Font Scale %1$.1f</string>
 
     <string name="select_dialog_style">Pick Dialog Style</string>
     <string-array name="dialog_style_array">

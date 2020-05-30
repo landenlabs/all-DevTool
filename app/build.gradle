@@ -128,7 +128,7 @@ dependencies {
     // Standard flavor
     standardImplementation "com.google.android.gms:play-services-ads-identifier:17.0.0"
     standardImplementation "com.google.android.gms:play-services-gcm:17.0.0"
-    standardImplementation "com.google.android.gms:play-services-auth:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-auth:18.0.0"
     standardImplementation "com.google.android.gms:play-services-analytics:17.0.0"
     standardImplementation "com.google.android.gms:play-services-location:17.0.0"
     standardImplementation "com.google.android.gms:play-services-drive:17.0.0"
@@ -143,7 +143,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
 
     // Firebase
-    standardImplementation "com.google.firebase:firebase-core:17.2.1"
+    standardImplementation "com.google.firebase:firebase-core:17.4.2"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
 
     // HockeyApp crash reporting

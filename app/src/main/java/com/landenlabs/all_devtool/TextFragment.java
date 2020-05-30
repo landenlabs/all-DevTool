@@ -1,7 +1,7 @@
 package com.landenlabs.all_devtool;
 
 /*
- * Copyright (c) 2016 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+ * Copyright (c) 2015 - 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
  * <p/>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction, including
@@ -23,11 +23,14 @@ package com.landenlabs.all_devtool;
  */
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+
+import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -116,6 +119,13 @@ public class TextFragment extends DevFragment {
         View rootView = inflater.inflate(R.layout.text_tab, container, false);
         m_context = this.getActivity();
 
+        TextView fontScale = Ui.viewById(rootView, R.id.text_tab_font_scale);
+        fontScale.setText(  getString( R.string.text_font_scale, getResources().getConfiguration().fontScale));
+        fontScale.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_DISPLAY_SETTINGS));
+            }
+        });
         m_tableLayout = Ui.viewById(rootView, R.id.text_tablelayout);
 
         fillLayout();

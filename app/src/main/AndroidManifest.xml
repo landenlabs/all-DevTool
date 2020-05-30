@@ -55,6 +55,10 @@
 
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
+    <!--
+        https://developer.android.com/training/data-storage/use-cases
+        android:requestLegacyExternalStorage="true"
+    -->
     <application
         android:allowClearUserData="true"
         android:description="@string/app_description"
@@ -64,6 +68,7 @@
         android:theme="@style/AppTheme"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
+        android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
 
         <meta-data android:name="com.google.android.gms.version"
