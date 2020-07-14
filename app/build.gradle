@@ -8,10 +8,10 @@ android {
 
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 29
-        versionCode 21222
-        versionName '2.12.22'
+        versionCode 30714
+        versionName '3.07.14'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -119,6 +119,7 @@ ext {
     legacyPlayServiceVersion = '17.0.0'
     supportLibVersion = '29.0.0'
     leakCanaryVersion = '1.6.1'
+    appCenter = '2.3.0'     // https://docs.microsoft.com/en-us/appcenter/transition/android-sdk-migration
 }
 
 dependencies {
@@ -143,18 +144,24 @@ dependencies {
     implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
 
     // Firebase
-    standardImplementation "com.google.firebase:firebase-core:17.4.2"
+    standardImplementation "com.google.firebase:firebase-core:17.4.3"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
 
-    // HockeyApp crash reporting
-    implementation 'net.hockeyapp.android:HockeySDK:5.1.1'
+    // Recommended: Add the Google Analytics SDK.
+    // implementation 'com.google.firebase:firebase-analytics:17.4.3'
+
+    // AppCenter crash reporting
+    implementation "com.microsoft.appcenter:appcenter-crashes:$appCenter"
+    implementation "com.microsoft.appcenter:appcenter-analytics:$appCenter"
 
     // 3rdparty libraries
+
     // Memory leaks tool - see main activity to see LeakCanary.install(this.getApplication());
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
     //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+
     implementation 'com.androidplot:androidplot-core:1.5.6'
-    implementation 'net.danlew:android.joda:2.10.1'
+    implementation 'net.danlew:android.joda:2.10.6'
 }
 
 // Rename app

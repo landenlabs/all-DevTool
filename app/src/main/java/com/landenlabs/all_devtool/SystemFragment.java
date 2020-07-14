@@ -296,6 +296,7 @@ public class SystemFragment extends DevFragment {
         addBuild("Android ID", androidIDStr);
         ConfigurationInfo info = actMgr.getDeviceConfigurationInfo();
         addBuild("OpenGL", info.getGlEsVersion());
+        addBuild("FontScale", String.valueOf(getContext().getResources().getConfiguration().fontScale));
 
         try {
             try {
@@ -820,7 +821,6 @@ public class SystemFragment extends DevFragment {
                 textView.setText(val);
 
                 String text = key + val;
-
                 if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
                         || text.matches(m_filter)
                         || Utils.containsIgnoreCase(text, m_filter))  ) {
@@ -893,10 +893,17 @@ public class SystemFragment extends DevFragment {
             textView = Ui.viewById(summaryView, R.id.buildValue);
             textView.setText(buildInfo.valueStr());
 
-            if ((groupPosition & 1) == 1)
-                summaryView.setBackgroundColor(m_rowColor1);
-            else
-                summaryView.setBackgroundColor(m_rowColor2);
+            String text = buildInfo.fieldStr() + buildInfo.valueStr();
+            if (!TextUtils.isEmpty(m_filter) && (m_filter.equals("*")
+                    || text.matches(m_filter)
+                    || Utils.containsIgnoreCase(text, m_filter))  ) {
+                summaryView.setBackgroundColor(0x80ffff00);
+            } else {
+                if ((groupPosition & 1) == 1)
+                    summaryView.setBackgroundColor(m_rowColor1);
+                else
+                    summaryView.setBackgroundColor(m_rowColor2);
+            }
 
             summaryView.setTag(groupPosition);
             summaryView.setOnClickListener(this);

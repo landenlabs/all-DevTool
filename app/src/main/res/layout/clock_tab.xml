@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -71,19 +73,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
+            tools:visibility="visible"
             android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/alarmTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/alarmTimePickerLayout"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:gravity="center_horizontal|bottom"
         android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/alarmExpand"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/up_arrow" />
 
         <TextView
             android:layout_width="wrap_content"

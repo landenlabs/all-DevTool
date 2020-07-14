@@ -23,6 +23,11 @@ public class UninstallIntentReceiver extends BroadcastReceiver {
     public static final String SHARED_PACKAGE_UNINSTALLER = "package-uninstaller";
     public static final String SHARED_PKG_NAME = "Pkg";
 
+    /*
+        <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED"  />
+        <action android:name="android.intent.action.DELETE" />
+        <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+    */
     @Override
     public void onReceive(Context context, Intent intent) {
         mLog.i("onReceive " + intent);

@@ -119,13 +119,11 @@ public class GpsFragment extends DevFragment implements
     private ImageView m_statusIcon;
 
     // Additional times
-    private static final Locale s_locale = Locale.getDefault();
-    private static final SimpleDateFormat s_hour12Format = new SimpleDateFormat("hh:mm:ss a", s_locale);
-    private static final SimpleDateFormat s_hour24Format = new SimpleDateFormat("HH:mm:ss.S", s_locale);
-    // private static final SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a", s_locale);
-    // private static final SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm", s_locale);
-
-    private static SimpleDateFormat s_hourFormat = s_hour24Format;
+    private final SimpleDateFormat s_hour12Format = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
+    private final SimpleDateFormat s_hour24Format = new SimpleDateFormat("HH:mm:ss.S", Locale.getDefault());
+    // private  final SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a", Locale.getDefault());
+    // private  final SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm", v);
+    private  SimpleDateFormat s_hourFormat = s_hour24Format;
 
 
     static final int s_colorGps = 0xff80ffff;   // must match Status toggle
@@ -148,7 +146,7 @@ public class GpsFragment extends DevFragment implements
     LocationRequest m_locationRequest;
     GoogleApiClient m_googleApiClient;
 
-    class LocInfo {
+    static class LocInfo {
         Location m_currLocation;
         Location m_prevLocation;
     }
@@ -256,6 +254,8 @@ public class GpsFragment extends DevFragment implements
         m_listView = Ui.viewById(rootView, R.id.gpsListView);
         final GpsArrayAdapter adapter = new GpsArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
+
+        checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
 
         // ---- Setup GPS ----
         m_locMgr = getServiceSafe(Context.LOCATION_SERVICE);
@@ -480,37 +480,39 @@ public class GpsFragment extends DevFragment implements
     //  GpsStatus.Listener
     @Override
     public void onGpsStatusChanged(int event) {
-        final LocationManager locMgr = getServiceSafe(Context.LOCATION_SERVICE);
+        if (getActivity() != null) {
+            final LocationManager locMgr = getServiceSafe(Context.LOCATION_SERVICE);
 
-        try {
-            gpsStatus = locMgr.getGpsStatus(gpsStatus);
-            String msg = "";
-            switch (event) {
-                case GpsStatus.GPS_EVENT_STARTED:
-                    msg = "GPS event started";
-                    break;
-                case GpsStatus.GPS_EVENT_STOPPED:
-                    msg = "GPS event stopped";
-                    break;
-                case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    msg = "GPS first fix";
-                    break;
-                case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                    msg = "GPS sat status";
-                    break;
-            }
-
-            if (TextUtils.isEmpty(msg)) {
-                addMsgToDetailRow(s_colorGps, msg);
-                GpsItem gpsItem = m_lastUpdates.get(STATUS_CB);
-                if (gpsItem != null) {
-                    gpsItem.set(System.currentTimeMillis(), msg);
-                    listChanged();
+            try {
+                gpsStatus = locMgr.getGpsStatus(gpsStatus);
+                String msg = "";
+                switch (event) {
+                    case GpsStatus.GPS_EVENT_STARTED:
+                        msg = "GPS event started";
+                        break;
+                    case GpsStatus.GPS_EVENT_STOPPED:
+                        msg = "GPS event stopped";
+                        break;
+                    case GpsStatus.GPS_EVENT_FIRST_FIX:
+                        msg = "GPS first fix";
+                        break;
+                    case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                        msg = "GPS sat status";
+                        break;
                 }
+
+                if (TextUtils.isEmpty(msg)) {
+                    addMsgToDetailRow(s_colorGps, msg);
+                    GpsItem gpsItem = m_lastUpdates.get(STATUS_CB);
+                    if (gpsItem != null) {
+                        gpsItem.set(System.currentTimeMillis(), msg);
+                        listChanged();
+                    }
+                }
+                showProviders();
+            } catch (SecurityException ex) {
+                Log.e(TAG, ex.getMessage());
             }
-            showProviders();
-        } catch (SecurityException ex) {
-            Log.e(TAG, ex.getMessage());
         }
     }
 
@@ -707,6 +709,13 @@ public class GpsFragment extends DevFragment implements
             && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
+                if (m_locMgr != null) {
+                    if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        m_locMgr.addGpsStatusListener(this);
+                    }
+                }
+
                 // PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
                 //        m_googleApiClient, m_locationRequest, this);
                 if (m_gpsCb.isChecked() && m_locationRequest.getPriority() == LocationRequest.PRIORITY_HIGH_ACCURACY) {
@@ -758,6 +767,9 @@ public class GpsFragment extends DevFragment implements
                 == PackageManager.PERMISSION_GRANTED)) {
                 //noinspection deprecation
                 LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
+        }
+        if (m_locMgr != null) {
+            m_locMgr.removeUpdates(this);
         }
     }
 

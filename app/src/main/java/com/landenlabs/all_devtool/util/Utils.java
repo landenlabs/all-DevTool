@@ -703,7 +703,7 @@ public class Utils {
 
     public static final int CLOCK_NOTIFICATION_ID = 1;
 
-    public static void sendNotification(Context context, int id, String msg) {
+    public static void showAlarmNotification(Context context, int id, String msg) {
         s_log.i("Preparing to send notification...: " + msg);
         NotificationManager notificationManager = SysUtils.getServiceSafe(context, Context.NOTIFICATION_SERVICE);
 
@@ -711,7 +711,7 @@ public class Utils {
                 new Intent(context, DevToolActivity.class), 0);
 
         Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.dev_tool_ic);
-        NotificationCompat.Builder alamNotificationBuilder =
+        NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context, "Alarm")
                         .setContentTitle("DevTool Alarm")
                         .setSmallIcon(R.drawable.dev_tool)
@@ -719,8 +719,8 @@ public class Utils {
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                         .setContentText(msg);
 
-        alamNotificationBuilder.setContentIntent(contentIntent);
-        notificationManager.notify(id, alamNotificationBuilder.build());
+        notificationBuilder.setContentIntent(contentIntent);
+        notificationManager.notify(id, notificationBuilder.build());
 
         s_log.i("Notification sent.");
     }

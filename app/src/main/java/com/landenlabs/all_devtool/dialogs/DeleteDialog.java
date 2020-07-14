@@ -194,7 +194,6 @@ public class DeleteDialog extends DialogFragment   {  // TODO - use AppCompatDia
         File fileInfo = new File(fileName);
         if (fileInfo.exists()) {
             try  {
-                //noinspection ResultOfMethodCallIgnored
                 deleted = fileInfo.delete();
                 if (!deleted) {
                     Toast.makeText(this.getActivity(), "Failed to delete\n" + fileInfo.getName(), Toast.LENGTH_SHORT).show();

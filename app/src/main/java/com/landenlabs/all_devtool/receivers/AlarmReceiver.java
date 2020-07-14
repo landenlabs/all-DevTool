@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
+
 import androidx.legacy.content.WakefulBroadcastReceiver;
 
 import com.landenlabs.all_devtool.util.LLog;
+
+import java.io.IOException;
 
 /**
  * Created by Dennis Lang on 2/27/2015.
@@ -35,7 +40,20 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
             alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         }
         Ringtone ringtone = RingtoneManager.getRingtone(context, alarmUri);
-        ringtone.play();
+        if (Build.VERSION.SDK_INT >= 28) {
+            ringtone.setLooping(false);
+            ringtone.play();
+        } else {
+            try {
+                MediaPlayer mediaPlayer = MediaPlayer.create(context, alarmUri);
+                // mediaPlayer.setDataSource(context, alarmUri);
+                mediaPlayer.setLooping(true);
+                // mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         // This will send a notification message
         ComponentName comp = new ComponentName(context.getPackageName(), AlarmService.class.getName());

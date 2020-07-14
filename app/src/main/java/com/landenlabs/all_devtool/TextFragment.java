@@ -63,9 +63,10 @@ import java.util.List;
 public class TextFragment extends DevFragment {
 
     public static final String s_name = "Text";
-    FragmentActivity m_context;
-    TableLayout m_tableLayout;
-    final ArrayList<TextInfo> m_textInfoList = new ArrayList<>();
+    private FragmentActivity m_context;
+    private TableLayout m_tableLayout;
+    private final ArrayList<TextInfo> m_textInfoList = new ArrayList<>();
+    private View m_rootView;
 
     /*
     public static final int s_MSG_SHARE_PATH_KEY = 1;
@@ -87,6 +88,13 @@ public class TextFragment extends DevFragment {
 
     public static TextFragment create() {
         return new TextFragment();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        TextView fontScale = Ui.viewById(m_rootView, R.id.text_tab_font_scale);
+        fontScale.setText(  getString( R.string.text_font_scale, getResources().getConfiguration().fontScale));
     }
 
     // ============================================================================================
@@ -116,21 +124,21 @@ public class TextFragment extends DevFragment {
             @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        View rootView = inflater.inflate(R.layout.text_tab, container, false);
+        m_rootView = inflater.inflate(R.layout.text_tab, container, false);
         m_context = this.getActivity();
 
-        TextView fontScale = Ui.viewById(rootView, R.id.text_tab_font_scale);
+        TextView fontScale = Ui.viewById(m_rootView, R.id.text_tab_font_scale);
         fontScale.setText(  getString( R.string.text_font_scale, getResources().getConfiguration().fontScale));
         fontScale.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(Settings.ACTION_DISPLAY_SETTINGS));
             }
         });
-        m_tableLayout = Ui.viewById(rootView, R.id.text_tablelayout);
+        m_tableLayout = Ui.viewById(m_rootView, R.id.text_tablelayout);
 
         fillLayout();
 
-        return rootView;
+        return m_rootView;
     }
 
     private void fillLayout() {

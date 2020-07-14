@@ -57,8 +57,8 @@ public class OsUtils {
                 stat.st_uid = osStat.st_uid;
                 stat.st_gid = osStat.st_gid;
                 return stat;
-            } catch (ErrnoException ex) {
-                Log.e("OsUtils", ex.getLocalizedMessage());
+            } catch (ErrnoException ex) {    //
+                Log.e("OsUtils", file.getAbsolutePath(), ex);
             }
         }
         return null;

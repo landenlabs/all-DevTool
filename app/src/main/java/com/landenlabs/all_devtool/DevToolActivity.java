@@ -46,6 +46,7 @@ import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.landenlabs.all_devtool.shortcuts.ShortcutUtil;
+import com.landenlabs.all_devtool.util.ALogNotification;
 import com.landenlabs.all_devtool.util.AppCrash;
 import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
 import com.landenlabs.all_devtool.util.Ui;
@@ -177,6 +178,8 @@ public class DevToolActivity extends FragmentActivity {
         MenuItem m_shareMenuItem = menu.findItem(R.id.menu_share);
         GlobalInfo.s_globalInfo.shareActionProvider = (ShareActionProvider) m_shareMenuItem.getActionProvider();
 
+        menu.findItem( R.id.menu_lock_orientation).setChecked(GlobalInfo.s_globalInfo.isLockedOrientation);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -239,6 +242,7 @@ public class DevToolActivity extends FragmentActivity {
         GlobalInfo.s_globalInfo.mainFragActivity = this;
         m_uncaughtExceptionHandler = new UncaughtExceptionHandler(this);
         Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
+        ALogNotification.init(this);
     }
 
     @Override

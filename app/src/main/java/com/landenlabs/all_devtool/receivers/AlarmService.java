@@ -18,7 +18,7 @@ public class AlarmService extends IntentService {
     @Override
     public void onHandleIntent(Intent intent) {
         // sendNotification("DevStuff Alarm!");
-        Utils.sendNotification(this, Utils.CLOCK_NOTIFICATION_ID, "Alarm!");
+        Utils.showAlarmNotification(this, Utils.CLOCK_NOTIFICATION_ID, "Alarm!");
         AlarmReceiver.completeWakefulIntent(intent);
     }
 

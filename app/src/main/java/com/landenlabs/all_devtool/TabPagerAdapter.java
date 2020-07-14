@@ -31,6 +31,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcelable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -41,6 +42,8 @@ import android.widget.Toast;
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Utils;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -306,8 +309,25 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
             },
     };
 
+    private  Creator[] removeArrayIdx(Creator[] inArray, int removeIdx) {
+        Creator[] outArray = new Creator[inArray.length - 1];
+        System.arraycopy(inArray, 0, outArray, 0, removeIdx);
+        System.arraycopy(inArray, removeIdx + 1, outArray, removeIdx, inArray.length - removeIdx - 1);
+        return outArray;
+    }
+
     TabPagerAdapter(FragmentManager fm, ViewPager viewPager, ActionBar actionBar) {
-        super(fm);
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+
+        if (Build.VERSION.SDK_INT >= 29) {
+            // https://developer.android.com/about/versions/10/privacy/changes
+            for (int idx = 0; idx < m_tabList.length; idx++) {
+                if (m_tabList[idx].name().equals(NetstatFragment.s_name)) {
+                    m_tabList = removeArrayIdx(m_tabList, idx);
+                    break;
+                }
+            }
+        }
 
         m_viewPager = viewPager;
         m_actionBar = actionBar;

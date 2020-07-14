@@ -202,7 +202,6 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
         return Utils.getListViewAsCSV(m_listView);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

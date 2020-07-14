@@ -36,7 +36,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.ProxyInfo;
+import android.net.RouteInfo;
+import android.net.TransportInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -47,6 +53,8 @@ import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
@@ -81,6 +89,7 @@ import com.landenlabs.all_devtool.util.Utils;
 
 import java.math.BigInteger;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.text.SimpleDateFormat;
@@ -90,6 +99,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -334,6 +344,7 @@ public class NetFragment extends DevFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        //noinspection SwitchStatementWithTooFewBranches
         switch (id) {
             case R.id.net_clean_networks:
                 clearNetworks();
@@ -347,13 +358,13 @@ public class NetFragment extends DevFragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
     }
 
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         m_menu = menu.addSubMenu("Net Options");
         inflater.inflate(R.menu.net_menu, m_menu);
@@ -409,24 +420,21 @@ public class NetFragment extends DevFragment {
         boolean firstTime = m_list.isEmpty();
         m_list.clear();
 
-
-
         // --------------- Connection Services -------------
+        Map<String, String> cellListStr = new LinkedHashMap<>();
         try {
             checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION
                     , Manifest.permission.READ_PHONE_STATE);
-
-            Map<String, String> cellListStr = new LinkedHashMap<>();
             TelephonyManager telephonyManager = getServiceSafe(Context.TELEPHONY_SERVICE);
 
-            cellListStr.put("Device Id", telephonyManager.getDeviceId());
+            //[not allowed]  cellListStr.put("Device Id", telephonyManager.getDeviceId());
             if (Build.VERSION.SDK_INT >= 26) {
-                cellListStr.put("IMEI", telephonyManager.getImei());    // api 26
+                //[not allowed]  cellListStr.put("IMEI", telephonyManager.getImei());    // api 26
                 PersistableBundle carrierCfgBundle = telephonyManager.getCarrierConfig();   // api 26
                 if (carrierCfgBundle != null) {
                     cellListStr.put("Carrier", carrierCfgBundle.toString());
                 }
-                cellListStr.put("Meid", telephonyManager.getMeid());        // api 26
+                //[not allowed] cellListStr.put("Meid", telephonyManager.getMeid());        // api 26
             }
 
             cellListStr.put("Call State", String.valueOf(telephonyManager.getCallState()));
@@ -439,13 +447,13 @@ public class NetFragment extends DevFragment {
             if (Build.VERSION.SDK_INT >= 19) {
                 cellListStr.put("Agent", telephonyManager.getMmsUserAgent());       // api 19
             }
-            cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
+            //[not allowed]  cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("VoiceMail", telephonyManager.getVoiceMailNumber());
             cellListStr.put("Data act", String.valueOf(telephonyManager.getDataActivity()));
             if (Build.VERSION.SDK_INT >= 24) {
                 cellListStr.put("Net type", String.valueOf(telephonyManager.getDataNetworkType()));
             }
-            cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
+            //[not allowed] cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("PhoneType", String.valueOf(telephonyManager.getPhoneType()));
             if (Build.VERSION.SDK_INT >= 24) {
                 cellListStr.put("Net Data Typ",
@@ -455,7 +463,6 @@ public class NetFragment extends DevFragment {
                 cellListStr.put("Is World",
                         String.valueOf(telephonyManager.isWorldPhone()));       // api 23
             }
-
 
             // Type of the network
             int phoneTypeInt = telephonyManager.getPhoneType();
@@ -528,102 +535,138 @@ public class NetFragment extends DevFragment {
                     cellListStr.put(id, msg);
                 }
             }
-
+        } catch (Exception ex) {
+            cellListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
+        }
+        if (!cellListStr.isEmpty()) {
             addBuild("Cell...", cellListStr);
-        } catch (Exception ignore) {
         }
 
         // --------------- Connection Services -------------
+        Map<String, String> netListStr = new LinkedHashMap<>();
         try {
             ConnectivityManager connMgr = getServiceSafe(Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo listInfo = connMgr.getActiveNetworkInfo();
-            if (listInfo != null) {
-                Map<String, String> netListStr = new LinkedHashMap<>();
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                final Network activeNet = connMgr.getActiveNetwork();
+                if (activeNet != null) {
+                    ProxyInfo proxyInfo =  connMgr.getDefaultProxy();
+                    if (proxyInfo != null) {
+                        netListStr.put("Proxy", proxyInfo.getHost() + ":" + proxyInfo.getPort());
+                    }
 
-                putIf(netListStr, "Available", "Yes", listInfo.isAvailable());
-                putIf(netListStr, "Connected", "Yes", listInfo.isConnected());
-                putIf(netListStr, "Connecting", "Yes", !listInfo.isConnected() && listInfo.isConnectedOrConnecting());
-                putIf(netListStr, "Roaming", "Yes", listInfo.isRoaming());
-                putIf(netListStr, "Extra", listInfo.getExtraInfo(), !TextUtils.isEmpty(listInfo.getExtraInfo()));
-                putIf(netListStr, "WhyFailed", listInfo.getReason(), !TextUtils.isEmpty(listInfo.getReason()));
-                putIf(netListStr, "Metered", "Avoid heavy use", connMgr.isActiveNetworkMetered());
-
-                netListStr.put("NetworkType", listInfo.getTypeName());
-                if (connMgr.getAllNetworkInfo().length > 1) {
-                    netListStr.put("Available Networks:", " ");
-                    for (NetworkInfo netI : connMgr.getAllNetworkInfo()) {
-                        if (netI.isAvailable()) {
-                            String state = netI.isAvailable() ? "Yes" : "No";
-                            if (netI.isConnected())
-                                state = "Connected";
-                            else if (netI.isConnectedOrConnecting())
-                                state = "Connecting";
-
-                            netListStr.put("  " + netI.getTypeName(), state);
+                    final Network[] allNet = connMgr.getAllNetworks();
+                    if (allNet.length > 0) {
+                        for (Network net : allNet) {
+                            putIf(netListStr,  "Connected", "Yes", activeNet.equals(net));
+                            final LinkProperties linkProp = connMgr.getLinkProperties(net);
+                             if (linkProp != null) {
+                                 String netInterfaceName = linkProp.getInterfaceName();
+                                 putIf(netListStr,  "Domain", linkProp.getDomains(), !TextUtils.isEmpty(linkProp.getDomains()));
+                                 addNetCapToList(netListStr, netInterfaceName, connMgr.getNetworkCapabilities(activeNet));
+                                 int dnsNum=0;
+                                 for (InetAddress dns : linkProp.getDnsServers()) {
+                                     if (dns.getHostAddress() != null) {
+                                         dnsNum++;
+                                         netListStr.put(netInterfaceName + " DNS " + dnsNum, formatInet(dns));
+                                     }
+                                 }
+                                 for (RouteInfo route : linkProp.getRoutes()) {
+                                     netListStr.put(route.getInterface() + " Route ", formatInet(route.getGateway()));
+                                 }
+                             }
                         }
                     }
+                    addBuild("Network...", netListStr);
                 }
+            } else {
+                final NetworkInfo listInfo = connMgr.getActiveNetworkInfo();
+                if (listInfo != null) {
+                    putIf(netListStr, "Available", "Yes", listInfo.isAvailable());
+                    putIf(netListStr, "Connected", "Yes", listInfo.isConnected());
+                    putIf(netListStr, "Connecting", "Yes", !listInfo.isConnected() && listInfo.isConnectedOrConnecting());
+                    putIf(netListStr, "Roaming", "Yes", listInfo.isRoaming());
+                    putIf(netListStr, "Extra", listInfo.getExtraInfo(), !TextUtils.isEmpty(listInfo.getExtraInfo()));
+                    putIf(netListStr, "WhyFailed", listInfo.getReason(), !TextUtils.isEmpty(listInfo.getReason()));
+                    putIf(netListStr, "Metered", "Avoid heavy use", connMgr.isActiveNetworkMetered());
 
-                if (connMgr.isActiveNetworkMetered()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        String howMetered = "";
-                        switch (connMgr.getRestrictBackgroundStatus()) {
-                            case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED:
-                                // Background data usage is blocked for this app. Wherever possible,
-                                // the app should also use less data in the foreground.
-                                howMetered = "Restrict background";
-                                break;
-                            case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED:
-                                // The app is whitelisted. Wherever possible,
-                                // the app should use less data in the foreground and background.
-                                howMetered = "Restrict bg, whitelist";
-                                break;
-                            case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED:
-                                // Data Saver is disabled. Since the device is connected to a
-                                // metered network, the app should use less data wherever possible.
-                                howMetered = "Data Saver disabled";
-                                break;
-                        }
-                        netListStr.put("Metered", howMetered);
-                    }
-                }
+                    netListStr.put("NetworkType", listInfo.getTypeName());
+                    if (connMgr.getAllNetworkInfo().length > 1) {
+                        netListStr.put("Available Networks:", " ");
+                        for (NetworkInfo netI : connMgr.getAllNetworkInfo()) {
+                            if (netI.isAvailable()) {
+                                String state = netI.isAvailable() ? "Yes" : "No";
+                                if (netI.isConnected())
+                                    state = "Connected";
+                                else if (netI.isConnectedOrConnecting())
+                                    state = "Connecting";
 
-                if (listInfo.isConnected()) {
-                    try {
-                        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
-                            NetworkInterface intf = en.nextElement();
-                            for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
-                                InetAddress inetAddress = enumIpAddr.nextElement();
-                                if (!inetAddress.isLoopbackAddress()) {
-                                    if (inetAddress.getHostAddress() != null) {
-                                        String ipType = (inetAddress instanceof Inet4Address) ? "IPv4" : "IPv6";
-                                        netListStr.put(intf.getName() + " " + ipType, inetAddress.getHostAddress());
-                                    }
-                                    // if (!TextUtils.isEmpty(inetAddress.getHostName()))
-                                    //     listStr.put( "HostName", inetAddress.getHostName());
-                                }
+                                netListStr.put("  " + netI.getTypeName(), state);
                             }
                         }
-                    } catch (Exception ex) {
-                        m_log.e("Network %s", ex.getMessage());
                     }
-                }
 
-                addBuild("Network...", netListStr);
+                    if (connMgr.isActiveNetworkMetered()) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            String howMetered = "";
+                            switch (connMgr.getRestrictBackgroundStatus()) {
+                                case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED:
+                                    // Background data usage is blocked for this app. Wherever possible,
+                                    // the app should also use less data in the foreground.
+                                    howMetered = "Restrict background";
+                                    break;
+                                case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+                                    // The app is whitelisted. Wherever possible,
+                                    // the app should use less data in the foreground and background.
+                                    howMetered = "Restrict bg, whitelist";
+                                    break;
+                                case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED:
+                                    // Data Saver is disabled. Since the device is connected to a
+                                    // metered network, the app should use less data wherever possible.
+                                    howMetered = "Data Saver disabled";
+                                    break;
+                            }
+                            netListStr.put("Metered", howMetered);
+                        }
+                    }
+
+                    if (listInfo.isConnected()) {
+                        try {
+                            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                                NetworkInterface intf = en.nextElement();
+                                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                                    InetAddress inetAddress = enumIpAddr.nextElement();
+                                    if (!inetAddress.isLoopbackAddress()) {
+                                        if (inetAddress.getHostAddress() != null) {
+                                            String ipType = (inetAddress instanceof Inet4Address) ? "IPv4" : "IPv6";
+                                            netListStr.put(intf.getName() + " " + ipType, inetAddress.getHostAddress());
+                                        }
+                                        // if (!TextUtils.isEmpty(inetAddress.getHostName()))
+                                        //     listStr.put( "HostName", inetAddress.getHostName());
+                                    }
+                                }
+                            }
+                        } catch (Exception ex) {
+                            m_log.e("Network %s", ex.getMessage());
+                        }
+                    }
+
+                }
             }
         } catch (Exception ex) {
             m_log.e("Network %s", ex.getMessage());
+            netListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
         }
+        addBuild("Network...", netListStr);
 
         // --------------- Telephony Services -------------
         TelephonyManager telephonyManager = getServiceSafe(Context.TELEPHONY_SERVICE);
-        Map<String, String> cellListStr = new LinkedHashMap<>();
+        Map<String, String> phoneListStr = new LinkedHashMap<>();
         try {
-            cellListStr.put("Version", telephonyManager.getDeviceSoftwareVersion());
-            cellListStr.put("Number", telephonyManager.getLine1Number());
-            cellListStr.put("Service", telephonyManager.getNetworkOperatorName());
-            cellListStr.put("Roaming", telephonyManager.isNetworkRoaming() ? "Yes" : "No");
-            cellListStr.put("Type", getNetworkTypeName(telephonyManager.getNetworkType()));
+            phoneListStr.put("Version", telephonyManager.getDeviceSoftwareVersion());
+            phoneListStr.put("Number", telephonyManager.getLine1Number());
+            phoneListStr.put("Service", telephonyManager.getNetworkOperatorName());
+            phoneListStr.put("Roaming", telephonyManager.isNetworkRoaming() ? "Yes" : "No");
+            phoneListStr.put("Type", getNetworkTypeName(telephonyManager.getNetworkType()));
 
             if (Build.VERSION.SDK_INT >= 17) {
                 if (telephonyManager.getAllCellInfo() != null) {
@@ -639,7 +682,7 @@ public class NetFragment extends DevFragment {
                         } else if (Build.VERSION.SDK_INT >= 18 && cellInfo instanceof CellInfoWcdma) {
                             level = ((CellInfoWcdma) cellInfo).getCellSignalStrength().getLevel();
                         }
-                        cellListStr.put(cellName, "Level% " + String.valueOf(100 * level / 4));
+                        phoneListStr.put(cellName, "Level% " + String.valueOf(100 * level / 4));
                     }
                 }
             }
@@ -647,25 +690,24 @@ public class NetFragment extends DevFragment {
             /*
             for (NeighboringCellInfo cellInfo : telephonyManager.getNeighboringCellInfo()) {
                 int level = cellInfo.getRssi();
-                cellListStr.put("Cell level%", String.valueOf(100 * level / 31));
+                phoneListStr.put("Cell level%", String.valueOf(100 * level / 31));
             }
             */
         } catch (Exception ex) {
             m_log.e("Cell %s", ex.getMessage());
+            phoneListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
         }
 
-        if (!cellListStr.isEmpty()) {
-            addBuild("Cell...", cellListStr);
+        if (!phoneListStr.isEmpty()) {
+            addBuild("Phone...", phoneListStr);
         }
 
         // --------------- Bluetooth Services (API18) -------------
         if (Build.VERSION.SDK_INT >= 18) {
+            Map<String, String> btListStr = new LinkedHashMap<>();
             try {
                 BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                 if (bluetoothAdapter != null) {
-
-                    Map<String, String> btListStr = new LinkedHashMap<>();
-
                     btListStr.put("Enabled", bluetoothAdapter.isEnabled() ? "yes" : "no");
                     btListStr.put("Name", bluetoothAdapter.getName());
                     btListStr.put("Address", bluetoothAdapter.getAddress());
@@ -694,12 +736,14 @@ public class NetFragment extends DevFragment {
                     // BluetoothProfileManager manager = BluetoothProfileManager.getInstance();
 
 
-                    // btMgr.getAdapter().
-                    addBuild("Bluetooth", btListStr);
+
                 }
 
-            } catch (Exception ignore) {
+            } catch (Exception ex) {
+                btListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
             }
+            // btMgr.getAdapter().
+            addBuild("Bluetooth", btListStr);
         }
 
         // --------------- Telephony Services -------------
@@ -774,6 +818,7 @@ public class NetFragment extends DevFragment {
 
             } catch (Exception ex) {
                 m_log.e("Wifi %s", ex.getMessage());
+                wifiListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
             }
 
             if (!wifiListStr.isEmpty()) {
@@ -818,7 +863,6 @@ public class NetFragment extends DevFragment {
                 m_log.e("WifiList %s", ex.getMessage());
             }
 
-
             addConfigNetworks();
         }
 
@@ -830,6 +874,33 @@ public class NetFragment extends DevFragment {
         }
 
         m_adapter.notifyDataSetChanged();
+    }
+
+    @NonNull
+    private String formatInet(@Nullable InetAddress inetAddress) {
+        String result = "";
+        if (inetAddress != null) {
+            if (inetAddress.getHostAddress() != null) {
+                String ipType = (inetAddress instanceof Inet4Address) ? "IPv4 "
+                        : (inetAddress instanceof Inet6Address ? "IPv6 "
+                        : "");
+                return ipType + inetAddress.getHostName();
+            }
+        }
+        return result;
+    }
+
+    private void addNetCapToList(Map<String,String> netListStr, String tag, NetworkCapabilities netCap) {
+        if (netCap != null) {
+            if (Build.VERSION.SDK_INT >= 21) {
+                netListStr.put("Down limit", String.format(Locale.US, "%,d Mbps", netCap.getLinkDownstreamBandwidthKbps()/1000));
+                netListStr.put("Up limit", String.format(Locale.US, "%,d Mbps", netCap.getLinkUpstreamBandwidthKbps()/1000));
+                if (Build.VERSION.SDK_INT >= 29) {
+                    netListStr.put("Signal", String.valueOf(netCap.getSignalStrength()));
+                    // TransportInfo transportInfo = netCap.getTransportInfo();
+                }
+            }
+        }
     }
 
     @NonNull

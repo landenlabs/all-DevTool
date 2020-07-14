@@ -90,7 +90,6 @@ public class BuildFragment extends DevFragment {
 // ============================================================================================
     // Fragment methods
 
-    @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

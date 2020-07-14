@@ -32,7 +32,6 @@ import com.landenlabs.all_devtool.GlobalInfo;
  *
  * Created by Dennis Lang on 11/28/2015.
  */
-@SuppressWarnings("FieldCanBeLocal")
 public class LLog {
 
     // LLog states OFF or ON, use DBG to auto enable in Debug build.

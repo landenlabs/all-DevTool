@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.icu.text.TimeZoneNames;
+import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,12 +47,14 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
 import com.landenlabs.all_devtool.receivers.AlarmReceiver;
+import com.landenlabs.all_devtool.util.ALogNotification;
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
@@ -87,6 +90,8 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     private PendingIntent m_pendingIntent;
     private TimePicker m_alarmTimePicker;
     private TextView m_alarmTextView;
+    private ToggleButton alarmToggle;
+    private ImageView alarmExpander;
 
     // ---- Clock / Times ----
     private TextView m_clockLocalTv;
@@ -166,7 +171,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     // ============================================================================================
     // Fragment methods
 
-    @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -204,10 +208,12 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         m_timeBotList.addView(m_dayLight);
 
         // ---- Alaram ----
-        ToggleButton alarmToggle = Ui.viewById(m_rootView, R.id.alarmToggle);
+        alarmToggle = Ui.viewById(m_rootView, R.id.alarmToggle);
         alarmToggle.setOnClickListener(this);
+        alarmExpander = Ui.viewById(m_rootView, R.id.alarmExpand);
+        alarmExpander.setOnClickListener(this);
 
-        m_alarmTimePicker.setVisibility(alarmToggle.isChecked() ? View.VISIBLE : View.GONE);
+        m_alarmTimePicker.setVisibility(alarmExpander.getTag() != null ? View.VISIBLE : View.GONE);
         m_alarmManager = getAlarmMgr();
 
         return m_rootView;
@@ -218,6 +224,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         super.onResume();
         m_handler.removeCallbacks(m_updateElapsedTimeTask);
         m_handler.postDelayed(m_updateElapsedTimeTask, 0);
+        updateAlarm();
     }
 
     @Override
@@ -281,9 +288,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
         int id = view.getId();
         switch (id) {
-            case R.id.alarmToggle:
-                toggleAlarm(((ToggleButton) view).isChecked());
-                break;
             case R.id.showTzMapBtn:
                 showTimezoneMap();
                 break;
@@ -299,6 +303,17 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
                 m_daylightFilter = DaylightFilter.NoDS;
                 updateClock();
                 break;
+
+            case R.id.alarmToggle:
+                if (alarmToggle.isChecked() && alarmToggle.getTag() == null) {
+                    toggleAlaramExpand();
+                }
+                updateAlarm();
+                break;
+            case R.id.alarmExpand:
+                toggleAlaramExpand();
+                updateAlarm();
+                break;
         }
     }
 
@@ -307,7 +322,6 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     private static final long MIN_MILLI = 60 * 1000;
     private static final long HOUR_MILLI = MIN_MILLI * 60;
-
 
     private String getTzOffsetStr(TimeZone tz) {
         long tzOffMilli = tz.getRawOffset();
@@ -468,43 +482,62 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         return String.format("%s %02d:%02d:%02d.%03d", (day == 0 ? "" : String.valueOf(day)), hr, min, sec, ms);
     }
 
-    /**
-     * Toogle alarm setting UI on/off and start/stop pending intent.
-     */
-    private void toggleAlarm(boolean isOn) {
-        if (m_pendingIntent == null) {
-            Intent myIntent = new Intent(GlobalInfo.s_globalInfo.mainFragActivity, AlarmReceiver.class);
-            m_pendingIntent = PendingIntent.getBroadcast(
-                    GlobalInfo.s_globalInfo.mainFragActivity, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
-
-        if (isOn) {
-            m_alarmTimePicker.setVisibility(View.VISIBLE);
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, m_alarmTimePicker.getCurrentHour());
-            calendar.set(Calendar.MINUTE, m_alarmTimePicker.getCurrentMinute());
-            calendar.set(Calendar.SECOND, 0);
-            m_alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), m_pendingIntent);
-
-            s_timeFormat.setTimeZone(m_timeZone);
-            String alarmStr = s_timeFormat.format(calendar.getTime());
-            Utils.sendNotification(this.getActivity(), Utils.CLOCK_NOTIFICATION_ID,  "Alarm " + alarmStr);
-            m_alarmTextView.setText(alarmStr);
-
-            m_log.i("Alarm On " + alarmStr);
-        } else {
-            m_alarmTimePicker.setVisibility(View.GONE);
-            m_alarmManager.cancel(m_pendingIntent);
-            Utils.cancelNotification(this.getActivity(), Utils.CLOCK_NOTIFICATION_ID);
-            m_alarmTextView.setText("");
-            m_log.i("Alarm Off");
-        }
-    }
-
     private void showTimezoneMap() {
         String htmlStr = Utils.LoadData(getContextSafe(), "timezone.html");
 
         Ui.showWebMessage(getContext(), Ui.HTML_CENTER_BOX, htmlStr);
         // Ui.showWebImage(getContext(), "file:///android_asset/world_timezone_map.png");
     }
+
+    // ============================================================================================
+    // Alarm methods
+
+    private void toggleAlaramExpand() {
+        alarmExpander.animate().rotationBy(180).setDuration(1000).start();
+        alarmExpander.setTag(alarmExpander.getTag() == null ? 1 : null);
+    }
+
+    /**
+     * Toogle alarm setting UI on/off and start/stop pending intent.
+     */
+    private void updateAlarm() {
+        boolean isOn = alarmToggle.isChecked();
+        m_alarmTimePicker.setVisibility(alarmExpander.getTag() != null ? View.VISIBLE : View.GONE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, m_alarmTimePicker.getCurrentHour());
+        calendar.set(Calendar.MINUTE, m_alarmTimePicker.getCurrentMinute());
+        if (isOn && calendar.getTimeInMillis() - System.currentTimeMillis() < TimeUnit.SECONDS.toMillis(60)) {
+            calendar.add(Calendar.SECOND, 60);
+            m_alarmTimePicker.setCurrentHour(calendar.get(Calendar.HOUR));
+            m_alarmTimePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
+        }
+
+        if (isOn) {
+            if (m_pendingIntent == null) {
+                Intent myIntent = new Intent(GlobalInfo.s_globalInfo.mainFragActivity, AlarmReceiver.class);
+                m_pendingIntent = PendingIntent.getBroadcast(
+                        GlobalInfo.s_globalInfo.mainFragActivity, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                m_alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), m_pendingIntent);
+            }
+            s_timeFormat.setTimeZone(m_timeZone);
+            String alarmStr = s_timeFormat.format(calendar.getTime());
+            // Utils.showAlarmNotification(this.getActivity(), Utils.CLOCK_NOTIFICATION_ID,  "Alarm " + alarmStr);
+            ALogNotification.updateNotification(this.getActivity(), "Alarm " + alarmStr);
+            m_alarmTextView.setText(alarmStr);
+
+            m_log.i("Alarm On " + alarmStr);
+        } else {
+            if (m_pendingIntent != null) {
+                m_alarmManager.cancel(m_pendingIntent);
+                Utils.cancelNotification(this.getActivity(), Utils.CLOCK_NOTIFICATION_ID);
+                m_pendingIntent = null;
+                RingtoneManager ringMan = new RingtoneManager(getActivity());
+                ringMan.stopPreviousRingtone();
+            }
+            m_alarmTextView.setText("");
+            m_log.i("Alarm Off");
+        }
+    }
+
 }
