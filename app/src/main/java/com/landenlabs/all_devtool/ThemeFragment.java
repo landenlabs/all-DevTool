@@ -27,7 +27,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +38,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
 import com.landenlabs.all_devtool.util.Ui;
@@ -61,7 +62,6 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
     public static final String s_name = "Theme";
 
     private View m_rootView;
-    @SuppressWarnings("unused")
     private TextView m_title;
     private Spinner m_theme_spinner;
     private Spinner m_dialog_style_spinner;

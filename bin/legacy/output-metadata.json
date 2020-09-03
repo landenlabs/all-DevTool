@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.landenlabs.all_devtool",
+  "variantName": "legacyRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "properties": [],
+      "versionCode": 30714,
+      "versionName": "3.07.14",
+      "enabled": true,
+      "outputFile": "all-DevTool-legacyRelease-3.07.14.apk"
+    }
+  ]
+}

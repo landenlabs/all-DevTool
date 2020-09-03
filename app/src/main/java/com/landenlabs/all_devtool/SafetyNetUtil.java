@@ -1,8 +1,9 @@
 package com.landenlabs.all_devtool;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;

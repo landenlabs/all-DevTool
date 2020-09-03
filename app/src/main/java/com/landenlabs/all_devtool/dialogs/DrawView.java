@@ -183,11 +183,9 @@ public class DrawView extends View {
         m_drawPaint.setStrokeWidth(10);
         m_drawPaint.setStyle(Paint.Style.STROKE);
 
-        if (Build.VERSION.SDK_INT >= 17) {
-            m_drawPaint.setAntiAlias(true);
-            m_drawPaint.setShadowLayer(5 + 4, 0, 0, 0xffffffff);
-            setLayerType(LAYER_TYPE_SOFTWARE, m_drawPaint);
-        }
+        m_drawPaint.setAntiAlias(true);
+        m_drawPaint.setShadowLayer(5 + 4, 0, 0, 0xffffffff);
+        setLayerType(LAYER_TYPE_SOFTWARE, m_drawPaint);
 
         m_handler.postDelayed(m_pruneTimerTask, TIMER_MSEC);
     }

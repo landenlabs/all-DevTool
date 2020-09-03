@@ -735,71 +735,67 @@ public class NumAttrFragment extends NumBaseFragment {
         addNum("voicePromptText", android.R.attr.voicePromptText, "string");
         addNum("defaultValue", android.R.attr.defaultValue, "string");
 
-        if (Build.VERSION.SDK_INT >= 19) {
-            AddToListLevel19();
+        AddToListLevel19();
 
-            if (Build.VERSION.SDK_INT >= 21) {
-                AddToListLevel21();
-            }
+        if (Build.VERSION.SDK_INT >= 21) {
+            AddToListLevel21();
         }
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     void AddToListLevel19() {
         // Api 19
-        if (Build.VERSION.SDK_INT >= 19) {
-            addNum("apduServiceBanner", android.R.attr.apduServiceBanner);
-            addNum("autoMirrored", android.R.attr.autoMirrored);
-            addNum("fadingMode", android.R.attr.fadingMode);
-            addNum("fontFamily", android.R.attr.fontFamily);
-            addNum("layoutDirection", android.R.attr.layoutDirection);
-            addNum("layoutMode", android.R.attr.layoutMode);
-            addNum("transitionOrdering", android.R.attr.transitionOrdering);
-            addNum("windowOverscan", android.R.attr.windowOverscan);
-            addNum("windowTranslucentNavigation", android.R.attr.windowTranslucentNavigation);
-            addNum("windowTranslucentStatus", android.R.attr.windowTranslucentStatus);
-            addNum("autoMirrored", android.R.attr.autoMirrored, "boolean");
-            addNum("canRequestEnhancedWebAccessibility", android.R.attr.canRequestEnhancedWebAccessibility, "boolean");
-            addNum("canRequestFilterKeyEvents", android.R.attr.canRequestFilterKeyEvents, "boolean");
-            addNum("canRequestTouchExplorationMode", android.R.attr.canRequestTouchExplorationMode, "boolean");
-            addNum("isAsciiCapable", android.R.attr.isAsciiCapable, "boolean");
-            addNum("layout_alignParentEnd", android.R.attr.layout_alignParentEnd, "boolean");
-            addNum("layout_alignParentStart", android.R.attr.layout_alignParentStart, "boolean");
-            addNum("mipMap", android.R.attr.mipMap, "boolean");
-            addNum("mirrorForRtl", android.R.attr.mirrorForRtl, "boolean");
-            addNum("requireDeviceUnlock", android.R.attr.requireDeviceUnlock, "boolean");
-            addNum("supportsSwitchingToNextInputMethod", android.R.attr.supportsSwitchingToNextInputMethod, "boolean");
-            addNum("windowOverscan", android.R.attr.windowOverscan, "boolean");
-            addNum("windowTranslucentNavigation", android.R.attr.windowTranslucentNavigation, "boolean");
-            addNum("windowTranslucentStatus", android.R.attr.windowTranslucentStatus, "boolean");
-            addNum("childIndicatorEnd", android.R.attr.childIndicatorEnd, "dimension");
-            addNum("childIndicatorStart", android.R.attr.childIndicatorStart, "dimension");
-            addNum("indicatorEnd", android.R.attr.indicatorEnd, "dimension");
-            addNum("indicatorStart", android.R.attr.indicatorStart, "dimension");
-            addNum("layout_marginEnd", android.R.attr.layout_marginEnd, "dimension");
-            addNum("layout_marginStart", android.R.attr.layout_marginStart, "dimension");
-            addNum("listPreferredItemPaddingEnd", android.R.attr.listPreferredItemPaddingEnd, "dimension");
-            addNum("listPreferredItemPaddingStart", android.R.attr.listPreferredItemPaddingStart, "dimension");
-            addNum("paddingEnd", android.R.attr.paddingEnd, "dimension");
-            addNum("paddingStart", android.R.attr.paddingStart, "dimension");
-            addNum("accessibilityLiveRegion", android.R.attr.accessibilityLiveRegion, "integer");
-            addNum("importantForAccessibility", android.R.attr.importantForAccessibility, "integer");
-            addNum("labelFor", android.R.attr.labelFor, "integer");
-            addNum("mediaRouteTypes", android.R.attr.mediaRouteTypes, "integer");
-            addNum("startDelay", android.R.attr.startDelay, "integer");
-            addNum("subtypeId", android.R.attr.subtypeId, "integer");
-            addNum("textAlignment", android.R.attr.textAlignment, "integer");
-            addNum("textDirection", android.R.attr.textDirection, "integer");
-            addNum("widgetCategory", android.R.attr.widgetCategory, "integer");
-            addNum("addPrintersActivity", android.R.attr.addPrintersActivity, "string");
-            addNum("advancedPrintOptionsActivity", android.R.attr.advancedPrintOptionsActivity, "string");
-            addNum("category", android.R.attr.category, "string");
-            addNum("fontFamily", android.R.attr.fontFamily, "string");
-            addNum("format12Hour", android.R.attr.format12Hour, "string");
-            addNum("format24Hour", android.R.attr.format24Hour, "string");
-            addNum("timeZone", android.R.attr.timeZone, "string");
-            addNum("vendor", android.R.attr.vendor, "string");
-        }
+        addNum("apduServiceBanner", android.R.attr.apduServiceBanner);
+        addNum("autoMirrored", android.R.attr.autoMirrored);
+        addNum("fadingMode", android.R.attr.fadingMode);
+        addNum("fontFamily", android.R.attr.fontFamily);
+        addNum("layoutDirection", android.R.attr.layoutDirection);
+        addNum("layoutMode", android.R.attr.layoutMode);
+        addNum("transitionOrdering", android.R.attr.transitionOrdering);
+        addNum("windowOverscan", android.R.attr.windowOverscan);
+        addNum("windowTranslucentNavigation", android.R.attr.windowTranslucentNavigation);
+        addNum("windowTranslucentStatus", android.R.attr.windowTranslucentStatus);
+        addNum("autoMirrored", android.R.attr.autoMirrored, "boolean");
+        addNum("canRequestEnhancedWebAccessibility", android.R.attr.canRequestEnhancedWebAccessibility, "boolean");
+        addNum("canRequestFilterKeyEvents", android.R.attr.canRequestFilterKeyEvents, "boolean");
+        addNum("canRequestTouchExplorationMode", android.R.attr.canRequestTouchExplorationMode, "boolean");
+        addNum("isAsciiCapable", android.R.attr.isAsciiCapable, "boolean");
+        addNum("layout_alignParentEnd", android.R.attr.layout_alignParentEnd, "boolean");
+        addNum("layout_alignParentStart", android.R.attr.layout_alignParentStart, "boolean");
+        addNum("mipMap", android.R.attr.mipMap, "boolean");
+        addNum("mirrorForRtl", android.R.attr.mirrorForRtl, "boolean");
+        addNum("requireDeviceUnlock", android.R.attr.requireDeviceUnlock, "boolean");
+        addNum("supportsSwitchingToNextInputMethod", android.R.attr.supportsSwitchingToNextInputMethod, "boolean");
+        addNum("windowOverscan", android.R.attr.windowOverscan, "boolean");
+        addNum("windowTranslucentNavigation", android.R.attr.windowTranslucentNavigation, "boolean");
+        addNum("windowTranslucentStatus", android.R.attr.windowTranslucentStatus, "boolean");
+        addNum("childIndicatorEnd", android.R.attr.childIndicatorEnd, "dimension");
+        addNum("childIndicatorStart", android.R.attr.childIndicatorStart, "dimension");
+        addNum("indicatorEnd", android.R.attr.indicatorEnd, "dimension");
+        addNum("indicatorStart", android.R.attr.indicatorStart, "dimension");
+        addNum("layout_marginEnd", android.R.attr.layout_marginEnd, "dimension");
+        addNum("layout_marginStart", android.R.attr.layout_marginStart, "dimension");
+        addNum("listPreferredItemPaddingEnd", android.R.attr.listPreferredItemPaddingEnd, "dimension");
+        addNum("listPreferredItemPaddingStart", android.R.attr.listPreferredItemPaddingStart, "dimension");
+        addNum("paddingEnd", android.R.attr.paddingEnd, "dimension");
+        addNum("paddingStart", android.R.attr.paddingStart, "dimension");
+        addNum("accessibilityLiveRegion", android.R.attr.accessibilityLiveRegion, "integer");
+        addNum("importantForAccessibility", android.R.attr.importantForAccessibility, "integer");
+        addNum("labelFor", android.R.attr.labelFor, "integer");
+        addNum("mediaRouteTypes", android.R.attr.mediaRouteTypes, "integer");
+        addNum("startDelay", android.R.attr.startDelay, "integer");
+        addNum("subtypeId", android.R.attr.subtypeId, "integer");
+        addNum("textAlignment", android.R.attr.textAlignment, "integer");
+        addNum("textDirection", android.R.attr.textDirection, "integer");
+        addNum("widgetCategory", android.R.attr.widgetCategory, "integer");
+        addNum("addPrintersActivity", android.R.attr.addPrintersActivity, "string");
+        addNum("advancedPrintOptionsActivity", android.R.attr.advancedPrintOptionsActivity, "string");
+        addNum("category", android.R.attr.category, "string");
+        addNum("fontFamily", android.R.attr.fontFamily, "string");
+        addNum("format12Hour", android.R.attr.format12Hour, "string");
+        addNum("format24Hour", android.R.attr.format24Hour, "string");
+        addNum("timeZone", android.R.attr.timeZone, "string");
+        addNum("vendor", android.R.attr.vendor, "string");
 
     }
 

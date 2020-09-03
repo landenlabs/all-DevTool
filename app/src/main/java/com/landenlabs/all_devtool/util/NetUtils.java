@@ -333,7 +333,7 @@ public class NetUtils {
         byte[] res = new byte[4];
         for (int i = 0; i < 4; i++)
         {
-            res[i] = (new Integer(x >>> 24)).byteValue();
+            res[i] = (Integer.valueOf(x >>> 24)).byteValue();
             x <<= 8;
         }
         return res;

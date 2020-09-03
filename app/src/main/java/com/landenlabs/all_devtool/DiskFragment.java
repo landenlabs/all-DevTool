@@ -39,7 +39,6 @@ import android.os.Environment;
 import android.os.Process;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,6 +51,8 @@ import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.util.ListInfo;
@@ -230,15 +231,13 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
             @Override
             public void onClick(View view) {
 
-                if (Build.VERSION.SDK_INT > 19) {
-                    AppOpsManager appOps = getServiceSafe(Context.APP_OPS_SERVICE);
-                    int mode = appOps.checkOpNoThrow("android:get_usage_stats",
-                            Process.myUid(), getContextSafe().getPackageName());
-                    boolean granted = (mode == AppOpsManager.MODE_ALLOWED);
-                    if (!granted)
-                        Toast.makeText(getContextSafe(), "Don't have Usage Stat Access",
-                            Toast.LENGTH_LONG).show();
-                }
+                AppOpsManager appOps = getServiceSafe(Context.APP_OPS_SERVICE);
+                int mode = appOps.checkOpNoThrow("android:get_usage_stats",
+                        Process.myUid(), getContextSafe().getPackageName());
+                boolean granted = (mode == AppOpsManager.MODE_ALLOWED);
+                if (!granted)
+                    Toast.makeText(getContextSafe(), "Don't have Usage Stat Access",
+                        Toast.LENGTH_LONG).show();
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     // CheckPermissions calls updateList if permission granted.
@@ -351,7 +350,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
@@ -405,7 +404,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
      * Populate list with 'Disk' information.
      */
     @SuppressLint("WorldReadableFiles")
-    @SuppressWarnings({"ConstantConditions", "ConstantIfStatement", "unused"})
+    @SuppressWarnings({"ConstantConditions", "ConstantIfStatement"})
     void updateList(boolean force) {
         // if (!m_list.isEmpty() && !force)
         //     return;

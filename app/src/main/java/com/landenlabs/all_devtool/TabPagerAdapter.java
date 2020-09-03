@@ -33,17 +33,16 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
+import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import android.widget.Toast;
 
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Utils;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,7 +56,7 @@ import java.util.List;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings({"unused", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnnecessaryLocalVariable"})
 public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.TabListener {
 
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.

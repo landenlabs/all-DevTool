@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
-
 import com.landenlabs.all_devtool.GlobalInfo;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
@@ -47,7 +46,6 @@ public class AppCrash implements CrashesListener {
         return mRefContext.get();
     }
 
-    @SuppressWarnings("unused")
     public static void initalize(Application application, boolean isDebug) {
         Context context = application;
 

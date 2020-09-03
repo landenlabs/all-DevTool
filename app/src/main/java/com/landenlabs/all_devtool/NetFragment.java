@@ -42,7 +42,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
-import android.net.TransportInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -52,15 +51,11 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
-import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -80,6 +75,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.ListInfo;
@@ -439,14 +437,10 @@ public class NetFragment extends DevFragment {
 
             cellListStr.put("Call State", String.valueOf(telephonyManager.getCallState()));
             cellListStr.put("Soft Ver", telephonyManager.getDeviceSoftwareVersion());
-            if (Build.VERSION.SDK_INT >= 18) {
-                cellListStr.put("Grp Id Level", telephonyManager.getGroupIdLevel1());   // api 18
-            }
+            cellListStr.put("Grp Id Level", telephonyManager.getGroupIdLevel1());   // api 18
             cellListStr.put("Line1 Num", telephonyManager.getLine1Number());
 
-            if (Build.VERSION.SDK_INT >= 19) {
-                cellListStr.put("Agent", telephonyManager.getMmsUserAgent());       // api 19
-            }
+            cellListStr.put("Agent", telephonyManager.getMmsUserAgent());       // api 19
             //[not allowed]  cellListStr.put("Subscriber", telephonyManager.getSubscriberId());
             cellListStr.put("VoiceMail", telephonyManager.getVoiceMailNumber());
             cellListStr.put("Data act", String.valueOf(telephonyManager.getDataActivity()));
@@ -521,7 +515,7 @@ public class NetFragment extends DevFragment {
                             cellitem.getCellIdentity().getNetworkId(),
                             cellitem.getCellIdentity().getSystemId());
                     cellListStr.put(id, msg);
-                } else if (Build.VERSION.SDK_INT >= 18 && cellinfo instanceof CellInfoWcdma) {
+                } else if (cellinfo instanceof CellInfoWcdma) {
                     CellInfoWcdma cellitem = (CellInfoWcdma) cellinfo;
 
                     int dbm = cellitem.getCellSignalStrength().getDbm();
@@ -668,22 +662,20 @@ public class NetFragment extends DevFragment {
             phoneListStr.put("Roaming", telephonyManager.isNetworkRoaming() ? "Yes" : "No");
             phoneListStr.put("Type", getNetworkTypeName(telephonyManager.getNetworkType()));
 
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (telephonyManager.getAllCellInfo() != null) {
-                    for (CellInfo cellInfo : telephonyManager.getAllCellInfo()) {
-                        String cellName = cellInfo.getClass().getSimpleName();
-                        int level = 0;
-                        if (cellInfo instanceof CellInfoCdma) {
-                            level = ((CellInfoCdma) cellInfo).getCellSignalStrength().getLevel();
-                        } else if (cellInfo instanceof CellInfoGsm) {
-                            level = ((CellInfoGsm) cellInfo).getCellSignalStrength().getLevel();
-                        } else if (cellInfo instanceof CellInfoLte) {
-                            level = ((CellInfoLte) cellInfo).getCellSignalStrength().getLevel();
-                        } else if (Build.VERSION.SDK_INT >= 18 && cellInfo instanceof CellInfoWcdma) {
-                            level = ((CellInfoWcdma) cellInfo).getCellSignalStrength().getLevel();
-                        }
-                        phoneListStr.put(cellName, "Level% " + String.valueOf(100 * level / 4));
+            if (telephonyManager.getAllCellInfo() != null) {
+                for (CellInfo cellInfo : telephonyManager.getAllCellInfo()) {
+                    String cellName = cellInfo.getClass().getSimpleName();
+                    int level = 0;
+                    if (cellInfo instanceof CellInfoCdma) {
+                        level = ((CellInfoCdma) cellInfo).getCellSignalStrength().getLevel();
+                    } else if (cellInfo instanceof CellInfoGsm) {
+                        level = ((CellInfoGsm) cellInfo).getCellSignalStrength().getLevel();
+                    } else if (cellInfo instanceof CellInfoLte) {
+                        level = ((CellInfoLte) cellInfo).getCellSignalStrength().getLevel();
+                    } else if (cellInfo instanceof CellInfoWcdma) {
+                        level = ((CellInfoWcdma) cellInfo).getCellSignalStrength().getLevel();
                     }
+                    phoneListStr.put(cellName, "Level% " + String.valueOf(100 * level / 4));
                 }
             }
 
@@ -703,48 +695,46 @@ public class NetFragment extends DevFragment {
         }
 
         // --------------- Bluetooth Services (API18) -------------
-        if (Build.VERSION.SDK_INT >= 18) {
-            Map<String, String> btListStr = new LinkedHashMap<>();
-            try {
-                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (bluetoothAdapter != null) {
-                    btListStr.put("Enabled", bluetoothAdapter.isEnabled() ? "yes" : "no");
-                    btListStr.put("Name", bluetoothAdapter.getName());
-                    btListStr.put("Address", bluetoothAdapter.getAddress());
-                    btListStr.put("ScanMode", String.valueOf(bluetoothAdapter.getScanMode()));
-                    btListStr.put("State", String.valueOf(bluetoothAdapter.getState()));
-                    Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-                    // If there are paired devices
-                    if (pairedDevices.size() > 0) {
-                        // Loop through paired devices
-                        for (BluetoothDevice device : pairedDevices) {
-                            // Add the name and address to an array adapter to show in a ListView
-                            btListStr.put("Paired:" + device.getName(), device.getAddress());
-                        }
+        Map<String, String> btListStr = new LinkedHashMap<>();
+        try {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter != null) {
+                btListStr.put("Enabled", bluetoothAdapter.isEnabled() ? "yes" : "no");
+                btListStr.put("Name", bluetoothAdapter.getName());
+                btListStr.put("Address", bluetoothAdapter.getAddress());
+                btListStr.put("ScanMode", String.valueOf(bluetoothAdapter.getScanMode()));
+                btListStr.put("State", String.valueOf(bluetoothAdapter.getState()));
+                Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+                // If there are paired devices
+                if (pairedDevices.size() > 0) {
+                    // Loop through paired devices
+                    for (BluetoothDevice device : pairedDevices) {
+                        // Add the name and address to an array adapter to show in a ListView
+                        btListStr.put("Paired:" + device.getName(), device.getAddress());
                     }
-
-                    PackageManager pm = getActivity().getPackageManager();
-                    boolean isBT = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
-                    boolean isBLE = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
-                    btListStr.put("BLE", isBLE  ? "yes" : "no");
-
-                    // BluetoothManager btMgr = getServiceSafe(Context.BLUETOOTH_SERVICE);
-                    // BluetoothGattServer mGattServer = btMgr.openGattServer(getContext(), null);
-
-                    // BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
-                    // BluetoothConfigManager manager = BluetoothConfigManager.getInstance();
-                    // BluetoothProfileManager manager = BluetoothProfileManager.getInstance();
-
-
-
                 }
 
-            } catch (Exception ex) {
-                btListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
+                PackageManager pm = getActivity().getPackageManager();
+                boolean isBT = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+                boolean isBLE = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+                btListStr.put("BLE", isBLE  ? "yes" : "no");
+
+                // BluetoothManager btMgr = getServiceSafe(Context.BLUETOOTH_SERVICE);
+                // BluetoothGattServer mGattServer = btMgr.openGattServer(getContext(), null);
+
+                // BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
+                // BluetoothConfigManager manager = BluetoothConfigManager.getInstance();
+                // BluetoothProfileManager manager = BluetoothProfileManager.getInstance();
+
+
+
             }
-            // btMgr.getAdapter().
-            addBuild("Bluetooth", btListStr);
+
+        } catch (Exception ex) {
+            btListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
         }
+        // btMgr.getAdapter().
+        addBuild("Bluetooth", btListStr);
 
         // --------------- Telephony Services -------------
 
@@ -848,12 +838,10 @@ public class NetFragment extends DevFragment {
                                 scanResult.level, scanResult.frequency);
                         wifiScanListStr.put("  Level, Freq", levelFreq);
                         // wifiScanListStr.put("  Width", scanResult.channelWidth);
-                        if (Build.VERSION.SDK_INT >= 17) {
-                            Date wifiTime = new Date(scanResult.timestamp/1000 + bootTime);
-                            SimpleDateFormat fmt = new SimpleDateFormat("M/d/yy h:mm a");
-                            wifiScanListStr.put("  Time", fmt.format(wifiTime));
-                            // wifiScanListStr.put("  Time", wifiTime.toLocaleString());
-                        }
+                        Date wifiTime = new Date(scanResult.timestamp/1000 + bootTime);
+                        SimpleDateFormat fmt = new SimpleDateFormat("M/d/yy h:mm a");
+                        wifiScanListStr.put("  Time", fmt.format(wifiTime));
+                        // wifiScanListStr.put("  Time", wifiTime.toLocaleString());
 
                         addBuild(String.format("WiFi%d %s %s", ++idx,
                                 wifiScanListStr.get("SSID"), levelFreq), wifiScanListStr);
@@ -1072,7 +1060,7 @@ public class NetFragment extends DevFragment {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             updateList();
         }

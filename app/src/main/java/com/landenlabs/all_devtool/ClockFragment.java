@@ -36,7 +36,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -52,6 +51,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.receivers.AlarmReceiver;
 import com.landenlabs.all_devtool.util.ALogNotification;

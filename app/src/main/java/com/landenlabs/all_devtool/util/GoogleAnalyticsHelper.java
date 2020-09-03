@@ -2,8 +2,9 @@ package com.landenlabs.all_devtool.util;
 
 import android.app.Activity;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;

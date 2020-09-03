@@ -34,15 +34,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
-import androidx.core.os.ConfigurationCompat;
-import androidx.viewpager.widget.ViewPager;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.os.ConfigurationCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager.widget.ViewPager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.landenlabs.all_devtool.shortcuts.ShortcutUtil;
@@ -89,9 +90,9 @@ public class DevToolActivity extends FragmentActivity {
     protected String m_startFrag;
 
 
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    @SuppressWarnings({"FieldCanBeLocal"})
     private UncaughtExceptionHandler m_uncaughtExceptionHandler;
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    @SuppressWarnings({"FieldCanBeLocal"})
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @SuppressLint("DefaultLocale")

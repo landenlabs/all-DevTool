@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -20,6 +19,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.util.ListInfo;
 import com.landenlabs.all_devtool.util.SearchList;
@@ -264,7 +265,6 @@ public class PropFragment extends DevFragment {
     // ============================================================================================
     // Internal methods
 
-    @SuppressWarnings("unused")
     void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
             m_list.add(new ListInfo(name, value.trim()));

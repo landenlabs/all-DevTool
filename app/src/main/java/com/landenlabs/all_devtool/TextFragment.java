@@ -27,9 +27,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
-
 import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -40,6 +37,9 @@ import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 
 import com.landenlabs.all_devtool.dialogs.TextInfoDialog;
 import com.landenlabs.all_devtool.util.Ui;
@@ -189,7 +189,7 @@ public class TextFragment extends DevFragment {
                 });
 
                 textView = new TextView(m_context);
-                textView.setText(String.valueOf(sizeSP) + "sp ");
+                textView.setText(sizeSP + "sp ");
                 textView.setBackgroundColor(0x20000000);
                 textView.setPadding(8, 0, 8, 0);
                 textView.setGravity(Gravity.CENTER);

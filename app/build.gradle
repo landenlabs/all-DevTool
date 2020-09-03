@@ -10,8 +10,8 @@ android {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 30714
-        versionName '3.07.14'
+        versionCode 30902
+        versionName '3.09.02'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -119,36 +119,26 @@ ext {
     legacyPlayServiceVersion = '17.0.0'
     supportLibVersion = '29.0.0'
     leakCanaryVersion = '1.6.1'
-    appCenter = '2.3.0'     // https://docs.microsoft.com/en-us/appcenter/transition/android-sdk-migration
+    appCenter = '3.3.0'     // https://docs.microsoft.com/en-us/appcenter/transition/android-sdk-migration
 }
 
 dependencies {
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    // implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
 
     // Standard flavor
-    standardImplementation "com.google.android.gms:play-services-ads-identifier:17.0.0"
-    standardImplementation "com.google.android.gms:play-services-gcm:17.0.0"
-    standardImplementation "com.google.android.gms:play-services-auth:18.0.0"
-    standardImplementation "com.google.android.gms:play-services-analytics:17.0.0"
-    standardImplementation "com.google.android.gms:play-services-location:17.0.0"
-    standardImplementation "com.google.android.gms:play-services-drive:17.0.0"
+    standardImplementation "com.google.android.gms:play-services-auth:18.1.0"
+    standardImplementation "com.google.firebase:firebase-core:17.5.0"
     // Legacy flavor
-    legacyImplementation "com.google.android.gms:play-services-ads-identifier:$legacyPlayServiceVersion"
-    legacyImplementation "com.google.android.gms:play-services-gcm:$legacyPlayServiceVersion"
     legacyImplementation "com.google.android.gms:play-services-auth:$legacyPlayServiceVersion"
-    legacyImplementation "com.google.android.gms:play-services-analytics:$legacyPlayServiceVersion"
-    legacyImplementation "com.google.android.gms:play-services-location:$legacyPlayServiceVersion"
-    legacyImplementation "com.google.android.gms:play-services-drive:$legacyPlayServiceVersion"
-
-    implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
-
-    // Firebase
-    standardImplementation "com.google.firebase:firebase-core:17.4.3"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
 
-    // Recommended: Add the Google Analytics SDK.
-    // implementation 'com.google.firebase:firebase-analytics:17.4.3'
+    implementation "com.google.android.gms:play-services-ads-identifier:$legacyPlayServiceVersion"
+    implementation "com.google.android.gms:play-services-analytics:$legacyPlayServiceVersion"
+    implementation "com.google.android.gms:play-services-location:$legacyPlayServiceVersion"
+    implementation "com.google.android.gms:play-services-drive:$legacyPlayServiceVersion"
+
+    implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
 
     // AppCenter crash reporting
     implementation "com.microsoft.appcenter:appcenter-crashes:$appCenter"

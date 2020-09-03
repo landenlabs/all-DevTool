@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.MailTo;
 import android.net.Uri;
-import androidx.annotation.FloatRange;
-import androidx.fragment.app.FragmentActivity;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,6 +20,9 @@ import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.FloatRange;
+import androidx.fragment.app.FragmentActivity;
 
 import com.landenlabs.all_devtool.R;
 
@@ -79,7 +80,7 @@ public class Ui {
         return dialog;
     }
 
-    @SuppressWarnings({"unused", "WeakerAccess"})
+    @SuppressWarnings({"WeakerAccess"})
     public static Intent newEmailIntent(Context context, String address, String subject, String body, String cc) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
@@ -150,7 +151,6 @@ public class Ui {
      *
      * @param imagePath  "file:///android_asset/world_timezone_map.png"
      */
-    @SuppressWarnings("unused")
     public static void showWebImage(final Context context, String imagePath) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);

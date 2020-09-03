@@ -44,6 +44,10 @@
             app:showAsAction="always"
             android:title="@string/package_menu_system" />
         <item
+            android:id="@id/package_running"
+            app:showAsAction="always"
+            android:title="@string/package_menu_running" />
+        <item
             android:id="@id/package_pref"
             app:showAsAction="always"
             android:title="@string/package_menu_pref" />

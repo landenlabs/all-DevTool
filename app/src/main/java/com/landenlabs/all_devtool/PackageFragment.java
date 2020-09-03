@@ -23,6 +23,7 @@ package com.landenlabs.all_devtool;
  *
  */
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -54,9 +55,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -66,6 +64,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +81,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -101,6 +105,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -153,11 +158,13 @@ public class PackageFragment extends DevFragment
     SubMenu m_menu;
 
     int m_sortBy = R.id.package_sort_by_size;
+    // SHOW_XXXX must match array order of menu string pkg_load_array and package_menu.xml
     final int SHOW_USER = 0;
     final int SHOW_SYS = 1;
-    final int SHOW_PREF = 2;
-    final int SHOW_CACHE = 3;
-    final int SHOW_LIB = 4;
+    final int SHOW_RUNNING = 2;
+    final int SHOW_PREF = 3;
+    final int SHOW_CACHE = 4;
+    final int SHOW_LIB = 5;
 
     int m_show = SHOW_USER;
 
@@ -332,7 +339,6 @@ public class PackageFragment extends DevFragment
      *
      * @param message GCM message received.
      */
-    @SuppressWarnings("unused")
     private void sendNotification(Context context, String from, String message) {
         /*
         Intent intent = new Intent(context, DevToolActivity.class);
@@ -414,7 +420,6 @@ public class PackageFragment extends DevFragment
     }
 
     FileBrowseDialog m_fileOpenDialog;
-    @SuppressWarnings("unused")
     void fireIntentOn(String field, String value, int grpPos) {
         try {
             File root = new File(Environment.getExternalStorageDirectory().getPath() + value);
@@ -450,6 +455,9 @@ public class PackageFragment extends DevFragment
         }
     }
 
+    private float listTouchLastY = -1;
+    private int listFirstVisItem = -1;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -462,6 +470,7 @@ public class PackageFragment extends DevFragment
         final PkgArrayAdapter adapter = new PkgArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
 
+
         adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
                 Toast.makeText(getActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
@@ -472,6 +481,27 @@ public class PackageFragment extends DevFragment
                     return true;
                 }
                 return false;
+            }
+        });
+
+
+        m_listView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (listTouchLastY == -1) {
+                        listFirstVisItem = m_listView.getFirstVisiblePosition();
+                        listTouchLastY = event.getRawY();
+                    }
+                } else  if (event.getAction() == MotionEvent.ACTION_UP) {
+                    float newY = event.getRawY();
+                    if  ((newY - listTouchLastY) > 100
+                            && listFirstVisItem == m_listView.getFirstVisiblePosition()) {
+                        refreshPackages();
+                    }
+                    listTouchLastY = -1;
+                }
+                return false;   // true if consumed event.
             }
         });
 
@@ -620,6 +650,9 @@ public class PackageFragment extends DevFragment
             case R.id.package_system:
                 show = SHOW_SYS;
                 break;
+            case R.id.package_running:
+                show = SHOW_RUNNING;
+                break;
             case R.id.package_pref:
                 show = SHOW_PREF;
                 break;
@@ -674,13 +707,13 @@ public class PackageFragment extends DevFragment
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
     }
 
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         m_menu = menu.addSubMenu("Pkg Options");
         inflater.inflate(R.menu.package_menu, m_menu);
@@ -784,19 +817,22 @@ public class PackageFragment extends DevFragment
             m_show = pos;
             int menu_id = R.id.package_user;
             switch (pos) {
-                case 0:
+                case SHOW_USER:
                     menu_id = R.id.package_user;
                     break;
-                case 1:
+                case SHOW_SYS:
                     menu_id = R.id.package_system;
                     break;
-                case 2:
+                case SHOW_RUNNING:
+                    menu_id = R.id.package_running;
+                    break;
+                case SHOW_PREF:
                     menu_id = R.id.package_pref;
                     break;
-                case 3:
+                case SHOW_CACHE:
                     menu_id = R.id.package_cache;
                     break;
-                case 4:
+                case SHOW_LIB:
                     menu_id = R.id.package_lib;
                     break;
             }
@@ -836,7 +872,7 @@ public class PackageFragment extends DevFragment
     }
 
     // ============================================================================================
-    public class ArrayListPairString extends ArrayListPair<String, String> {
+    public static class ArrayListPairString extends ArrayListPair<String, String> {
     }
 
     // ============================================================================================
@@ -1172,6 +1208,9 @@ public class PackageFragment extends DevFragment
         case SHOW_SYS:
             loadInstalledPackages();
             break;
+        case SHOW_RUNNING:
+            loadRunningPackages();
+            break;
         case SHOW_PREF:
             loadDefaultPackages();
             break;
@@ -1181,6 +1220,38 @@ public class PackageFragment extends DevFragment
         case SHOW_LIB:
             loadLibraries();
             break;
+        }
+
+        Message msgObj = m_handler.obtainMessage(MSG_UPDATE_DONE);
+        m_handler.sendMessage(msgObj);
+    }
+
+    /**
+     * Load Package list with User, System or Preferred items.
+     */
+    void refreshPackages() {
+        m_uninstallResId = R.string.package_uninstall;
+        m_pkgUninstallBtn.post(this::updateUninstallBtn);
+
+        switch (m_show) {
+            case SHOW_USER:
+            case SHOW_SYS:
+                if (m_checkCnt == 0) {
+                    loadInstalledPackages();
+                }
+                break;
+            case SHOW_RUNNING:
+                loadRunningPackages();
+                break;
+            case SHOW_PREF:
+                loadDefaultPackages();
+                break;
+            case SHOW_CACHE:
+                loadCachedPackages();
+                break;
+            case SHOW_LIB:
+                loadLibraries();
+                break;
         }
 
         Message msgObj = m_handler.obtainMessage(MSG_UPDATE_DONE);
@@ -1330,7 +1401,6 @@ public class PackageFragment extends DevFragment
     /**
      * Get info on the preferred (launch by default) applications.
      */
-    @SuppressWarnings("unused")
     public String getPreferredAppInfo() {
         List<PackageInfo> packages = getPackageMgr().getInstalledPackages(0);
         List<IntentFilter> filters = new ArrayList<>();
@@ -1384,6 +1454,119 @@ public class PackageFragment extends DevFragment
         return info.toString();
     }
 
+    private static boolean isStopped(ApplicationInfo appInfo) {
+        return (appInfo.flags & ApplicationInfo.FLAG_STOPPED /* 0x200000 */) != 0;
+    }
+    private static boolean isSystem(ApplicationInfo appInfo) {
+        // return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM /* 0x1 */) != 0;
+        return false;
+    }
+
+    // No longer works - only returns self.
+    void loadRunningPackages() {
+        final Map<String, Object> runningPkg = new HashMap<>();
+
+        final ActivityManager activityManager =  getServiceSafe(Context.ACTIVITY_SERVICE);
+        // final List<ActivityManager.AppTask> tasks = activityManager.getAppTasks();
+
+        if (false) {
+            final List<ActivityManager.RunningTaskInfo> runninngTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+            for (int i = 0; i < runninngTasks.size(); i++) {
+                boolean isRunning = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // isRunning = runninngTasks.get(i).isRunning;
+                }
+                if (isRunning) {
+                    ComponentName activity = runninngTasks.get(i).baseActivity;
+                    if (activity != null) {
+                        String pkgName = activity.getPackageName();
+                        runningPkg.put(pkgName, activity);
+                    }
+                }
+            }
+        }
+
+        if (false) {
+            final List<ActivityManager.RunningAppProcessInfo> runninngProc = activityManager.getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo appProcInfo : runninngProc) {
+                // Get the info we need for comparison.
+                ComponentName componentInfo = appProcInfo.importanceReasonComponent;
+                if (componentInfo != null) {
+                    String pkgName = componentInfo.getPackageName();
+                    runningPkg.put(pkgName, componentInfo);
+                } else if (appProcInfo.pkgList != null && appProcInfo.pkgList.length > 0) {
+                    runningPkg.put(appProcInfo.pkgList[0], componentInfo);
+                }
+            }
+        }
+
+        if (true) {
+            PackageManager packageManager = requireActivity().getPackageManager();
+
+            Intent launchIntent = new Intent("android.intent.action.MAIN", null);
+            launchIntent.addCategory("android.intent.category.LAUNCHER");
+            List<ResolveInfo> infoList = packageManager.queryIntentActivities(launchIntent, 0);
+
+            for (ResolveInfo info : infoList) {
+                ApplicationInfo appInfo = info.activityInfo.applicationInfo;
+                boolean isDup = runningPkg.containsKey(appInfo.packageName);
+
+                if (!isStopped(appInfo) && !isSystem(appInfo) && !isDup) {
+                    runningPkg.put(appInfo.packageName, info.activityInfo);
+                }
+            }
+
+            if (!packageManager.hasSystemFeature("android.hardware.touchscreen")
+                    && Build.VERSION.SDK_INT >= 21) {
+
+                Intent leanbackIntent = new Intent("android.intent.action.MAIN", null);
+                leanbackIntent.addCategory("android.intent.category.LEANBACK_LAUNCHER");
+
+                for (ResolveInfo info : packageManager.queryIntentActivities(leanbackIntent, 0)) {
+                    ApplicationInfo appInfo = info.activityInfo.applicationInfo;
+                    boolean isDup = runningPkg.containsKey(appInfo.packageName);
+
+                    if (!isStopped(appInfo) && !isSystem(appInfo) && !isDup) {
+                        runningPkg.put(appInfo.packageName, info.activityInfo);
+                    }
+                }
+            }
+        }
+
+        try {
+            m_workList = new ArrayList<>();
+            // PackageManager.MATCH_ALL
+            int flags1 = PackageManager.GET_PERMISSIONS
+                    | PackageManager.GET_PROVIDERS           // use hides some app, may require permissions
+                    | PackageManager.GET_ACTIVITIES
+                    | PackageManager.GET_RECEIVERS           // use hides some app, may require permissions
+                    | PackageManager.GET_SERVICES;
+
+            int flags2 = PackageManager.GET_PERMISSIONS
+                    | PackageManager.GET_ACTIVITIES
+                    | PackageManager.GET_SERVICES;
+
+
+            int flags3 = PackageManager.GET_PERMISSIONS;
+            int flags4 = 0;
+            boolean showSys = (m_show == SHOW_SYS);
+
+            // Some packages will not appear with some flags.
+            loadAndAddPackages(showSys, flags1, runningPkg);
+            loadAndAddPackages(showSys, flags2, runningPkg);
+            loadAndAddPackages(showSys, flags3, runningPkg);
+            loadAndAddPackages(showSys, flags4, runningPkg);
+
+            // Sort per settings.
+            // TODO *** This does not seem to be working ***
+            Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
+            m_handler.sendMessage(msgObj);
+
+        } catch (Exception ex) {
+            m_log.e(ex.getMessage());
+        }
+    }
+
     /**
      * Load installed (user or system) packages.
      */
@@ -1407,10 +1590,10 @@ public class PackageFragment extends DevFragment
             boolean showSys = (m_show == SHOW_SYS);
 
             // Some packages will not appear with some flags.
-            loadAndAddPackages(showSys, flags1);
-            loadAndAddPackages(showSys, flags2);
-            loadAndAddPackages(showSys, flags3);
-            loadAndAddPackages(showSys, flags4);
+            loadAndAddPackages(showSys, flags1, null);
+            loadAndAddPackages(showSys, flags2, null);
+            loadAndAddPackages(showSys, flags3, null);
+            loadAndAddPackages(showSys, flags4, null);
 
             // Sort per settings.
             // TODO *** This does not seem to be working ***
@@ -1422,20 +1605,20 @@ public class PackageFragment extends DevFragment
         }
     }
 
-    void loadAndAddPackages(boolean showSys, int flags) {
+    void loadAndAddPackages(boolean showSys, int flags, @Nullable Map<String, Object> runningPkgs) {
         List<PackageInfo> packList = getPackageMgr().getInstalledPackages(flags);
         if (packList != null) {
             for (int idx = 0; idx < packList.size(); idx++) {
                 PackageInfo packInfo = packList.get(idx);
-
                 if (((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) == showSys) {
-                    addPackageInfo(packInfo);
+                    if (runningPkgs == null || runningPkgs.containsKey(packInfo.packageName)) {
+                        addPackageInfo(packInfo);
+                    }
                 }
             }
         }
     }
 
-    @SuppressWarnings("unused")
     List<PackageInfo>  mergePackages(List<PackageInfo> pkgMain, List<PackageInfo> pkgAdd) {
         if (pkgAdd != null) {
             for (int addIdx = 0; addIdx < pkgAdd.size(); addIdx++) {
@@ -1454,7 +1637,6 @@ public class PackageFragment extends DevFragment
         return pkgMain;
     }
 
-    @SuppressWarnings("unused")
     interface IPackageStatsObserver1 {
         void onGetStatsCompleted(PackageStats pStats, boolean succeeded);
     }
@@ -1597,7 +1779,6 @@ public class PackageFragment extends DevFragment
      *    /sdcard/download
      *
      */
-    @SuppressWarnings("unused")
     void loadCachedPackages() {
         try {
             // m_pkgUninstallBtn.setText(R.string.package_uninstall);
@@ -1908,7 +2089,6 @@ public class PackageFragment extends DevFragment
         list.add(value1, value2);
     }
 
-    @SuppressWarnings("unused")
     void addList(Map<String, String> list, String name, String value) {
         if (!TextUtils.isEmpty(value)) {
             list.put(name, value);
@@ -1916,7 +2096,6 @@ public class PackageFragment extends DevFragment
     }
 
     // Put values in List ifValue true.
-    @SuppressWarnings("unused")
     private static <M extends Map<E, E>, E> void putIf(M listObj, E v1, E v2, boolean ifValue) {
         if (ifValue) {
             listObj.put(v1, v2);
@@ -1938,7 +2117,6 @@ public class PackageFragment extends DevFragment
     /**
      * Hold Package information
      */
-    @SuppressWarnings("unused")
     class PackingItem {
         final String m_fieldStr;
         final String m_valueStr;

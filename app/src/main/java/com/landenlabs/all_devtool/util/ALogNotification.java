@@ -19,8 +19,6 @@ import com.landenlabs.all_devtool.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
-
 /**
  * Manage Notification draw
  */

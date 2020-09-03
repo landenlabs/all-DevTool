@@ -47,7 +47,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -62,6 +61,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.androidplot.Plot;
 import com.androidplot.util.Redrawer;
@@ -183,7 +184,7 @@ public class SensorFragment extends DevFragment
             // obj contains the raw Number value representing the position of the label being drawn.
             // customize the labeling however you want here:
             int iValue = Math.round(((Number) obj).floatValue());
-            return toAppendTo.append(String.valueOf(iValue));
+            return toAppendTo.append(iValue);
         }
 
         @Override
@@ -297,9 +298,7 @@ public class SensorFragment extends DevFragment
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_PRESSURE));
         m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_GRAVITY));
-        if (Build.VERSION.SDK_INT >= 19) {
-            m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
-        }
+        m_sensorList.add(m_sensorMgr.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
 
         //  ToDo - add multi-checkboxes instead of single.
         ArrayAdapter<String> spinnerArrayAdapter =
@@ -421,7 +420,7 @@ public class SensorFragment extends DevFragment
     // ============================================================================================
     // Permission
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -449,7 +448,6 @@ public class SensorFragment extends DevFragment
         }
     }
 
-    @SuppressWarnings("unused")
     public void createGraph(View rootView, Bundle savedInstanceState) {
 
         final int lineOnlyWidth = 6;

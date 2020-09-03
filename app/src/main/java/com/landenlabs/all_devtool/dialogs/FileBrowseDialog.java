@@ -26,7 +26,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.view.Gravity;
 import android.view.View;
@@ -40,6 +39,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.R;
 import com.landenlabs.all_devtool.util.Ui;

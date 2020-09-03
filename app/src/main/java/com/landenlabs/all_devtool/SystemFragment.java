@@ -55,9 +55,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.UserManager;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.os.ConfigurationCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -76,6 +73,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.os.ConfigurationCompat;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -425,14 +426,12 @@ public class SystemFragment extends DevFragment {
         // --------------- Caption Manager ---------
         try {
 
-            if (Build.VERSION.SDK_INT >= 19) {
-                Map<String, String> listStr = new LinkedHashMap<>();
-                final CaptioningManager capMgr = getServiceSafe(Context.CAPTIONING_SERVICE);
-                listStr.put("Enabled", capMgr.isEnabled() ? "yes" : "no");
-                listStr.put("Font Size", String.valueOf(capMgr.getFontScale()));
-                listStr.put("Language", capMgr.getLocale().getLanguage());
-                addBuild("Caption...", listStr);
-            }
+            Map<String, String> listStr = new LinkedHashMap<>();
+            final CaptioningManager capMgr = getServiceSafe(Context.CAPTIONING_SERVICE);
+            listStr.put("Enabled", capMgr.isEnabled() ? "yes" : "no");
+            listStr.put("Font Size", String.valueOf(capMgr.getFontScale()));
+            listStr.put("Language", capMgr.getLocale().getLanguage());
+            addBuild("Caption...", listStr);
         } catch (Exception ignore) {
 
         }
@@ -633,14 +632,12 @@ public class SystemFragment extends DevFragment {
 
         // ----- User info -----
         try {
-            if (Build.VERSION.SDK_INT >= 17) {
-                final UserManager userMgr = (UserManager) getActivity().getSystemService(Context.USER_SERVICE);
-                if (null != userMgr) {
-                    try {
-                        addBuild("UserName", userMgr.getUserName());
-                    } catch (Exception ex) {
-                        m_log.e(ex.getMessage());
-                    }
+            final UserManager userMgr = (UserManager) getActivity().getSystemService(Context.USER_SERVICE);
+            if (null != userMgr) {
+                try {
+                    addBuild("UserName", userMgr.getUserName());
+                } catch (Exception ex) {
+                    m_log.e(ex.getMessage());
                 }
             }
         } catch (Exception ignore) {
@@ -652,11 +649,9 @@ public class SystemFragment extends DevFragment {
             strList.put("ScreenTimeOut", String.valueOf(screenTimeout / 1000));
             int rotate = Settings.System.getInt(getActivity().getContentResolver(), Settings.System.ACCELEROMETER_ROTATION);
             strList.put("RotateEnabled", String.valueOf(rotate));
-            if (Build.VERSION.SDK_INT >= 17) {
-                // Global added in API 17
-                int adb = Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED);
-                strList.put("AdbEnabled", String.valueOf(adb));
-            }
+            // Global added in API 17
+            int adb = Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED);
+            strList.put("AdbEnabled", String.valueOf(adb));
             strList.put("ByteOrder", ByteOrder.nativeOrder().toString());
 
             int nightModeFlags = getContextSafe().getResources().getConfiguration().uiMode &
@@ -749,7 +744,6 @@ public class SystemFragment extends DevFragment {
     // ============================================================================================
     // Internal methods
 
-    @SuppressWarnings("unused")
     private void clean_networks() {
         StringBuilder sb = new StringBuilder();
         final WifiManager wifiMgr = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);

@@ -47,10 +47,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -71,6 +67,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 
 import com.landenlabs.all_devtool.dialogs.DeleteDialog;
 import com.landenlabs.all_devtool.util.FileUtil;
@@ -519,10 +520,7 @@ public class FileBrowserFragment extends DevFragment
             } else if (dirName.compareToIgnoreCase("Sdcard") == 0) {
                 dir = Environment.getExternalStorageDirectory();
             } else if (dirName.compareToIgnoreCase("documents") == 0) {
-                if (Build.VERSION.SDK_INT >= 19)
-                    dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-                else
-                    dir = Environment.getExternalStorageDirectory();
+                dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
             } else {
                 dir = Environment.getExternalStoragePublicDirectory(dirName);
             }
@@ -822,7 +820,7 @@ public class FileBrowserFragment extends DevFragment
 
     // ============================================================================================
     // Permission
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults.length > 0)
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST: {
@@ -871,10 +869,7 @@ public class FileBrowserFragment extends DevFragment
                 m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
                 break;
             case R.id.filebrowser_documents:
-                if (Build.VERSION.SDK_INT >= 19)
-                    m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-                else
-                    m_dir = Environment.getExternalStorageDirectory();
+                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
                 break;
             case R.id.filebrowser_movies:
                 m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);

@@ -17,8 +17,6 @@ import android.location.Location;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
-import androidx.fragment.app.FragmentActivity;
-import androidx.core.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -34,6 +32,9 @@ import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.GlobalInfo;
 import com.landenlabs.all_devtool.R;
@@ -47,7 +48,6 @@ import java.util.List;
 
 // import com.google.android.gms.maps.model.LatLng;
 
-@SuppressWarnings("unused")
 public class Utils {
     static class LatLng {
         double latitude;
@@ -639,7 +639,7 @@ public class Utils {
                         String screenImgFilename = Utils.saveBitmap(context, bitmap, String.valueOf(bmIdx) + imageName);
                         Uri uri = Uri.fromFile(new File(screenImgFilename));
                         */
-                        Uri uri = Utils.getUriForBitmap(context, bitmap, String.valueOf(bmIdx) + imageName);
+                        Uri uri = Utils.getUriForBitmap(context, bitmap, bmIdx + imageName);
                         uris.add(uri);
                         bitmap.recycle();
                     } else

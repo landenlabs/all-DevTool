@@ -15,6 +15,7 @@
 
     <item type="id" name="package_user" />
     <item type="id" name="package_system" />
+    <item type="id" name="package_running" />
     <item type="id" name="package_pref" />
     <item type="id" name="package_cache" />
     <item type="id" name="package_lib" />

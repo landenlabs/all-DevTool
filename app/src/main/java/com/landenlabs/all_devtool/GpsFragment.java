@@ -42,9 +42,6 @@ import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -63,6 +60,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -321,9 +322,7 @@ public class GpsFragment extends DevFragment implements
         */
         // GpsReceiver m_gpsReceiver = new GpsReceiver();
         m_intentFilter.addAction(GpsReceiver.GPS_ENABLED_CHANGE_ACTION);
-        if (Build.VERSION.SDK_INT >= 19) {
-            m_intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        }
+        m_intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
         m_intentFilter.addAction(GpsReceiver.GPS_FIX_CHANGE_ACTION);
         m_intentFilter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
 

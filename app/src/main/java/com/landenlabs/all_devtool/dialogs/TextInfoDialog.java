@@ -74,7 +74,6 @@ public class TextInfoDialog extends DialogFragment {
         m_idx = -1;
     }
 
-    @SuppressWarnings("unused")
     public static TextInfoDialog create(TextFragment textFragment, final ArrayList<TextInfo> textInfoList, final int idx) {
         TextInfoDialog textInfoDialog = new TextInfoDialog();
         textInfoDialog.m_textInfoList = textInfoList;
@@ -107,7 +106,6 @@ public class TextInfoDialog extends DialogFragment {
         });
     }
 
-    @SuppressWarnings("unused")
     boolean handleEvent(View view, MotionEvent event) {
         final int action = event.getAction(); // MotionEventCompat.getActionMasked(event);
         // final int pointerIndex = MotionEventCompat.getActionIndex(event);
@@ -217,11 +215,11 @@ public class TextInfoDialog extends DialogFragment {
     void setTextSize() {
         int heightPx = m_textGroup.getMeasuredHeight();
         float heightDp = Utils.pxToDp(heightPx);
-        m_textHeight.setText(String.valueOf(heightPx) + " px\n" + String.format("%.1f dp", heightDp));
+        m_textHeight.setText(heightPx + " px\n" + String.format("%.1f dp", heightDp));
 
         int widthPx = m_charGroup.getMeasuredWidth();
         float widthDp = Utils.pxToDp(widthPx);
-        m_charMaxWidth.setText("10 characters\n " + String.valueOf(widthPx) + " px " + String.format("%.1f dp", widthDp));
+        m_charMaxWidth.setText("10 characters\n " + widthPx + " px " + String.format("%.1f dp", widthDp));
     }
 
     void computeMaximumTextWidth(char minChar, char maxChar) {
@@ -253,7 +251,7 @@ public class TextInfoDialog extends DialogFragment {
             final TextView textTitle = m_dialogLayout.findViewById(R.id.text_dlg_title);
             String infoStr = "Font typeface:" + textInfo.getTypefaceStr()
                     + "\nFont size:"
-                    + String.valueOf(textInfo.m_sizeSP)
+                    + textInfo.m_sizeSP
                     + " sp";
             textTitle.setText(infoStr);
 

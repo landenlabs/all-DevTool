@@ -44,8 +44,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +51,9 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.landenlabs.all_devtool.util.LLog;
 import com.landenlabs.all_devtool.util.Ui;
@@ -285,11 +286,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             textView.setMaxWidth(dpToPx(widthDp));
 
 
-        if (Build.VERSION.SDK_INT >= 17) {
-            textView.setId(View.generateViewId());
-        } else {
-            textView.setId(sNextId++);
-        }
+        textView.setId(View.generateViewId());
 
         relLayout.addView(textView, params);
         return textView;

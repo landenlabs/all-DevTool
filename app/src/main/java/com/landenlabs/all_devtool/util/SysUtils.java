@@ -2,6 +2,7 @@ package com.landenlabs.all_devtool.util;
 
 import android.content.Context;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 
 import java.io.BufferedReader;
@@ -18,7 +19,7 @@ import static android.system.Os.sysconf;
  * Created by Dennis Lang on 2/23/17.
  */
 
-@SuppressWarnings({"unused", "OctalInteger", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"OctalInteger", "UnnecessaryLocalVariable"})
 public class SysUtils {
 
 

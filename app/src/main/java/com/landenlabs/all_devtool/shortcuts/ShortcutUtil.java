@@ -7,8 +7,9 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
 import android.os.Build;
-import androidx.fragment.app.FragmentActivity;
 import android.util.Log;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.FileBrowserFragment;

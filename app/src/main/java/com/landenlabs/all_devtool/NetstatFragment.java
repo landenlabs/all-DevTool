@@ -30,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -51,6 +50,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.util.ArrayListPair;
 import com.landenlabs.all_devtool.util.LLog;
@@ -75,7 +76,7 @@ import java.util.concurrent.BlockingQueue;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal", "SynchronizeOnNonFinalField", "unused"})
+@SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal", "SynchronizeOnNonFinalField"})
 public class NetstatFragment extends DevFragment {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
     private final LLog m_log = LLog.DBG;
@@ -519,7 +520,6 @@ public class NetstatFragment extends DevFragment {
     }
 
     // =============================================================================================
-    @SuppressWarnings("unused")
     static
     class NetInfo {
         final String m_fieldStr;

@@ -74,6 +74,7 @@
     <string-array name="pkg_load_array">
         <item>User</item>
         <item>System</item>
+        <item>Running</item>
         <item>Preferred</item>
         <item>Cached</item>
         <item>Libs</item>
@@ -95,6 +96,7 @@
 
     <string name="package_menu_user">Show User Pkgs</string>
     <string name="package_menu_system">Show System Pkgs</string>
+    <string name="package_menu_running">Show Running Pkgs</string>
     <string name="package_menu_pref">Show Preferred</string>
     <string name="package_menu_cache">Show Caches</string>
     <string name="package_menu_lib">Show Libs</string>
