@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+ * LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * @author Dennis Lang
+ * @see http://LanDenLabs.com/
+ */
+
 package com.landenlabs.all_devtool.util;
 
 import android.content.Context;
@@ -10,6 +31,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static android.system.Os.sysconf;
@@ -351,29 +374,6 @@ public class SysUtils {
 
     // =============================================================================================
 
-    public static ArrayList<String> runShellCmd(String[] shellCmd) {
-        ArrayList<String> list = new ArrayList<>();
-        try {
-            Process process = new ProcessBuilder()
-                    .command(shellCmd)
-                    .redirectErrorStream(true)
-                    .start();
-
-            // Process process = Runtime.getRuntime().exec(shellCmd);
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                list.add(line);
-            }
-        }
-        catch (IOException ex) {
-            list.add(ex.getLocalizedMessage());
-        }
-
-        return list;
-    }
 
     private static boolean isBit(int val, int mask) {
         return (val & mask) != 0;
@@ -407,5 +407,45 @@ public class SysUtils {
     public static  <T> T getServiceSafe(Context context, String service) {
         //noinspection unchecked
         return (T) Objects.requireNonNull(context.getSystemService(service));
+    }
+
+    @NonNull
+    public static Map<String, String> getShellCmd(String[] shellCmd) {
+        Map<String, String> mapList = new LinkedHashMap<>();
+        ArrayList<String> responseList = runShellCmd(shellCmd);
+        for (String line : responseList) {
+            String[] vals = line.split(": ");
+            if (vals.length > 1) {
+                mapList.put(vals[0], vals[1]);
+            } else {
+                mapList.put(line, "");
+            }
+        }
+        return mapList;
+    }
+
+
+    public static ArrayList<String> runShellCmd(String[] shellCmd) {
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            Process process = new ProcessBuilder()
+                    .command(shellCmd)
+                    .redirectErrorStream(true)
+                    .start();
+
+            // Process process = Runtime.getRuntime().exec(shellCmd);
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                list.add(line);
+            }
+        }
+        catch (IOException ex) {
+            list.add(ex.getLocalizedMessage());
+        }
+
+        return list;
     }
 }

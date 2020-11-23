@@ -4,14 +4,14 @@ File javaDocDstDir = file('../javadoc')
 
 android {
 
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
         minSdkVersion 21
-        targetSdkVersion 29
-        versionCode 30902
-        versionName '3.09.02'
+        targetSdkVersion 30
+        versionCode 31111
+        versionName '3.11.11'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -128,7 +128,7 @@ dependencies {
 
     // Standard flavor
     standardImplementation "com.google.android.gms:play-services-auth:18.1.0"
-    standardImplementation "com.google.firebase:firebase-core:17.5.0"
+    standardImplementation "com.google.firebase:firebase-core:18.0.0"
     // Legacy flavor
     legacyImplementation "com.google.android.gms:play-services-auth:$legacyPlayServiceVersion"
     legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
@@ -150,7 +150,7 @@ dependencies {
     //debugImplementation "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
     //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
 
-    implementation 'com.androidplot:androidplot-core:1.5.6'
+    implementation 'com.androidplot:androidplot-core:1.5.7'
     implementation 'net.danlew:android.joda:2.10.6'
 }
 

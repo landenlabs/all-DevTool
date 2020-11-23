@@ -1,8 +1,5 @@
-package com.landenlabs.all_devtool;
-
 /*
- * Copyright (c) 2015 - 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
- *
+ * Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -18,10 +15,11 @@ package com.landenlabs.all_devtool;
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * @author Dennis Lang  (3/21/2015)
+ * @author Dennis Lang
  * @see http://LanDenLabs.com/
- *
  */
+
+package com.landenlabs.all_devtool;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -94,6 +92,7 @@ import com.landenlabs.all_devtool.dialogs.UninstallDialog;
 import com.landenlabs.all_devtool.receivers.UninstallIntentReceiver;
 import com.landenlabs.all_devtool.util.ArrayListPair;
 import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.util.SysUtils;
 import com.landenlabs.all_devtool.util.Ui;
 import com.landenlabs.all_devtool.util.Utils;
 
@@ -614,6 +613,16 @@ public class PackageFragment extends DevFragment
                 new IntentFilter(Intent.ACTION_PACKAGE_FULLY_REMOVED));
         getContextSafe().registerReceiver(mMessageReceiver,
                 new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
+        getContextSafe().registerReceiver(mMessageReceiver,
+                new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
+        getContextSafe().registerReceiver(mMessageReceiver,
+                new IntentFilter(Intent.ACTION_PACKAGE_DATA_CLEARED));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            getContextSafe().registerReceiver(mMessageReceiver,
+                    new IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED));
+            getContextSafe().registerReceiver(mMessageReceiver,
+                    new IntentFilter(Intent.ACTION_PACKAGES_UNSUSPENDED));
+        }
 
         return m_rootView;
     }
@@ -664,10 +673,13 @@ public class PackageFragment extends DevFragment
                 break;
 
             case R.id.package_uninstall:
-                if (m_uninstallResId == R.string.package_del_cache)
+                if (m_uninstallResId == R.string.package_del_cache) {
                     deleteCaches();
-                else
+                } else if (m_uninstallResId == R.string.package_stop) {
+                    stopPackages();
+                } else {
                     uninstallPackages();
+                }
                 break;
             case R.id.package_uncheck_all:
                 uncheckAll();
@@ -733,10 +745,13 @@ public class PackageFragment extends DevFragment
                 updateList();
                 break;
             case R.id.package_uninstall:
-                 if (m_uninstallResId == R.string.package_del_cache)
+                 if (m_uninstallResId == R.string.package_del_cache) {
                      deleteCaches();
-                 else
-                    uninstallPackages();
+                 } else if (m_uninstallResId == R.string.package_stop) {
+                     stopPackages();
+                 } else {
+                     uninstallPackages();
+                 }
                 break;
             case R.id.pkg_plus_minus_toggle:
                 if (m_expand_collapse_toggle.isChecked())
@@ -1147,6 +1162,14 @@ public class PackageFragment extends DevFragment
                 } catch (Exception ex) {
                     m_log.e(ex.getLocalizedMessage());
                 }
+
+                try {
+                    //pm clear $pkg
+                    PackageInfo packInfo = packageItem.m_packInfo;
+                    SysUtils.getShellCmd(new String[]{"pm", "clear", packInfo.packageName});
+                } catch (Exception ignore) {
+
+                }
             }
         }
 
@@ -1154,6 +1177,44 @@ public class PackageFragment extends DevFragment
         // updateList();
         loadPackages();
     }
+
+
+    private void stopPackages() {
+        ActivityManager actMgr = getServiceSafe(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runningProcInfo = actMgr.getRunningAppProcesses();
+        Log.e("pkg", "stop running " + runningProcInfo.size());
+
+        for (PackingItem packageItem : m_list) {
+            if (packageItem.m_checked) {
+                try {
+                    // adb shell am force-stop $pkg
+                    PackageInfo packInfo = packageItem.m_packInfo;
+                    actMgr.killBackgroundProcesses(packInfo.packageName);
+
+                    Map<String, String> outReport =
+                    SysUtils.getShellCmd(new String[]{"am", "force-stop", packInfo.packageName});
+                    Log.e("pkg", "stop report " + outReport.size());
+
+
+                    /*
+                    // https://www.schibsted.pl/blog/killing-an-android-app-from-anywhere/
+                    Intent intent = new Intent(this, OtherActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    // intent.putExtra(ActivityA.SHOULD_FINISH, true);
+                    startActivity(intent);
+                     */
+                } catch (Exception ex) {
+                    Log.e("pkg", "stop failed ", ex);
+                }
+            }
+        }
+
+        // ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
+        // updateList();
+        loadPackages();
+    }
+
 
     /**
      * Update Package list, show progress indicator while loading in background.
@@ -1464,6 +1525,7 @@ public class PackageFragment extends DevFragment
 
     // No longer works - only returns self.
     void loadRunningPackages() {
+        m_uninstallResId = R.string.package_stop;
         final Map<String, Object> runningPkg = new HashMap<>();
 
         final ActivityManager activityManager =  getServiceSafe(Context.ACTIVITY_SERVICE);

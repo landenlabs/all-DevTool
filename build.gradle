@@ -11,10 +11,10 @@ buildscript {
         // https://developer.android.com/studio/releases/gradle-plugin
         // https://gradle.org/releases/
         //
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:4.0.2'
 
         // Firebase
-        classpath 'com.google.gms:google-services:4.3.3'
+        classpath 'com.google.gms:google-services:4.3.4'
 
         // Add the Firebase Crashlytics Gradle plugin: 'com.google.firebase.crashlytics'
         // classpath 'com.google.firebase:firebase-crashlytics-gradle:2.1.1'

@@ -1,11 +1,36 @@
+/*
+ * Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+ * LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * @author Dennis Lang
+ * @see http://LanDenLabs.com/
+ */
+
 package com.landenlabs.all_devtool;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +47,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
+import com.landenlabs.all_devtool.util.ArrayListEx;
 import com.landenlabs.all_devtool.util.ListInfo;
 import com.landenlabs.all_devtool.util.SearchList;
 import com.landenlabs.all_devtool.util.Ui;
@@ -36,7 +62,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import static com.landenlabs.all_devtool.util.SysUtils.getShellCmd;
 import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 
 /**
@@ -48,7 +76,7 @@ import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
 @SuppressWarnings("Convert2Lambda")
 public class PropFragment extends DevFragment {
 
-    final ArrayList<ListInfo> m_list = new ArrayList<>();
+    final ArrayListEx<ListInfo> m_list = new ArrayListEx<>();
     ExpandableListView m_listView;
     EditText m_titleTime;
     ImageButton m_search;
@@ -218,32 +246,95 @@ public class PropFragment extends DevFragment {
         }
 
         // -----------------------------------------------------------------------------------------
-        // Collect Security values
+        // Collect Settings.Global values
 
-        Map<String, String> secureList = new LinkedHashMap<>();
-        Field[] fields = Settings.Secure.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+        {
+            Map<String, String> globalList = new TreeMap<>();
+            Field[] fields = Settings.Global.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
 
-                //  && isRightName(f.getName())
-                String fieldType = f.getType().getName();
-                if (fieldType.equals(String.class.getName())) {
-                    @SuppressWarnings("UnusedAssignment")
-                    String key = f.toString();
-                    try {
-                        key = f.get(null).toString();
-                        String value =
-                                Settings.Secure.getString(getContextSafe().getContentResolver(), key);
-                        if (!TextUtils.isEmpty(value)) {
-                            secureList.put(key, value);
+                    //  && isRightName(f.getName())
+                    String fieldType = f.getType().getName();
+                    if (fieldType.equals(String.class.getName())) {
+                        @SuppressWarnings("UnusedAssignment")
+                        String key = f.toString();
+                        try {
+                            key = f.get(null).toString();
+                            String value =
+                                    Settings.Global.getString(getContextSafe().getContentResolver(), key);
+                            if (!TextUtils.isEmpty(value)) {
+                                globalList.put(key, value);
+                            }
+                        } catch (Exception ignore) {
+                            Log.d("propFrag", ignore.toString());
                         }
-                    } catch (Exception ignore) {
-
                     }
                 }
             }
+            addString("Global", globalList);
         }
-        addString("Secure", secureList);
+
+        // -----------------------------------------------------------------------------------------
+        // Collect Settings.Security values
+
+        {
+            Map<String, String> secureList = new TreeMap<>();
+            Field[] fields = Settings.Secure.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+
+                    //  && isRightName(f.getName())
+                    String fieldType = f.getType().getName();
+                    if (fieldType.equals(String.class.getName())) {
+                        @SuppressWarnings("UnusedAssignment")
+                        String key = f.toString();
+                        try {
+                            key = f.get(null).toString();
+                            String value =
+                                    Settings.Secure.getString(getContextSafe().getContentResolver(), key);
+                            if (!TextUtils.isEmpty(value)) {
+                                secureList.put(key, value);
+                            }
+                        } catch (Exception ignore) {
+
+                        }
+                    }
+                }
+            }
+            addString("Secure", secureList);
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // Collect Settings.System values
+
+        {
+            Map<String, String> systemList = new TreeMap<>();
+            Field[] fields = Settings.System.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers())) {
+
+                    //  && isRightName(f.getName())
+                    String fieldType = f.getType().getName();
+                    if (fieldType.equals(String.class.getName())) {
+                        @SuppressWarnings("UnusedAssignment")
+                        String key = f.toString();
+                        try {
+                            key = f.get(null).toString();
+                            String value =
+                                    Settings.System.getString(getContextSafe().getContentResolver(), key);
+                            if (!TextUtils.isEmpty(value)) {
+                                systemList.put(key, value);
+                            }
+                        } catch (Exception ignore) {
+                            Log.d("propFrag", ignore.toString());
+                        }
+                    }
+                }
+            }
+            addString("System", systemList);
+        }
+
 
         // -----------------------------------------------------------------------------------------
 
@@ -265,6 +356,22 @@ public class PropFragment extends DevFragment {
     // ============================================================================================
     // Internal methods
 
+    private String getGlobalSettingValues(Map<String, String> secureList) {
+        ContentResolver cr = requireContext().getContentResolver();
+        // Cursor globalCursor = null;
+        String aeroplaneMode = null;
+
+        // globalCursor = cr.query(Settings.Global.CONTENT_URI, null, null, null, null);
+        // if (globalCursor != null && globalCursor.moveToFirst()){
+            aeroplaneMode =  Settings.Global.getString(cr, Settings.Global.AIRPLANE_MODE_RADIOS);
+            secureList.put(Settings.Global.AIRPLANE_MODE_RADIOS, aeroplaneMode);
+        // }
+        // if (globalCursor != null) {
+        //     globalCursor.close();
+        // }
+        return aeroplaneMode;
+    }
+
     void addString(String name, String value) {
         if (!TextUtils.isEmpty(value))
             m_list.add(new ListInfo(name, value.trim()));
@@ -273,20 +380,6 @@ public class PropFragment extends DevFragment {
     void addString(String name, Map<String, String> value) {
         if (!value.isEmpty())
             m_list.add(new ListInfo(name, value));
-    }
-
-    private Map<String, String> getShellCmd(String[] shellCmd) {
-        Map<String, String> mapList = new LinkedHashMap<>();
-        ArrayList<String> responseList = runShellCmd(shellCmd);
-        for (String line : responseList) {
-            String[] vals = line.split(": ");
-            if (vals.length > 1) {
-                mapList.put(vals[0], vals[1]);
-            } else {
-                mapList.put(line, "");
-            }
-        }
-        return mapList;
     }
 
     private void collapseAll() {
@@ -370,7 +463,8 @@ public class PropFragment extends DevFragment {
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            return m_list.get(groupPosition).getCount();
+            ListInfo listInfo =  m_list.get(groupPosition, null);
+            return listInfo != null ? listInfo.getCount() : 0;
         }
 
         @Override

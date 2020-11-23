@@ -1,8 +1,5 @@
-package com.landenlabs.all_devtool.shortcuts;
-
 /*
- * Copyright (c) 2015 - 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
- *
+ * Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -18,10 +15,11 @@ package com.landenlabs.all_devtool.shortcuts;
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * @author Dennis Lang  (3/21/2015)
+ * @author Dennis Lang
  * @see http://LanDenLabs.com/
- *
  */
+
+package com.landenlabs.all_devtool.shortcuts;
 
 import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.FileBrowserFragment;
