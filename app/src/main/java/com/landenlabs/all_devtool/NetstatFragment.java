@@ -50,11 +50,11 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.util.ArrayListPair;
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.NetUtils;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.ArrayListPair;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.NetUtils;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;

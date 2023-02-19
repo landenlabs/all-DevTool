@@ -52,9 +52,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

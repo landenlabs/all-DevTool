@@ -59,7 +59,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Light"
+            android:text="Canmera/Screen Light"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
@@ -84,16 +84,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Flash Light" />
+        android:text="Camera Flash Light" />
 
     <ToggleButton
         android:id="@+id/lightCameraOnTb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textOff="Light is Off"
-        android:textOn="Light is ON" />
+        android:textOff="Camera Light is Off"
+        android:textOn="Camera Light is ON" />
 
-    <!-- Todo  get betters seekBar look -->
+     <TextView
+         android:layout_width="match_parent"
+         android:gravity="center_horizontal"
+         android:layout_height="wrap_content"
+         android:text="Flash speed"
+         />
     <SeekBar
         android:id="@+id/lightCameraSB"
         android:layout_width="match_parent"
@@ -115,6 +120,13 @@
             android:layout_height="2dp"
             android:layout_marginBottom="10dp"
             android:background="@android:color/white" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:text="Screen Settings"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"

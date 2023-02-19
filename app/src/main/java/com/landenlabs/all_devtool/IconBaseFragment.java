@@ -50,8 +50,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

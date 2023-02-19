@@ -76,14 +76,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.os.ConfigurationCompat;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.ListInfo;
-import com.landenlabs.all_devtool.util.SearchList;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
+import com.landenlabs.all_devtool.shortcuts.util.SearchList;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.ByteOrder;
@@ -124,6 +122,8 @@ public class SystemFragment extends DevFragment {
 
     BuildArrayAdapter m_adapter;
     SubMenu m_menu;
+    int m_advertisingIdIdx = 0;
+    String m_advertisingId = "no ad id";
 
     // ============================================================================================
     // DevFragment methods
@@ -236,8 +236,27 @@ public class SystemFragment extends DevFragment {
         m_adapter = new BuildArrayAdapter(this.getActivity());
         m_listView.setAdapter(m_adapter);
 
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(requireContext());
+                    m_advertisingId = adInfo != null ? adInfo.getId() : "no ad id";
+                    m_list.get(m_advertisingIdIdx).m_valueStr = m_advertisingId;
+                    // TODO - refresh displaying of list.
+                } catch (Exception ex) {
+                    // exception.printStackTrace();
+                    m_log.e("ad id", ex.getMessage());
+                }
+            }
+        };
+
+        // call thread start for background process
+        thread.start();
+
         return rootView;
     }
+
 
     @Override
     public void onResume() {
@@ -297,18 +316,13 @@ public class SystemFragment extends DevFragment {
         addBuild("FontScale", String.valueOf(getContext().getResources().getConfiguration().fontScale));
 
         try {
-            try {
-                AdvertisingIdClient.Info adInfo =
-                        AdvertisingIdClient.getAdvertisingIdInfo(getContext());
-                final String adIdStr = adInfo.getId();
-                // final boolean isLAT = adInfo.isLimitAdTrackingEnabled();
-                addBuild("Ad ID", adIdStr);
-            } catch (IOException e) {
-                // Unrecoverable error connecting to Google Play services (e.g.,
-                // the old version of the service doesn't support getting AdvertisingId).
-            } catch (GooglePlayServicesNotAvailableException e) {
-                // Google Play services is not available entirely.
-            }
+            /*  See thread spawned above to get Advertizing id.
+            AdvertisingIdClient.Info adInfo =  AdvertisingIdClient.getAdvertisingIdInfo(getContext());
+            final String adIdStr = adInfo.getId();
+            // final boolean isLAT = adInfo.isLimitAdTrackingEnabled();
+             */
+            m_advertisingIdIdx = m_list.size();
+            addBuild("Ad ID", m_advertisingId);
 
             /*
             try {

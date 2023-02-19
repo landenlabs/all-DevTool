@@ -32,12 +32,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.GnssStatus;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
@@ -65,15 +67,21 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.util.concurrent.HandlerExecutor;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.landenlabs.all_devtool.receivers.GpsReceiver;
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.SysUtils;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -106,10 +114,10 @@ public class GpsFragment extends DevFragment implements
     public static String s_name = "GPS";
     SubMenu m_menu;
 
-    static final int s_providersRow = 0;
-    static final int s_lastUpdateRow = 1;
-    static final int s_detailRow = 2;
-    static final int s_maxRows = 3;
+    private static final int s_providersRow = 0;
+    private static final int s_lastUpdateRow = 1;
+    private static final int s_detailRow = 2;
+    private static final int s_maxRows = 3;
 
     private final ArrayList<GpsInfo> m_list = new ArrayList<>(s_maxRows);
     private final ItemList m_detailList = new ItemList();
@@ -119,15 +127,15 @@ public class GpsFragment extends DevFragment implements
     // Additional times
     private final SimpleDateFormat s_hour12Format = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
     private final SimpleDateFormat s_hour24Format = new SimpleDateFormat("HH:mm:ss.S", Locale.getDefault());
-    // private  final SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a", Locale.getDefault());
-    // private  final SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm", v);
-    private  SimpleDateFormat s_hourFormat = s_hour24Format;
+    private SimpleDateFormat s_hourFormat = s_hour24Format;
 
+    private static final int s_colorGps = 0xff80ffff;   // must match Status toggle
+    private static final int s_colorMsg = s_colorGps;
+    private static final int s_maxToKeep = 20;
+    private static final long s_noTime = -1;
 
-    static final int s_colorGps = 0xff80ffff;   // must match Status toggle
-    static final int s_colorMsg = s_colorGps;
-    static final int s_maxToKeep = 20;
-    static final long s_noTime = -1;
+    private boolean s_gpsVibrate = true;
+    private boolean s_gpsTone = true;
 
     // ---- GPS ----
     // https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest
@@ -140,31 +148,32 @@ public class GpsFragment extends DevFragment implements
     private static final long GPS_FASTEST_INTERVAL = TimeUnit.SECONDS.toMillis(1);
     private static final long GPS_SLOW_INTERVAL = TimeUnit.MINUTES.toMillis(5);
 
-    LocationManager m_locMgr;
-    LocationRequest m_locationRequest;
-    GoogleApiClient m_googleApiClient;
+    private LocationManager m_locMgr;
+    private LocationRequest m_locationRequest;
+    private LocationCallback m_fuseCallback = null;
+    private GoogleApiClient m_googleApiClient;
 
-    static class LocInfo {
+    private static class LocInfo {
         Location m_currLocation;
         Location m_prevLocation;
     }
 
-    static final String STATUS_CB = "Status";
-    static final String FUSED_PROVIDER = "fused";
-    Map<String, LocInfo> m_mapLocProviders = new HashMap<>();
+    private static final String STATUS_CB = "Status";
+    private static final String FUSED_PROVIDER = "fused";
+    private Map<String, LocInfo> m_mapLocProviders = new HashMap<>();
 
-    TextView m_gpsTv;
-    CheckBox m_gpsCb;
-    boolean m_gpsMonitor = false;
+    private TextView m_gpsTv;
+    private CheckBox m_gpsCb;
+    private boolean m_gpsMonitor = false;
 
-    Map<String, CheckBox> m_providersCb = new HashMap<>();
-    SparseArray<CheckBox> m_colorsCb = new SparseArray<>();
-    Map<String, GpsItem> m_lastUpdates = new HashMap<>();
+    private Map<String, CheckBox> m_providersCb = new HashMap<>();
+    private SparseArray<CheckBox> m_colorsCb = new SparseArray<>();
+    private Map<String, GpsItem> m_lastUpdates = new HashMap<>();
 
-    boolean m_isGpsFixed = false;
-    boolean m_isGpsEnabled = false;
-    IntentFilter m_intentFilter = new IntentFilter();
-    private BroadcastReceiver m_gpsReceiver = new BroadcastReceiver() {
+    private boolean m_isGpsFixed = false;
+    private boolean m_isGpsEnabled = false;
+    private IntentFilter m_intentFilter = new IntentFilter();
+    private final BroadcastReceiver m_gpsReceiver = new BroadcastReceiver() {
         public void onReceive(Context paramContext, Intent paramIntent) {
             String str = paramIntent.getAction();
             Log.d("foo", "gps receiver action=" + str + paramIntent);
@@ -199,9 +208,6 @@ public class GpsFragment extends DevFragment implements
 
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
-        // List<Bitmap> bitmapList = new ArrayList<Bitmap>();
-        // bitmapList.add(Utils.grabScreen(this.getActivitySafe()));
-        // return bitmapList;
         return Utils.getListViewAsBitmaps(m_listView, maxHeight);
     }
 
@@ -216,9 +222,24 @@ public class GpsFragment extends DevFragment implements
         GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
+    @SuppressLint("MissingPermission")
+    private void addGpsListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // TODO - fix this so it works in DevTool
+            GnssStatus.Callback gnssStatusCallBack = new GnssStatus.Callback() {
+                @Override
+                public void onSatelliteStatusChanged(GnssStatus status) {
+                    // satelliteCount = status.getSatelliteCount();
+                }
+            };
+            m_locMgr.registerGnssStatusCallback(gnssStatusCallBack);
+        } else {
+            m_locMgr.addGpsStatusListener(this);
+        }
+    }
+
     // ============================================================================================
     // Fragment methods
-    @SuppressWarnings("deprecation")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -269,7 +290,15 @@ public class GpsFragment extends DevFragment implements
 
         m_gpsTv = Ui.viewById(rootView, R.id.gps);
         if (isGooglePlayServicesAvailable()) {
+            // google_app_id
+            m_googleApiClient = new GoogleApiClient.Builder(this.getActivitySafe())
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+
             m_locationRequest = new LocationRequest();
+            m_locationRequest.setNumUpdates(1);
             m_locationRequest.setInterval(GPS_INTERVAL);
             m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
             // Priority needs to match permissions.
@@ -277,14 +306,8 @@ public class GpsFragment extends DevFragment implements
             // <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
             //  Use LocationRequest.PRIORITY_HIGH_ACCURACY with
             // <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-            m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-            // google_app_id
-            m_googleApiClient = new GoogleApiClient.Builder(this.getActivitySafe())
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
+            // m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            m_locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
             m_gpsTv.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -296,28 +319,17 @@ public class GpsFragment extends DevFragment implements
                     showProviders();
                 }
             });
-
         } else {
             m_gpsTv.setText("Need Google Play Service");
         }
 
+
+
         if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            m_locMgr.addGpsStatusListener(this);
+            addGpsListener();
         }
 
-        /*  http://stackoverflow.com/questions/11398732/how-do-i-receive-the-system-broadcast-when-gps-status-has-changed
-            <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
-            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-            <receiver android:name=".GpsReceiver">
-            <intent-filter>
-                 <action android:name="android.location.GPS_ENABLED_CHANGE" />
-                 <action android:name="android.location.PROVIDERS_CHANGED" />
-            </intent-filter>
-            </receiver>
-        */
-        // GpsReceiver m_gpsReceiver = new GpsReceiver();
         m_intentFilter.addAction(GpsReceiver.GPS_ENABLED_CHANGE_ACTION);
         m_intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
         m_intentFilter.addAction(GpsReceiver.GPS_FIX_CHANGE_ACTION);
@@ -339,7 +351,7 @@ public class GpsFragment extends DevFragment implements
         for (int idx = 0; idx != s_maxRows; idx++)
             m_listView.expandGroup(idx);
 
-        onLocationChanged(null);
+        // onLocationChanged(null);
         return rootView;
     }
 
@@ -380,70 +392,58 @@ public class GpsFragment extends DevFragment implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case R.id.clock_12:
-                s_hourFormat = s_hour12Format;
-                addMsgToDetailRow(s_colorMsg, "12h Clock");
-                break;
-            case R.id.clock_24:
-                s_hourFormat = s_hour24Format;
-                addMsgToDetailRow(s_colorMsg, "24h Clock");
-                break;
-
-            case R.id.gps_clear_list:
-                clearList();
-                break;
-
-            case R.id.gps_fast_accurate:
-                if (m_locationRequest != null) {
-                    m_locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                    m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
-                    m_locationRequest.setSmallestDisplacement(0);
-                    addMsgToDetailRow(s_colorMsg, "1sec 0 miles HighPwr");
-                    startLocationUpdates();
-                }
-                break;
-
-            case R.id.gps_fast_accurate_one_mile:
-                if (m_locationRequest != null) {
-                    m_locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                    m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
-                    m_locationRequest.setSmallestDisplacement(1609.0f);  // 1 mile = 1609 km
-                    addMsgToDetailRow(s_colorMsg, "1sec 1 mile HighPwr");
-                    startLocationUpdates();
-                }
-                break;
-
-            case R.id.gps_fast_balanced:
-                if (m_locationRequest != null) {
-                    m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-                    m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
-                    m_locationRequest.setSmallestDisplacement(0);
-                    addMsgToDetailRow(s_colorMsg, "1sec 0 miles Balanced");
-                    startLocationUpdates();
-                }
-                break;
-            case R.id.gps_fast_balanced_one_mile:
-                if (m_locationRequest != null) {
-                    m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-                    m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
-                    m_locationRequest.setSmallestDisplacement(1609.0f);  // 1 mile = 1609 km
-                    addMsgToDetailRow(s_colorMsg, "1sec 1 miles Balanced");
-                    startLocationUpdates();
-                }
-                break;
-            case R.id.gps_slow_balanced_one_mile:
-                if (m_locationRequest != null) {
-                    m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-                    m_locationRequest.setFastestInterval(GPS_SLOW_INTERVAL);
-                    m_locationRequest.setSmallestDisplacement(1609.0f);  // 1 mile = 1609 km
-                    addMsgToDetailRow(s_colorMsg, "5min 1 miles Balanced");
-                    startLocationUpdates();
-                }
-                break;
-
-            default:
-                break;
+        if (id == R.id.gps_clock_12) {
+            s_hourFormat = s_hour12Format;
+            addMsgToDetailRow(s_colorMsg, "12h Clock");
+        } else if (id == R.id.gps_clock_24) {
+            s_hourFormat = s_hour24Format;
+            addMsgToDetailRow(s_colorMsg, "24h Clock");
+        } else if (id == R.id.gps_clear_list) {
+            clearList();
+        } else if (id == R.id.gps_vibrate) {
+            s_gpsVibrate = item.isChecked();
+        } else if (id == R.id.gps_tone) {
+            s_gpsTone = item.isChecked();
+        } else if (id == R.id.gps_fast_accurate) {
+            if (m_locationRequest != null) {
+                m_locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
+                m_locationRequest.setSmallestDisplacement(0);
+                addMsgToDetailRow(s_colorMsg, "1sec 0 miles HighPwr");
+                startLocationUpdates();
+            }
+        } else if (id == R.id.gps_fast_accurate_one_mile) {
+            if (m_locationRequest != null) {
+                m_locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
+                m_locationRequest.setSmallestDisplacement(1609.0f);  // 1 mile = 1609 km
+                addMsgToDetailRow(s_colorMsg, "1sec 1 mile HighPwr");
+                startLocationUpdates();
+            }
+        } else if (id == R.id.gps_fast_balanced) {
+            if (m_locationRequest != null) {
+                m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
+                m_locationRequest.setSmallestDisplacement(0);
+                addMsgToDetailRow(s_colorMsg, "1sec 0 miles Balanced");
+                startLocationUpdates();
+            }
+        } else if (id == R.id.gps_fast_balanced_one_mile) {
+            if (m_locationRequest != null) {
+                m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                m_locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
+                m_locationRequest.setSmallestDisplacement(1609.0f);  // 1 mile = 1609 km
+                addMsgToDetailRow(s_colorMsg, "1sec 1 miles Balanced");
+                startLocationUpdates();
+            }
+        } else if (id == R.id.gps_slow_balanced_one_mile) {
+            if (m_locationRequest != null) {
+                m_locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                m_locationRequest.setFastestInterval(GPS_SLOW_INTERVAL);
+                m_locationRequest.setSmallestDisplacement(1609.0f);  // 1 mile = 1609 km
+                addMsgToDetailRow(s_colorMsg, "5min 1 miles Balanced");
+                startLocationUpdates();
+            }
         }
 
         item.setChecked(true);
@@ -451,16 +451,16 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         m_menu = menu.addSubMenu("GPS Settings");
         inflater.inflate(R.menu.gps_menu, m_menu);
-        m_menu.findItem(R.id.clock_12).setChecked(true);
+        m_menu.findItem(R.id.gps_clock_12).setChecked(true);
     }
 
     // ============================================================================================
@@ -493,11 +493,11 @@ public class GpsFragment extends DevFragment implements
                         msg = "GPS first fix";
                         break;
                     case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                        msg = "GPS sat status";
+                        // msg = "GPS sat status";
                         break;
                 }
 
-                if (TextUtils.isEmpty(msg)) {
+                if (!TextUtils.isEmpty(msg)) {
                     addMsgToDetailRow(s_colorGps, msg);
                     GpsItem gpsItem = m_lastUpdates.get(STATUS_CB);
                     if (gpsItem != null) {
@@ -507,7 +507,7 @@ public class GpsFragment extends DevFragment implements
                 }
                 showProviders();
             } catch (SecurityException ex) {
-                Log.e(TAG, ex.getMessage());
+                Log.e(TAG, ex.toString());
             }
         }
     }
@@ -538,7 +538,7 @@ public class GpsFragment extends DevFragment implements
     // ============================================================================================
     // LocationListener,
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(@NonNull Location location) {
 
         boolean isDupLoc = false;
 
@@ -579,8 +579,16 @@ public class GpsFragment extends DevFragment implements
             Toast.makeText(this.getActivitySafe(), "Passive " + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
 
-        if (!isDupLoc)
+        if (!isDupLoc) {
             showGPS(location);
+            if (s_gpsVibrate) {
+                final int LONG_PRESS_VIBRATION_MS = 50;
+                SysUtils.vibrateDevice(this.requireContext(), LONG_PRESS_VIBRATION_MS);
+            }
+            if (s_gpsTone) {
+                SysUtils.playRingtone(this.requireContext());
+            }
+        }
     }
 
     @Override
@@ -589,13 +597,28 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
+    public void onProviderEnabled(@NonNull String provider) {
         addMsgToDetailRow(s_colorMsg, "Provider enabled " + provider);
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
+    public void onProviderDisabled(@NonNull String provider) {
         addMsgToDetailRow(s_colorMsg, "Provider disabled " + provider);
+    }
+
+    // ============================================================================================
+    // LocationCallback
+
+    private class FuseCallback extends LocationCallback {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            onLocationChanged(locationResult.getLastLocation());
+        }
+
+        @Override
+        public void onLocationAvailability(LocationAvailability locationAvailability) {
+            addMsgToDetailRow(s_colorMsg, "Location available " + locationAvailability.toString());
+        }
     }
 
     // ============================================================================================
@@ -605,13 +628,34 @@ public class GpsFragment extends DevFragment implements
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
         if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            final LocationManager locMgr = getServiceSafe(Context.LOCATION_SERVICE);
-            // Criteria criteria = new Criteria();
-            // criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            // criteria.setPowerRequirement(Criteria.POWER_HIGH);
-            Looper looper = getContextSafe().getMainLooper();
-            locMgr.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, looper);
-            addMsgToDetailRow(s_colorMsg, "GPS location requested");
+            if (m_gpsCb.isChecked() && m_locationRequest.getPriority() == LocationRequest.PRIORITY_HIGH_ACCURACY) {
+                try {
+                    m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
+                    addMsgToDetailRow(s_colorMsg, "GPS request made");
+                } catch (Exception ex) {
+                    String errMsg = "Unable to access gps\n" + ex.getMessage() + "\n" + ex.getCause();
+                    Ui.ShowMessage(this.getActivitySafe(), errMsg);
+                    addMsgToDetailRow(s_colorMsg, errMsg);
+                }
+            } else {
+                try {
+                    Task<Void> task = LocationServices.getFusedLocationProviderClient(getContextSafe())
+                            .requestLocationUpdates(m_locationRequest, m_fuseCallback, Looper.getMainLooper());
+
+                    if (task.getException() != null)
+                        addMsgToDetailRow(s_colorMsg, "FUSE request exception=" + task.getException().toString());
+                    else if (task.isCanceled())
+                        addMsgToDetailRow(s_colorMsg, "FUSE request cancelled");
+                    else
+                        addMsgToDetailRow(s_colorMsg, "FUSE request made");
+
+                } catch (Exception ex) {
+                    String errMsg = "Unable to access gps\n" + ex.getMessage() + "\n" + ex.getCause();
+                    Ui.ShowMessage(this.getActivitySafe(), errMsg);
+                    addMsgToDetailRow(s_colorMsg, errMsg);
+                }
+            }
         } else {
             addMsgToDetailRow(s_colorMsg, "GPS permission not enabled");
         }
@@ -696,49 +740,33 @@ public class GpsFragment extends DevFragment implements
     }
 
     private void startLocationUpdates() {
+        // if (isGooglePlayServicesAvailable() && m_googleApiClient.isConnected()) {
 
-        if (isGooglePlayServicesAvailable() && m_googleApiClient.isConnected()) {
-            stopLocationUpdates();
+        stopLocationUpdates();
 
-            if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
 
-                if (m_locMgr != null) {
-                    if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        m_locMgr.addGpsStatusListener(this);
-                    }
+            if (m_locMgr != null) {
+                if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    // m_locMgr.addGpsStatusListener(this);
+                    addGpsListener();
                 }
-
-                // PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
-                //        m_googleApiClient, m_locationRequest, this);
-                if (m_gpsCb.isChecked() && m_locationRequest.getPriority() == LocationRequest.PRIORITY_HIGH_ACCURACY) {
-                    m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                            m_locationRequest.getFastestInterval(), m_locationRequest.getSmallestDisplacement(), this);
-                    addMsgToDetailRow(s_colorMsg, "GPS request made");
-                } else {
-                    try {
-                        // Disable GPS provider by setting a very long update cycle.
-                        m_locMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                                Long.MAX_VALUE, Long.MAX_VALUE, this);
-                    } catch (Exception ex) {
-                        String errMsg = "Unable to access gps\n" + ex.getMessage() + "\n" + ex.getCause();
-                        Ui.ShowMessage(this.getActivitySafe(), errMsg);
-                        addMsgToDetailRow(s_colorMsg, errMsg);
-                    }
-                }
-            } else {
-                String errMsg = "start GPS ignore, missing permissions";
-                Ui.ShowMessage(this.getActivitySafe(), errMsg);
-                addMsgToDetailRow(s_colorMsg, errMsg);
-                // Toast.makeText(getContextSafe(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
             }
+
+            getLocation();
+        } else {
+            String errMsg = "start GPS ignore, missing permissions";
+            Ui.ShowMessage(this.getActivitySafe(), errMsg);
+            addMsgToDetailRow(s_colorMsg, errMsg);
+            // Toast.makeText(getContextSafe(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
         }
 
         //noinspection ConstantConditions,ConstantIfStatement
-        if (false) {
+        if (true) {
             FusedLocationProviderClient fusedLocationProviderClient =
                     LocationServices.getFusedLocationProviderClient(getActivitySafe());
             fusedLocationProviderClient.getLastLocation()
@@ -755,15 +783,6 @@ public class GpsFragment extends DevFragment implements
     }
 
     protected void stopLocationUpdates() {
-        if (isGooglePlayServicesAvailable()
-            && m_googleApiClient != null
-            && (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED)) {
-                //noinspection deprecation
-                LocationServices.FusedLocationApi.removeLocationUpdates(m_googleApiClient, this);
-        }
         if (m_locMgr != null) {
             m_locMgr.removeUpdates(this);
         }
@@ -995,10 +1014,10 @@ public class GpsFragment extends DevFragment implements
         }
     }
 
-    private class ItemList extends ArrayList<GpsItem> {
+    private static class ItemList extends ArrayList<GpsItem> {
     }
 
-    class GpsInfo {
+    static class GpsInfo {
         GpsItem m_item;
         ItemList m_itemList;
 
@@ -1007,6 +1026,7 @@ public class GpsFragment extends DevFragment implements
             m_itemList = new ItemList();
         }
 
+        @NonNull
         public String toString() {
             return m_item.m_msg;
         }

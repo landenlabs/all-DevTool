@@ -33,12 +33,15 @@ import android.os.Build;
 
 import androidx.legacy.content.WakefulBroadcastReceiver;
 
-import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
 
 /**
  * Created by Dennis Lang on 2/27/2015.
  *
- * Look into: android.app.job.JobScheduler
+ *
+ * Look into:
+ * https://developer.android.com/topic/libraries/architecture/workmanager
+ * android.app.job.JobScheduler
  */
 public class AlarmReceiver extends WakefulBroadcastReceiver {
     // Logger - set to LLog.DBG to only log in Debug build, use LLog.On to always log.
@@ -47,6 +50,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
         m_log.i("onReceive ");
+
 
         // This will update the UI with message
         // inst.setAlarmText("Alarm! Wake up! Wake up!");
@@ -58,10 +62,12 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         if (alarmUri == null) {
             alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         }
-        Ringtone ringtone = RingtoneManager.getRingtone(context, alarmUri);
+
         if (Build.VERSION.SDK_INT >= 28) {
-            ringtone.setLooping(false);
+            Ringtone ringtone = RingtoneManager.getRingtone(context, alarmUri);
+            ringtone.setLooping(true);
             ringtone.play();
+            m_log.i("onReceive - Alarm ringtone");
         } else {
             try {
                 MediaPlayer mediaPlayer = MediaPlayer.create(context, alarmUri);
@@ -69,6 +75,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
                 mediaPlayer.setLooping(true);
                 // mediaPlayer.prepare();
                 mediaPlayer.start();
+                m_log.i("onReceive - Alarm media");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

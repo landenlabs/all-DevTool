@@ -72,12 +72,12 @@ import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 
 import com.landenlabs.all_devtool.dialogs.DeleteDialog;
-import com.landenlabs.all_devtool.util.FileUtil;
-import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.FileUtil;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.util.OsUtils;
-import com.landenlabs.all_devtool.util.SysUtils;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.SysUtils;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,8 +92,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.landenlabs.all_devtool.util.FileUtil.getMimeType;
-import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
+import static com.landenlabs.all_devtool.shortcuts.util.FileUtil.getMimeType;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
 
 // import android.system.Os;
 

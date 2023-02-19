@@ -42,8 +42,8 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.util.List;
 
@@ -72,6 +72,7 @@ public class LightFragment extends DevFragment
     // SDK >= 23
     private String mCameraId;
     CameraManager mCameraManager;
+    private float m_cameraPercent = 0.5f;
 
     private ToggleButton m_screenBrightnessTB;
 
@@ -209,6 +210,7 @@ public class LightFragment extends DevFragment
                 setScreenBrightness(progress / 100.0f);
                 break;
             case R.id.lightCameraSB:
+                m_cameraPercent = progress / 100.0f;
                 break;
         }
     }
@@ -255,12 +257,20 @@ public class LightFragment extends DevFragment
         return false;
     }
 
+    FlashCameraThread flashCamera;
     void updateCameraLight(boolean lightOn) {
 
         try {
             if (lightOn) {
                 turnFlashlightOn();
+                flashCamera = new FlashCameraThread();
+                flashCamera.start();
             } else {
+                if (flashCamera != null) {
+                    flashCamera.exit = true;
+                    flashCamera.interrupt();
+                    // flashCamera = null;
+                }
                 turnFlashlightOff();
             }
 
@@ -315,5 +325,28 @@ public class LightFragment extends DevFragment
         }
     }
 
+    // =============================================================================================
+    private  class FlashCameraThread extends Thread {
 
+        volatile
+        public boolean exit = false;
+        private final int SLEEP_MILLI = 200;
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                while (!exit) {
+                    turnFlashlightOn();
+                    long onMilli = Math.round(SLEEP_MILLI * m_cameraPercent);
+                    if (onMilli > 1) {
+                        Thread.sleep(onMilli);
+                        turnFlashlightOff();
+                    }
+                    Thread.sleep(onMilli);
+                }
+            } catch (InterruptedException ex) {
+            }
+        }
+    }
 }

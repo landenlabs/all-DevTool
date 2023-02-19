@@ -41,7 +41,6 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -63,6 +62,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.androidplot.Plot;
+import com.androidplot.Series;
 import com.androidplot.util.Redrawer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -71,9 +71,9 @@ import com.androidplot.xy.StepMode;
 import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
-import com.landenlabs.all_devtool.util.SoundMeter;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.SoundMeter;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.text.FieldPosition;
 import java.text.Format;
@@ -368,6 +368,10 @@ public class SensorFragment extends DevFragment
                 m_domainLabel = m_menuIdToLbl.get(id);
                 m_plot.setDomainLabel(m_domainLabel);
                 break;
+
+            case R.id.sensor_menu_data_clear:
+                clearSeries();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -391,8 +395,9 @@ public class SensorFragment extends DevFragment
     // ============================================================================================
     // implement OnLayoutChangeListener
     @Override
-    public void onLayoutChange(View v, int left, int top, int right,
-                               int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+    public void onLayoutChange(
+            View v, int left, int top, int right,
+            int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
         if (v == m_consoleSpinner)
             m_consoleSpinner.setOnItemSelectedListener(this);
     }
@@ -443,6 +448,13 @@ public class SensorFragment extends DevFragment
                 m_plot.removeSeries(xySeries);
             }
             */
+        }
+    }
+
+    private void clearSeries() {
+        for (Series series : m_plot.getRegistry().getSeriesList()) {
+            SimpleXYSeries xySeries = (SimpleXYSeries) series;
+            xySeries.clear();
         }
     }
 

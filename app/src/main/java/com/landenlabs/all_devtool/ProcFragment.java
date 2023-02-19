@@ -43,10 +43,10 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.util.ListInfo;
-import com.landenlabs.all_devtool.util.SearchList;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
+import com.landenlabs.all_devtool.shortcuts.util.SearchList;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -63,7 +63,7 @@ import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_BATTERY;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_GPU;
 import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
-import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
 
 /**
  * Display "Process"  information.

@@ -36,8 +36,8 @@ import android.widget.Toast;
 
 import com.landenlabs.all_devtool.DevFragment;
 import com.landenlabs.all_devtool.R;
-import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
-import com.landenlabs.all_devtool.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.io.File;
 import java.util.ArrayList;

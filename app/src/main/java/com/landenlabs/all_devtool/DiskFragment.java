@@ -53,10 +53,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
-import com.landenlabs.all_devtool.util.ListInfo;
+import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
 import com.landenlabs.all_devtool.util.OsUtils;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -72,7 +72,7 @@ import java.util.UUID;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static com.landenlabs.all_devtool.FileBrowserFragment.isBit;
-import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
 
 /**
  * Display "Disk" system information.

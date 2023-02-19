@@ -42,7 +42,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.R;
-import com.landenlabs.all_devtool.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.io.File;
 import java.io.IOException;

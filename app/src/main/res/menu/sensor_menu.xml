@@ -45,17 +45,24 @@
     <item
         android:title="@string/hr"
         android:enabled="false" />
-
+    <!--
     <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/sensor_menu_run_always"
-            app:showAsAction="always"
-            android:title="@string/sensor_menu_run_always"/>
-        <item
-            android:id="@+id/sensor_menu_data_chg"
-            app:showAsAction="always"
-            android:checked="true"
-            android:title="@string/sensor_menu_data_chg"/>
+       <item
+           android:id="@+id/sensor_menu_run_always"
+           app:showAsAction="always"
+           android:title="@string/sensor_menu_run_always"/>
+
+       <item
+           android:id="@+id/sensor_menu_data_chg"
+           app:showAsAction="always"
+           android:checked="true"
+           android:title="@string/sensor_menu_data_chg"/>
+
     </group>
+    -->
+    <item
+        android:id="@+id/sensor_menu_data_clear"
+        app:showAsAction="always"
+        android:title="@string/sensor_menu_data_clear"/>
 
 </menu>

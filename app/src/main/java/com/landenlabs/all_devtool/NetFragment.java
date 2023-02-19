@@ -76,11 +76,11 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.ListInfo;
-import com.landenlabs.all_devtool.util.SearchList;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
+import com.landenlabs.all_devtool.shortcuts.util.SearchList;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.math.BigInteger;
 import java.net.Inet4Address;

@@ -26,7 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
 
 /**
  * Created by Dennis Lang on 6/19/2015.

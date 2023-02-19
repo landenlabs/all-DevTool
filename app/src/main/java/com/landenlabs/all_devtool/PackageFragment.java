@@ -26,6 +26,8 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -90,11 +92,11 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.dialogs.UninstallDialog;
 import com.landenlabs.all_devtool.receivers.UninstallIntentReceiver;
-import com.landenlabs.all_devtool.util.ArrayListPair;
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.SysUtils;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.ArrayListPair;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.SysUtils;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.io.File;
 import java.text.NumberFormat;
@@ -135,6 +137,7 @@ public class PackageFragment extends DevFragment
     ArrayList<PackingItem> m_workList;
     ArrayList<PackingItem> m_beforeFilter = new ArrayList<>();
     ExpandableListView m_listView;
+    List<AppWidgetProviderInfo> widgetProviderInfos;
 
     ToggleButton m_pkgLoadBtn;
     ProgressDialog m_progress;
@@ -308,7 +311,7 @@ public class PackageFragment extends DevFragment
 
     @NonNull
     private PackageManager getPackageMgr() {
-        return Objects.requireNonNull(getActivity()).getPackageManager();
+        return requireActivity().getPackageManager();
     }
 
     @NonNull
@@ -469,6 +472,8 @@ public class PackageFragment extends DevFragment
         final PkgArrayAdapter adapter = new PkgArrayAdapter(getActivitySafe());
         m_listView.setAdapter(adapter);
 
+        AppWidgetManager appWidMgr = AppWidgetManager.getInstance(getContext());
+        widgetProviderInfos = appWidMgr.getInstalledProviders();
 
         adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
@@ -1365,8 +1370,11 @@ public class PackageFragment extends DevFragment
                 } else if (type.startsWith("video/*")) {
                     Uri uri = Uri.withAppendedPath(MediaStore.Video.Media.INTERNAL_CONTENT_URI, "1");
                     resolveIntent.setDataAndType(uri, type);
-                } else if (type.startsWith("text/")) {
+                } else if (type.contains("/plain")) {
                     Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath());
+                    resolveIntent.setDataAndType(uri, type);
+                } else if (type.contains("/html")) {
+                    Uri uri = Uri.parse("http://landenlabs.com");
                     resolveIntent.setDataAndType(uri, type);
                 } else {
                     resolveIntent.setType(type);
@@ -1374,6 +1382,7 @@ public class PackageFragment extends DevFragment
             }
 
             PackageManager pm = getPackageMgr();
+
 
             // PackageManager.GET_RESOLVED_FILTER);  // or PackageManager.MATCH_DEFAULT_ONLY
             List<ResolveInfo> resolveList = pm
@@ -1392,6 +1401,10 @@ public class PackageFragment extends DevFragment
                         packInfo = pm.getPackageInfo(pkgName, 0);
                         addList(pkgList, "Version", packInfo.versionName);
                         addList(pkgList, "VerCode", String.valueOf(packInfo.versionCode));
+                        CharSequence descCS = packInfo.applicationInfo.loadDescription(pm);
+                        if (descCS != null && descCS.length() > 0) {
+                            addList(pkgList, "Desc", descCS.toString());
+                        }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             addList(pkgList, "MinSDK", String.valueOf(packInfo.applicationInfo.minSdkVersion));
                         }
@@ -1422,6 +1435,7 @@ public class PackageFragment extends DevFragment
                                     addList(pkgList, " ", resolveInfo.filter.getDataType(dIdx));
                             }
                         }
+                        addWidgetInfo(pkgName, pkgList);
                         m_workList.add(new PackingItem(pkgName.trim(), pkgList, packInfo, orderCnt++, appName, actType));
                     } catch (Exception ex) {
                         m_log.e(ex.getMessage());
@@ -1457,6 +1471,22 @@ public class PackageFragment extends DevFragment
             }
         }
         */
+    }
+
+    private void addWidgetInfo (String pkgname, ArrayListPairString pkgList) {
+        int widNum = 1;
+        for (AppWidgetProviderInfo widProviderInfo : widgetProviderInfos) {
+            String widPkg = widProviderInfo.provider.getPackageName();
+            if (pkgname.equals( widPkg)) {
+                // addList(pkgList, "Wid-Preview" + widNum, String.valueOf(widProviderInfo.previewImage));
+                // addList(pkgList, "Wid-Icon" + widNum, String.valueOf(widProviderInfo.icon));
+                addList(pkgList, "Wid-MinHgt" + widNum, String.valueOf(widProviderInfo.minHeight));
+                addList(pkgList, "Wid-MinWid" + widNum, String.valueOf(widProviderInfo.minWidth));
+                addList(pkgList, "Wid-UpdMilli" + widNum, String.valueOf(widProviderInfo.updatePeriodMillis));
+                addList(pkgList, "Wid-Cat" + widNum, String.valueOf(widProviderInfo.widgetCategory));
+                widNum++;
+            }
+        }
     }
 
     /**
@@ -1722,6 +1752,10 @@ public class PackageFragment extends DevFragment
 
         addList(pkgList, "Version", packInfo.versionName);
         addList(pkgList, "VerCode", String.valueOf(packInfo.versionCode));
+        CharSequence descCS = packInfo.applicationInfo.loadDescription(getPackageMgr());
+        if (descCS != null && descCS.length() > 0) {
+            addList(pkgList, "Desc", descCS.toString());
+        }
         // addList(pkgList, "Directory", packInfo.applicationInfo.sourceDir);
 
         try {
@@ -1826,7 +1860,7 @@ public class PackageFragment extends DevFragment
             }
         }
 
-
+        addWidgetInfo(packageName, pkgList);
         m_workList.add(packingItem);
         return true;
     }
@@ -2069,6 +2103,8 @@ public class PackageFragment extends DevFragment
                             addList(pkgList, "Preferred #", String.valueOf(num));
                         }
 
+                        addWidgetInfo(packInfo.packageName, pkgList);
+
                         /* if (null != cacheDirectory) */
                         // if (cacheDirSize != null)
                         {
@@ -2103,6 +2139,33 @@ public class PackageFragment extends DevFragment
         return resName;
     }
 
+    void loadWidgets() {
+        m_workList = new ArrayList<>();
+        AppWidgetManager appWidMgr = AppWidgetManager.getInstance(getContext());
+
+        // https://stackoverflow.com/questions/46601500/create-widget-with-known-appwidgetproviderinfo
+        // Get a list of all app widget providers
+        List<AppWidgetProviderInfo> providers = appWidMgr.getInstalledProviders();
+        PackageInfo pkgInfo = new PackageInfo();
+        ArrayListPairString widList = new ArrayListPairString();
+
+        int i=100;
+        for (AppWidgetProviderInfo widProviderInfo : providers) {
+            String widPkg = widProviderInfo.provider.getPackageName();
+            addList(widList, String.valueOf(i++), String.valueOf(i++));
+        }
+        m_workList.add(new PackingItem("Libraries", widList, pkgInfo, providers.size(), "lib"));
+
+        // 2) Display the list to the user and let him select a widget provider => done via custom UI
+
+        // 3) handle the user selected widget and create it
+        // 3.1) create new widget id
+        //        int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
+        // 3.2) configure widget
+        // ??? How do I do this now? appWidgetInfo.configure = null, so I can't use this as I  normally would do it
+        // 4) Save the appWidgetId or delete it again depending on if the user finished the setup or cancelled it
+
+    }
     /**
      * Load installed libraries
      */
@@ -2379,7 +2442,7 @@ public class PackageFragment extends DevFragment
             imageView.setImageDrawable(packingItem.m_iconDrawable);
 
             Ui.<TextView>viewById(summaryView, R.id.packageName).setText(packingItem.fieldStr());
-            String ver = String.format(" v%.5s", packingItem.m_packInfo.versionName);
+            String ver = String.format(" v%s", packingItem.m_packInfo.versionName);
             Ui.<TextView>viewById(summaryView, appName).setText(packingItem.m_appName + ver);
 
             if (m_show == SHOW_PREF) {

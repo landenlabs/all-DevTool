@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

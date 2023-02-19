@@ -27,14 +27,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.landenlabs.all_devtool.util.ObjUtil;
+import com.landenlabs.all_devtool.shortcuts.util.ObjUtil;
 
 import java.util.ArrayList;
 

@@ -26,12 +26,12 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/clock_12"
+            android:id="@+id/gps_clock_12"
             app:showAsAction="always"
             android:title="@string/clock_menu_12hour" />
 
         <item
-            android:id="@+id/clock_24"
+            android:id="@+id/gps_clock_24"
             app:showAsAction="always"
             android:title="@string/clock_menu_24hour" />
 

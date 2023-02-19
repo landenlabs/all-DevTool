@@ -22,18 +22,27 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-
+    <item
+        android:checkable="true"
+        android:checked="true"
+        android:id="@+id/gps_vibrate"
+        android:title="Vibrate GPS change" />
+    <item
+        android:checkable="true"
+        android:checked="true"
+        android:id="@+id/gps_tone"
+        android:title="Tone GPS change" />
 
     <group
         android:title="Time Format"
-        android:id="@+id/clock_fmt"
+        android:id="@+id/gps_clock_fmt"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/clock_12"
+            android:id="@+id/gps_clock_12"
             android:title="@string/clock_menu_12hour" />
 
         <item
-            android:id="@+id/clock_24"
+            android:id="@+id/gps_clock_24"
             android:checked="true"
             android:title="@string/clock_menu_24hour" />
     </group>
@@ -41,6 +50,7 @@
     <item
         android:id="@+id/gps_clear_list"
         android:title="Clear List" />
+
 
     <group
         android:id="@+id/gps_mode"

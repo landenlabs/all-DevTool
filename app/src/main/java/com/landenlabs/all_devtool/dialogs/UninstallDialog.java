@@ -39,9 +39,9 @@ import android.widget.TextView;
 
 import com.landenlabs.all_devtool.DevFragment;
 import com.landenlabs.all_devtool.R;
-import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.util.ArrayList;
 

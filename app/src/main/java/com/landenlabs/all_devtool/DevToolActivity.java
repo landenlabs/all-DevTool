@@ -44,12 +44,12 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.landenlabs.all_devtool.shortcuts.ShortcutUtil;
-import com.landenlabs.all_devtool.util.ALogNotification;
-import com.landenlabs.all_devtool.util.AppCrash;
-import com.landenlabs.all_devtool.util.GoogleAnalyticsHelper;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.UncaughtExceptionHandler;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.ALogNotification;
+import com.landenlabs.all_devtool.shortcuts.util.AppCrash;
+import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.UncaughtExceptionHandler;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
@@ -123,7 +123,11 @@ public class DevToolActivity extends FragmentActivity {
         // See ClockFragment
         JodaTimeAndroid.init(this); // Load TimeZone database.
 
+        /* TODO - Deprecated
         GoogleAnalyticsHelper.init(this);
+         */
+
+
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Utils.onActivityCreateSetTheme(this);

@@ -37,6 +37,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <!--
+
+     -->
     <com.landenlabs.all_devtool.dialogs.BounceExpandableListView
         android:id="@+id/propListView"
         android:layout_width="match_parent"

@@ -89,6 +89,7 @@
     <string name="sensor_menu_10_minutes"> 10 minutes</string>
     <string name="sensor_menu_run_always">Run always</string>
     <string name="sensor_menu_data_chg">Data Chg</string>
+    <string name="sensor_menu_data_clear">Clear</string>
 
 
     <!-- Packages -->

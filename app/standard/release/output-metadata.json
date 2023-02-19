@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
@@ -10,11 +10,9 @@
     {
       "type": "SINGLE",
       "filters": [],
-      "properties": [],
-      "versionCode": 30902,
-      "versionName": "3.09.02",
-      "enabled": true,
-      "outputFile": "all-DevTool-standardRelease-3.09.02.apk"
+      "versionCode": 32201,
+      "versionName": "3.22.01",
+      "outputFile": "all-DevTool-standardRelease-3.22.01.apk"
     }
   ]
 }

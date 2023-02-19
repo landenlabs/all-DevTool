@@ -28,7 +28,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.icu.text.TimeZoneNames;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,10 +55,10 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.receivers.AlarmReceiver;
-import com.landenlabs.all_devtool.util.ALogNotification;
-import com.landenlabs.all_devtool.util.LLog;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.ALogNotification;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import org.joda.time.DateTimeZone;
 
@@ -84,6 +87,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
 
     // ---- Alaram ----
+    long m_alarmMilli = 0L;
     AlarmManager m_alarmManager;
     private PendingIntent m_pendingIntent;
     private TimePicker m_alarmTimePicker;
@@ -106,13 +110,13 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     private TextView m_clockSysClkUpTm;
     private TextView m_clockSysClkReal;
 
-    private static SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm a");
-    private static SimpleDateFormat s_time12ZoneFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm:ss a zzz");
-    private static SimpleDateFormat s_time12GmtFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm:ss a 'GMT'");
+    private static final SimpleDateFormat s_time12Format = new SimpleDateFormat("MMM-dd hh:mm:ss a");
+    private static final SimpleDateFormat s_time12ZoneFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm:ss a zzz");
+    private static final SimpleDateFormat s_time12GmtFormat = new SimpleDateFormat("MM/dd/yyyy  hh:mm:ss a 'GMT'");
 
-    private static SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm");
-    private static SimpleDateFormat s_time24ZoneFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm:ss zzz");
-    private static SimpleDateFormat s_time24GmtFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm:ss 'GMT'");
+    private static final SimpleDateFormat s_time24Format = new SimpleDateFormat("MMM-dd HH:mm:ss");
+    private static final SimpleDateFormat s_time24ZoneFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm:ss zzz");
+    private static final SimpleDateFormat s_time24GmtFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm:ss 'GMT'");
 
     private static SimpleDateFormat s_timeFormat = s_time12Format;
     private static SimpleDateFormat s_timeZoneFormat = s_time12ZoneFormat;
@@ -245,12 +249,12 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id){
-            case R.id.clock_12:
+            case R.id.gps_clock_12:
                 s_timeFormat = s_time12Format;
                 s_timeZoneFormat = s_time12ZoneFormat;
                 s_timeGmtFormat = s_time12GmtFormat;
                 break;
-            case R.id.clock_24:
+            case R.id.gps_clock_24:
                 s_timeFormat = s_time24Format;
                 s_timeZoneFormat = s_time24ZoneFormat;
                 s_timeGmtFormat = s_time24GmtFormat;
@@ -274,7 +278,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         super.onCreateOptionsMenu(menu, inflater);
         m_menu = menu.addSubMenu("Clock Format");
         inflater.inflate(R.menu.clock_menu, m_menu);
-        m_menu.findItem(R.id.clock_12).setChecked(true);
+        m_menu.findItem(R.id.gps_clock_12).setChecked(true);
     }
 
 
@@ -506,7 +510,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         calendar.set(Calendar.HOUR_OF_DAY, m_alarmTimePicker.getCurrentHour());
         calendar.set(Calendar.MINUTE, m_alarmTimePicker.getCurrentMinute());
         if (isOn && calendar.getTimeInMillis() - System.currentTimeMillis() < TimeUnit.SECONDS.toMillis(60)) {
-            calendar.add(Calendar.SECOND, 60);
+            // calendar.add(Calendar.SECOND, 60);
             m_alarmTimePicker.setCurrentHour(calendar.get(Calendar.HOUR));
             m_alarmTimePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
         }
@@ -515,11 +519,12 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
             if (m_pendingIntent == null) {
                 Intent myIntent = new Intent(GlobalInfo.s_globalInfo.mainFragActivity, AlarmReceiver.class);
                 m_pendingIntent = PendingIntent.getBroadcast(
-                        GlobalInfo.s_globalInfo.mainFragActivity, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                m_alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), m_pendingIntent);
+                        GlobalInfo.s_globalInfo.mainFragActivity, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                m_alarmMilli = calendar.getTimeInMillis();
+                m_alarmManager.set(AlarmManager.RTC, m_alarmMilli, m_pendingIntent);
             }
             s_timeFormat.setTimeZone(m_timeZone);
-            String alarmStr = s_timeFormat.format(calendar.getTime());
+            String alarmStr = s_timeFormat.format(m_alarmMilli);
             // Utils.showAlarmNotification(this.getActivity(), Utils.CLOCK_NOTIFICATION_ID,  "Alarm " + alarmStr);
             ALogNotification.updateNotification(this.getActivity(), "Alarm " + alarmStr);
             m_alarmTextView.setText(alarmStr);
@@ -530,9 +535,29 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
                 m_alarmManager.cancel(m_pendingIntent);
                 Utils.cancelNotification(this.getActivity(), Utils.CLOCK_NOTIFICATION_ID);
                 m_pendingIntent = null;
-                RingtoneManager ringMan = new RingtoneManager(getActivity());
-                ringMan.stopPreviousRingtone();
             }
+            // This will sound the alarm tone
+            // this will sound the alarm once, if you wish to
+            // raise alarm in loop continuously then use MediaPlayer and setLooping(true)
+            Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (alarmUri == null) {
+                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            }
+            if (Build.VERSION.SDK_INT >= 28) {
+                // RingtoneManager ringMan = new RingtoneManager(getActivity());
+                Ringtone ringtone = RingtoneManager.getRingtone(requireContext(), alarmUri);
+                if (ringtone != null) {
+                    m_log.i("Alarm ringtone stop");
+                    ringtone.stop();
+                }
+            } else {
+                MediaPlayer mediaPlayer = MediaPlayer.create(requireContext(), alarmUri);
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
+                    m_log.i("Alarm media stop");
+                }
+            }
+
             m_alarmTextView.setText("");
             m_log.i("Alarm Off");
         }

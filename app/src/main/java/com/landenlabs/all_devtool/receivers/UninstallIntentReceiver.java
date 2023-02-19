@@ -29,7 +29,7 @@ import android.text.TextUtils;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.landenlabs.all_devtool.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
 
 /**
  * Created by Dennis Lang on 2/21/2015.

@@ -33,7 +33,7 @@
         android:layout_gravity="center"
         android:layout_marginBottom="10dp"
         android:freezesText="true"
-        android:text="Pick App Theme"
+        android:text="Demo Android Themes\n      ---Warning---\nNot all themes are valid"
         android:textSize="@dimen/title_size" />
 
     <TableRow
@@ -109,7 +109,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sample Widgets"
+            android:text="Sample Android Widgets"
             android:textSize="18sp" />
 
         <View

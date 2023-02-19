@@ -24,7 +24,7 @@ package com.landenlabs.all_devtool.receivers;
 import android.app.IntentService;
 import android.content.Intent;
 
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 /**
  * Created by Dennis Lang on 2/27/2015.

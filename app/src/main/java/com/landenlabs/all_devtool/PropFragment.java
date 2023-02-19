@@ -23,10 +23,8 @@ package com.landenlabs.all_devtool;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -47,25 +45,22 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.util.ArrayListEx;
-import com.landenlabs.all_devtool.util.ListInfo;
-import com.landenlabs.all_devtool.util.SearchList;
-import com.landenlabs.all_devtool.util.Ui;
-import com.landenlabs.all_devtool.util.Utils;
+import com.landenlabs.all_devtool.shortcuts.util.ArrayListEx;
+import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
+import com.landenlabs.all_devtool.shortcuts.util.SearchList;
+import com.landenlabs.all_devtool.shortcuts.util.Ui;
+import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.landenlabs.all_devtool.util.SysUtils.getShellCmd;
-import static com.landenlabs.all_devtool.util.SysUtils.runShellCmd;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.getShellCmd;
 
 /**
  * Show system property information
