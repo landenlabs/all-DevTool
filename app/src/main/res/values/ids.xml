@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<resources>
+
+    <item type="id" name="list_title" />
+    <item type="id" name="list_time" />
+    <item type="id" name="list_time_bar" />
+    <item type="id" name="list_search" />
+    <item type="id" name="list_refresh" />
+
+    <item type="id" name="package_sort_by_appname" />
+    <item type="id" name="package_sort_by_pkgname" />
+    <item type="id" name="package_sort_by_size" />
+    <item type="id" name="package_sort_by_update_date" />
+    <item type="id" name="package_sort_by_install_date" />
+
+    <item type="id" name="package_user" />
+    <item type="id" name="package_system" />
+    <item type="id" name="package_running" />
+    <item type="id" name="package_pref" />
+    <item type="id" name="package_cache" />
+    <item type="id" name="package_lib" />
+
+    <item type="id" name="package_uninstall" />
+    <item type="id" name="package_uncheck_all" />
+    <item type="id" name="package_uninstall_all" />
+
+    <item type="id" name="package_collapseAll" />
+    <item type="id" name="package_expandAll" />
+    <item type="id" name="package_show_perm" />
+
+    <item type="id" name="sys_clean_networks" />
+
+    <item type="id" name="filebrowser_sort_by_name" />
+    <item type="id" name="filebrowser_sort_by_dir" />
+    <item type="id" name="filebrowser_sort_by_size" />
+    <item type="id" name="filebrowser_sort_by_date" />
+
+    <item type="id" name="filebrowser_root" />
+    <item type="id" name="filebrowser_sdcard" />
+    <item type="id" name="filebrowser_download" />
+    <item type="id" name="filebrowser_data" />
+    <item type="id" name="filebrowser_dcim" />
+    <item type="id" name="filebrowser_documents" />
+    <item type="id" name="filebrowser_movies" />
+    <item type="id" name="filebrowser_music" />
+    <item type="id" name="filebrowser_picture" />
+    <item type="id" name="filebrowser_podcast" />
+    <item type="id" name="filebrowser_ringtones" />
+
+    <item type="id" name="filebrowser_collapseAll" />
+    <item type="id" name="filebrowser_expandAll" />
+    <item type="id" name="filebrowser_delete" />
+    <item type="id" name="filebrowser_search" />
+    <item type="id" name="filebrowser_show_perm" />
+
+    <item type="id" name="filebrowser_show_extra" />
+
+</resources>

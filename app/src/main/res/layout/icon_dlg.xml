@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minHeight="2000dp"
+    android:minWidth="1000dp"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:id="@+id/icon_dlg_share"
+        android:layout_width="@dimen/text_dlg_title_height"
+        android:layout_height="@dimen/text_dlg_title_height"
+        android:layout_alignBottom="@+id/icon_dlg_extra"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/alphaGray"
+        android:clickable="true"
+        android:contentDescription="@string/menu_share"
+        android:src="@drawable/share"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/icon_dlg_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/icon_dlg_share"
+        android:background="@color/alphaGray"
+        android:gravity="center"
+        android:text="@string/icon_dlg_name"
+        android:textSize="@dimen/icon_dlg_title_size" />
+
+    <TextView
+        android:id="@+id/icon_dlg_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/icon_dlg_name"
+        android:layout_toLeftOf="@id/icon_dlg_share"
+        android:background="@color/alphaGray"
+        android:gravity="center"
+        android:text="@string/icon_dlg_size" />
+
+    <TextView
+        android:id="@+id/icon_dlg_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/icon_dlg_size"
+        android:layout_toLeftOf="@id/icon_dlg_share"
+        android:background="@color/alphaGray"
+        android:gravity="center"
+        android:text="@string/icon_dlg_listdrawable" />
+
+    <TextView
+        android:id="@id/icon_dlg_extra"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/icon_dlg_type"
+        android:layout_toLeftOf="@id/icon_dlg_share"
+        android:background="@color/alphaGray"
+        android:gravity="center"
+        android:text="@string/icon_dlg_extra" />
+
+    <LinearLayout
+        android:id="@+id/icon_dlg_color_btns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/lines_tiles"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp" >
+
+        <ImageButton
+            android:id="@+id/icon_dlg_whiteBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            android:background="@android:color/white"
+            android:src="@drawable/button_border_dark" />
+
+        <ImageButton
+            android:id="@+id/icon_dlg_grayBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            android:background="@color/gray" 
+            android:src="@drawable/button_border_dark" />
+
+        <ImageButton
+            android:id="@+id/icon_dlg_blackBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            android:background="@android:color/black"
+            android:src="@drawable/button_border_dark" />
+
+        <ImageButton
+            android:id="@+id/icon_dlg_squaresBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/squares"
+            android:src="@drawable/button_border_dark" />
+    </LinearLayout>
+
+    <TableLayout
+        android:id="@+id/icon_dlg_state_btns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/icon_dlg_color_btns"
+        android:background="@drawable/button_border_dark"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:stretchColumns="*" >
+
+        <TextView
+            android:id="@+id/icon_dlg_state_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/icon_dlg_states"
+            android:textSize="15sp" />
+
+        <TableRow
+            android:id="@+id/icon_dlg_state_row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_gravity="center"
+                android:text="@string/icon_dlg_enabled"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_gravity="center"
+                android:text="@string/icon_dlg_checked"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_gravity="center"
+                android:text="@string/icon_dlg_selected"
+                android:textSize="12sp" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/icon_dlg_state_row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <ImageButton
+                android:id="@+id/icon_dlg_unpressed"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@color/gray" />
+
+            <ImageButton
+                android:id="@+id/icon_dlg_checked"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@color/gray" />
+
+            <ImageButton
+                android:id="@+id/icon_dlg_selected"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@color/gray" />
+        </TableRow>
+    </TableLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@id/icon_dlg_state_btns"
+        android:layout_below="@id/icon_dlg_extra" >
+
+        <ImageView
+            android:id="@+id/icon_dlg_image"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:background="@drawable/button_border_light"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/stat_sys_download" />
+    </LinearLayout>
+
+</RelativeLayout>

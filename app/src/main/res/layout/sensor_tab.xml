@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/sensor_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:gravity="center"
+        android:text="@string/sensor_title"
+        android:textSize="@dimen/title_size"
+        android:textStyle="bold"
+        android:visibility="gone"/>
+
+    <Spinner
+        android:id="@+id/sensor_spinner"
+        android:layout_below="@id/sensor_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/sensor_array"
+        android:prompt="@string/sensor_prompt" />
+
+    <TextView
+        android:id="@+id/sensor_value"
+        android:layout_below="@id/sensor_title"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/title_size"
+        android:textStyle="bold" />
+
+    <!--suppress AndroidUnknownAttribute -->
+    <com.androidplot.xy.XYPlot
+        android:layout_below="@id/sensor_spinner"
+        android:id="@+id/plot"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="0dp"
+        app:marginLeft="10dp"
+        app:marginRight="10dp"
+        app:marginTop="10dp"
+        app:marginBottom="10dp"
+        app:gridBackgroundColor="#000"
+        app:domainTitle="Domain"
+        app:domainTitleTextSize="16sp"
+        app:domainStepMode="subdivide"
+        app:domainStep="6"
+        app:rangeTitle="Range"
+        app:rangeTitleTextSize="16sp"
+        app:rangeLineColor="#c88"
+        app:rangeLineThickness="1dp"
+        app:rangeStepMode="subdivide"
+        app:rangeStep="6"
+
+        app:lineLabels="left|bottom"
+        app:lineLabelTextSizeLeft="14sp"
+        app:lineLabelRotationLeft="0"
+        app:lineLabelAlignLeft="right"
+        app:lineLabelTextSizeBottom="14sp"
+        app:lineLabelRotationBottom="90"
+        app:lineLabelAlignBottom="left"
+
+        app:title="Title"
+        app:titleTextSize="16sp"
+
+        app:graphMarginTop="15dp"
+        app:graphMarginBottom="25dp"
+        app:graphMarginLeft="25dp"
+        app:graphMarginRight="10dp"
+
+        app:graphPaddingLeft="30dp"
+        app:graphPaddingBottom="30dp"
+
+        app:legendTextSize="16sp"
+        app:legendHeight="30dp"
+        app:legendTextColor="#fff"
+        />
+
+    <!--
+
+        app:rangeTickLabelTextSize="20sp"
+        app:rangeOriginTickLabelTextSize="20sp"
+        app:domainTickLabelTextSize="20sp"
+        app:domainOriginTickLabelTextSize="20sp"
+
+
+
+        androidPlot.backgroundPaint.color="#000000"
+        androidPlot.borderPaint.color="#000000"
+        androidplot.renderMode="use_background_thread"
+        androidPlot.title="Orientation"
+
+        androidPlot.domainLabel="Domain"
+        androidPlot.rangeLabel="Range"
+        androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
+        androidPlot.domainLabelWidget.labelPaint.textSize="@dimen/domain_label_font_size"
+        androidPlot.rangeLabelWidget.labelPaint.textSize="@dimen/range_label_font_size"
+
+        androidPlot.graphWidget.backgroundPaint.color="#000000"
+        androidPlot.graphWidget.gridBackgroundPaint.color="#000000"
+
+        androidPlot.graphWidget.marginTop="20dp"
+        androidPlot.graphWidget.marginLeft="15dp"
+        androidPlot.graphWidget.marginBottom="25dp"
+        androidPlot.graphWidget.marginRight="10dp"
+
+        androidPlot.graphWidget.rangeLabelPaint.textSize="@dimen/range_tick_label_font_size"
+        androidPlot.graphWidget.rangeOriginLabelPaint.textSize="@dimen/range_tick_label_font_size"
+        androidPlot.graphWidget.domainLabelPaint.textSize="@dimen/domain_tick_label_font_size"
+        androidPlot.graphWidget.domainOriginLabelPaint.textSize="@dimen/domain_tick_label_font_size"
+        androidPlot.legendWidget.textPaint.textSize="@dimen/legend_text_font_size"
+        androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"
+        androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
+        androidPlot.legendWidget.heightMetric.value="25dp" />
+        -->
+
+</RelativeLayout>

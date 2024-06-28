@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/screen_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+<!--    	android:windowActionBarOverlay="true" android:layout_marginTop="?android:attr/actionBarSize"
+ -->
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/squares100_tiles"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/screen_device"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:background="@color/alphaBlack"
+            android:gravity="center"
+            android:text="device"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/screen_density"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/screen_device"
+            android:layout_centerHorizontal="true"
+            android:background="@color/alphaBlack"
+            android:gravity="center"
+            android:text="Density: xhdpi"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <TextView
+            android:id="@+id/screen_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/screen_density"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:background="@color/alphaBlack"
+            android:gravity="center"
+            android:text="Full Screen Size"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <TextView
+            android:id="@+id/screen_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/screen_title"
+            android:layout_centerHorizontal="true"
+            android:background="@color/alphaBlack"
+            android:gravity="center"
+            android:text="width dp x height dp\nwidth px x height px"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <ImageView
+            android:id="@+id/vert_panel_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/varrow_red" />
+
+        <com.landenlabs.all_devtool.dialogs.VerticalTextView
+            android:id="@+id/theme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerHorizontal="false"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:background="@color/alphaPink"
+            android:gravity="center"
+            android:text="Theme.Halo\nBetter with Theme.Halo"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <TextView
+            android:id="@+id/vert_panel_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_toLeftOf="@id/vert_panel_arrow"
+            android:background="@color/alphaPink"
+            android:text="40dp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <View
+            android:id="@+id/bottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true" />
+
+        <ImageView
+            android:id="@+id/horz_arrow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottom"
+            android:layout_marginBottom="20dp"
+            android:background="@color/alphaBlack"
+            android:scaleType="fitXY"
+            android:src="@drawable/harrow" />
+
+        <TextView
+            android:id="@+id/horz_arrow_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/horz_arrow"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:background="@color/alphaBlack"
+            android:text="40dp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <TextView
+            android:id="@+id/grid_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/horz_arrow_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="40dp"
+            android:background="@color/alphaBlack"
+            android:gravity="center"
+            android:text="Grid 100 x 100 dp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+        <!-- Drawing plane on top -->
+        <com.landenlabs.all_devtool.dialogs.DrawView
+            android:id="@+id/drawPoints"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/touch_pos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/grid_size"
+            android:layout_centerHorizontal="true"
+            android:background="@color/alphaBlack"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/title_size" />
+
+    </RelativeLayout>
+
+</LinearLayout>

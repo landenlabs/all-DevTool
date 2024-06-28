@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/gpsIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/gps"
+         />
+
+    <ImageView
+        android:id="@+id/gpsStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/gpsIcon"
+        android:src="@drawable/gps_satellite" />
+
+    <!--
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@id/alarmIcon"
+        android:layout_alignTop="@id/alarmIcon"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar" />
+    -->
+
+    <AnalogClock
+        android:id="@+id/analogClock"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@id/gpsIcon"
+        android:layout_alignTop="@id/gpsIcon"
+        android:gravity="center|right"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/gps_clear"
+        android:layout_toLeftOf="@id/analogClock"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/gps_clear" />
+
+    <!-- android:background="@drawable/rounded_btn" -->
+    <ToggleButton
+        android:id="@+id/gps"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:layout_alignBottom="@id/gpsIcon"
+        android:layout_alignTop="@id/gpsIcon"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:background="@drawable/round_toggle_btn"
+        android:textColor="#8080ff"
+        android:textOff="monitor"
+        android:textOn="Monitor"
+         />
+
+    <View
+        android:id="@+id/gpsTopDivider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/gpsIcon"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:color/white" />
+
+    <HorizontalScrollView
+        android:id="@+id/gpsCheckboxes"
+        android:layout_below="@id/gpsTopDivider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#404040"
+        android:orientation="horizontal"  >
+
+        <CheckBox
+            android:id="@+id/gpsFuseCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fuse"
+            android:checked="true"
+            android:textColor="#ff80ff80" />
+        <CheckBox
+            android:id="@+id/gpsGPSCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GPS"
+            android:checked="true"
+            android:textColor="#ffff8000" />
+        <CheckBox
+            android:id="@+id/gpsNetwkCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Netwk"
+            android:checked="true" />
+        <CheckBox
+            android:id="@+id/gpsLowPwrCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pass'v"
+            android:checked="true"
+            android:textColor="#ffffff80" />
+
+        <CheckBox
+            android:id="@+id/gpsStatusCb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:checked="true"
+            android:textColor="#ff80ffff" />
+    </LinearLayout>
+    </HorizontalScrollView>
+
+    <View
+        android:id="@+id/gpsTblDivider"
+        android:layout_below="@id/gpsCheckboxes"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:color/white" />
+
+    <com.landenlabs.all_devtool.dialogs.BounceExpandableListView
+        android:id="@+id/gpsListView"
+        android:layout_below="@id/gpsTblDivider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:divider="#ff0000"
+        android:dividerHeight="1px"
+        android:fadingEdgeLength="60dp"
+        android:focusable="false"
+        android:footerDividersEnabled="true"
+        android:headerDividersEnabled="true"
+        android:listSelector="#8080ff80"
+        android:longClickable="false"
+        android:overScrollFooter="@null"
+        android:requiresFadingEdge="vertical"
+        android:scrollbars="none"
+        android:transcriptMode="disabled" />
+
+
+</RelativeLayout>

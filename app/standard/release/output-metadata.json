@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.landenlabs.all_devtool",
+  "variantName": "standardRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "versionCode": 32201,
+      "versionName": "3.22.01",
+      "outputFile": "all-DevTool-standardRelease-3.22.01.apk"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="theme_array" tools:ignore="InconsistentArrays">
+        <item> 0 Theme</item>
+        <item> 1 Theme.Black</item>
+        <item> 2 Theme.WithActionBar</item>
+        <item> 3 Theme.Translucent</item>
+        <item> 4 Theme.Wallpaper</item>
+        <item> 5 Theme.Holo.Light</item>
+        <item> 6 Theme.Holo</item>
+        <item> 7 Theme.Holo.Light.DarkActionBar</item>
+        <item> 8 Theme.Holo.Dialog</item>
+        <item> 9 Theme.Dialog</item>
+        <item>10 Theme.Panel</item>
+
+        <!-- Following themes crash app -->
+        <item>11 Theme.Material</item>
+        <item>12 Theme.Material.Light</item>
+        <item>13 Theme.Material.Light.DarkActionBar</item>
+
+        <item>14 Theme.AppCompat.Light.NoActionBar</item>
+        <item>15 Theme.AppCompat.Light</item>
+        <item>16 Theme.AppCompat.NoActionBar</item>
+        <item>17 Theme.AppCompat</item>
+
+    </string-array>
+</resources>

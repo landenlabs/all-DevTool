@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  ~ associated documentation files (the "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all copies or substantial
+  ~ portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  ~ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  ~ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ~
+  ~ @author Dennis Lang
+  ~ @see https://LanDenLabs.com/
+  -->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="app_name">All DevTool</string>
+    <string name="Theme">Theme</string>
+    <string name="app_description">Display build info, text sizes, themes, screen size</string>
+
+    <string-array name="theme_array" tools:ignore="InconsistentArrays">
+        <item> 0 Theme</item>
+        <item> 1 Theme.Black</item>
+        <item> 2 Theme.WithActionBar</item>
+        <item> 3 Theme.Translucent</item>
+        <item> 4 Theme.Wallpaper</item>
+        <item> 5 Theme.Holo.Light</item>
+        <item> 6 Theme.Holo</item>
+        <item> 7 Theme.Holo.Light.DarkActionBar</item>
+        <item> 8 Theme.Holo.Dialog</item>
+        <item> 9 Theme.Dialog</item>
+        <item>10 Theme.Panel</item>
+    </string-array>
+
+    <string name="Select_Theme">Select Theme</string>
+    <string name="build_title">"- Build Info -"</string>
+    <string name="prop_title">"- Properties -"</string>
+    <string name="network_title">"- Network Info -"</string>
+    <string name="system_title">"- System Info -"</string>
+    <string name="icon_title">"- System Icons -"</string>
+    <string name="click_for_more">(click items)"</string>
+    <string name="text_title">"- Text / Fonts -"</string>
+    <string name="num_title">"- Dimen / Attr -"</string>
+    <string name="sensor_title">"- Sensor -"</string>
+    <string name="console_title">"- Console -"</string>
+    <string name="package_title">"- Package -"</string>
+    <string name="proc_title">"- Processor Info -"</string>
+    <string name="disk_title">"- Disk Info -"</string>
+
+    <string name="console_snap">Snap</string>
+    <string name="console_memory">Memory</string>
+    <string name="console_system">System</string>
+    <string name="console_network">Network</string>
+    <string name="console_col2">Snap</string>
+    <string name="console_col3">Live</string>
+    <string name="console_col4">Change</string>
+
+    <string name="sensor_prompt">Sensor:</string>
+    <string-array name="sensor_array">
+        <item>Orientation</item>
+        <item>Light</item>
+        <item>Audio Db</item>
+        <item>#Processes</item>
+        <item>Battery</item>
+        <item>WiFi Level</item>
+
+        <item>Accelerometer</item>
+        <item>Magnetometer</item>
+        <item>Gyroscope</item>
+        <item>Barometer</item>
+        <item>Gravity</item>
+        <item>Step Counter</item>
+    </string-array>
+
+    <!--  menu -->
+    <string name="sensor_menu">Update Speed</string>
+    <string name="sensor_menu_100_msec"> 100 msec</string>
+    <string name="sensor_menu_1_second"> 1 second</string>
+    <string name="sensor_menu_5_seconds"> 5 seconds</string>
+    <string name="sensor_menu_1_minute"> 1 minute</string>
+    <string name="sensor_menu_10_minutes"> 10 minutes</string>
+    <string name="sensor_menu_run_always">Run always</string>
+    <string name="sensor_menu_data_chg">Data Chg</string>
+    <string name="sensor_menu_data_clear">Clear</string>
+
+
+    <!-- Packages -->
+    <string-array name="pkg_load_array">
+        <item>User</item>
+        <item>System</item>
+        <item>Running</item>
+        <item>Preferred</item>
+        <item>Cached</item>
+        <item>Libs</item>
+    </string-array>
+
+    <string-array name="pkg_sort_array">
+        <item>App Name</item>
+        <item>Pkg Name</item>
+        <item>Size</item>
+        <item>Update Date</item>
+        <item>Install Date</item>
+    </string-array>
+
+    <string name="package_menu_sort_by_appname">Sort by AppName</string>
+    <string name="package_menu_sort_by_pkgname">Sort by PkgName</string>
+    <string name="package_menu_sort_by_size">Sort by Size</string>
+    <string name="package_menu_sort_by_update_date">Sort by Update Date</string>
+    <string name="package_menu_sort_by_install_date">Sort by Install Date</string>
+
+    <string name="package_menu_user">Show User Pkgs</string>
+    <string name="package_menu_system">Show System Pkgs</string>
+    <string name="package_menu_running">Show Running Pkgs</string>
+    <string name="package_menu_pref">Show Preferred</string>
+    <string name="package_menu_cache">Show Caches</string>
+    <string name="package_menu_lib">Show Libs</string>
+
+    <string name="package_menu_uninstall_all">Uninstall All</string>
+
+    <string name="package_menu_uninstall">Uninstall Pkgs</string>
+    <string name="package_menu_uncheck_all">UnCheck All</string>
+
+    <string name="package_menu_collapseAll">Collapse All</string>
+    <string name="package_menu_expandAll">Expand All</string>
+    <string name="package_uninstall">Uninstall</string>
+    <string name="package_del_cache">Del Cache</string>
+    <string name="package_stop">Stop</string>
+
+    <string name="sys_menu_clean_networks">Clean Network List</string>
+
+    <string name="filebrowser_menu_sort_by_name">Sort by Name</string>
+    <string name="filebrowser_menu_sort_by_dir">Sort by Dir</string>
+    <string name="filebrowser_menu_sort_by_size">Sort by Size</string>
+    <string name="filebrowser_menu_sort_by_date">Sort by Date</string>
+
+    <string name="filebrowser_menu_root">Root</string>
+    <string name="filebrowser_menu_sdcard">Sdcard</string>
+    <string name="filebrowser_menu_download">Download</string>
+    <string name="filebrowser_menu_data">Data</string>
+    <string name="filebrowser_menu_dcim" >Dcim</string>
+    <string name="filebrowser_menu_documents">Documents</string>
+    <string name="filebrowser_menu_movies">Movies</string>
+    <string name="filebrowser_menu_music">Music</string>
+    <string name="filebrowser_menu_picture">Pictures</string>
+    <string name="filebrowser_menu_podcast">Podcast</string>
+    <string name="filebrowser_menu_ringtones">Ringtones</string>
+
+    <string name="filebrowser_menu_collapseAll">Collapse All</string>
+    <string name="filebrowser_menu_expandAll">Expand All</string>
+    <string name="filebrowser_delete">Delete</string>
+    <string name="filebrowser_search">Search</string>
+    <string name="filebrowser_show_extra">Show Extra</string>
+
+    <string-array name="fb_load_array">
+        <item>Root</item>
+        <item>Sdcard</item>
+        <item>Download</item>
+        <item>Data</item>
+        <item>DCIM</item>
+        <item>documents</item>
+        <item>Movies</item>
+        <item>Music</item>
+        <item>Pictures</item>
+        <item>Podcast</item>
+        <item>Ringtones</item>
+    </string-array>
+
+    <string-array name="fb_sort_array">
+        <item>Name</item>
+        <item>Dir</item>
+        <item>Size</item>
+        <item>Date</item>
+    </string-array>
+
+    <string name="clock_menu_12hour">12 hour</string>
+    <string name="clock_menu_24hour">24 hour</string>
+
+    <string name="hr"></string>
+
+    <string name="text">Text</string>
+    <string name="bold">Bold</string>
+    <string name="italic">Italic</string>
+    <string name="text_font_scale" formatted="true">Font Scale %1$.1f</string>
+
+    <string name="select_dialog_style">Pick Dialog Style</string>
+    <string-array name="dialog_style_array">
+        <item>0 Theme.Dialog</item>
+        <item>1 Theme.Holo.Dialog</item>
+        <item>2 Theme.Holo.Light.Dialog</item>
+        <item>3 Theme.Wallpaper</item>
+        <item>4 Theme.DeviceDefault.Dialog</item>
+        <item>5 Theme.DeviceDefault.Panel</item>
+        <item>6 Theme.DeviceDefault.Light.Dialog</item>
+    </string-array>
+
+    <string-array name="demo_list_array">
+        <item>0 ABC</item>
+        <item>1 abc</item>
+    	<item>2 qyp</item>
+    </string-array>
+     
+    <!--  menu -->
+    <string name="menu_about">About</string>          
+  	<string name="menu_web">Web</string>        
+ 	<string name="menu_share">Share</string>
+    <string name="menu_shortcuts_on">Make Shortcuts</string>
+    <string name="menu_shortcuts_off">Remove Shortcuts</string>
+
+    <!--  iconDlg -->
+	<string name="icon_dlg_name">name</string>
+	<string name="icon_dlg_size">width x height x depth</string>
+	<string name="icon_dlg_listdrawable">ListDrawable</string>
+	<string name="icon_dlg_extra">extra</string>
+	<string name="icon_dlg_states">- States - </string>
+	<string name="icon_dlg_enabled">Enabled</string>
+	<string name="icon_dlg_checked">Checked</string>
+	<string name="icon_dlg_selected">Selected</string>
+
+    <string name="gps_fast_accurate">Accurate 1sec, 0meters </string>
+    <string name="gps_fast_accurate_one_mile">Accurate 1sec, 1mile </string>
+    <string name="gps_fast_balanced">Balanced 1sec, 0meters </string>
+    <string name="gps_fast_balanced_one_mile">Balanced 1sec, 1mile </string>
+    <string name="gps_slow_balanced_one_mile">Balanced 5min, 1mile </string>
+    <string name="clear_screen">Clear Screen</string>
+    <string name="freeze_screen">Freeze Screen</string>
+    <string name="prune_path">Prune Path</string>
+    <string name="websiteLanDenLabs">https://LanDenLabs.com/</string>
+
+</resources>
