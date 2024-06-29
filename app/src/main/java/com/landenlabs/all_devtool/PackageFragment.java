@@ -650,6 +650,11 @@ public class PackageFragment extends DevFragment
         // m_listView.invalidateViews();
     }
 
+    /**
+     * TODO - remove switch/case, see grade.properties -
+     * <li>android.nonTransitiveRClass=false
+     * <li>android.nonFinalResIds=false
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int pos;

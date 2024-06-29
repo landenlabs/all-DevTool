@@ -38,23 +38,19 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file('/Users/ldennis/Dropbox/android/keystores/all_devtool.jks')
-            // storeFile file('/Users/ldennis/projects/projects-android/keystores/all_devtool.jks')
-            storePassword 'Salem2nh-d'
-            keyAlias 'all_devtool'
-            keyPassword 'Salem2nh-k'
-        }
+        release  // populated below
     }
 
-    // Load signing config
-    if (file("release.properties").exists()) {
+    // Load signing config (does not work for command line builds)
+    // println("Setting release=${rootDir}/release.properties")
+    if (file("${rootDir}/release.properties").exists()) {
         def props = new Properties()
-        props.load(new FileInputStream(rootProject.file("release.properties")))
-        android.signingConfigs.release.storeFile rootProject.file(props.keyStore)
-        android.signingConfigs.release.storePassword props.keyStorePassword
-        android.signingConfigs.release.keyAlias props.keyAlias
-        android.signingConfigs.release.keyPassword props.keyAliasPassword
+        props.load(new FileInputStream(file("${rootDir}/release.properties")))
+        android.signingConfigs.release.storeFile = file(props.keyStore)
+        android.signingConfigs.release.storePassword = props.keyStorePassword
+        android.signingConfigs.release.keyAlias = props.keyAlias
+        android.signingConfigs.release.keyPassword = props.keyAliasPassword
+        println("Setting release to " + signingConfigs.release.storeFile.absolutePath )
     }
 
     // New value required with Gradle 3.x
@@ -172,11 +168,28 @@ dependencies {
 }
 
 // Rename app
-android.applicationVariants.configureEach { variant ->
-    variant.outputs.configureEach {
+//  {project}-{flavor}-{buildType}.apk -> {parentProject}-{versionNameSuffix}-{buildType}-{versionStr}.apk
+//  Ex:
+//           app-release.apk -> threadpenalty -release-1.02.3456.apk
+//           app-release.aab -> threadpenalty -release-1.4.27.aab
+android.applicationVariants.configureEach {
+    variant -> variant.outputs.configureEach {
         def ourname = project.parent.name
-        outputFileName = "$ourname-${variant.name}-${variant.versionName}.apk"
-        println "out name= $outputFileName"
+        def buildType = outputFileName.replaceAll(".*(debug|release).*", '$1')
+        def versionStr = versionName.replaceAll("-.*", "")
+        def flavor = variant.mergedFlavor.versionNameSuffix.toString().replace("null", "")
+        // ext.flavorName = variant.name
+        def newNameRoot = "${ourname}${flavor}-${buildType}-${versionStr}"
+        outputFileName = "${newNameRoot}.apk"
+
+        // sign{flavor}{buildType}Bundle
+        //   Ex: signAppDebugBundle
+        def bundleFinalizeTaskName = "sign${variant.name.capitalize()}Bundle"
+        tasks.named(bundleFinalizeTaskName) {
+            def file = finalBundleFile.asFile.get()
+            def finalFile = new File(file.parentFile, "${newNameRoot}.aab")
+            finalBundleFile.set(finalFile)
+        }
     }
 }
 
@@ -209,5 +222,39 @@ tasks.register('genJavadocs', Javadoc) {
     exclude '**/*.xml'
 }
 
-// New plugin with play services version 15.x.x
-// apply plugin: 'com.google.gms.google-services'
+tasks.register('listFlavors') {
+    description = 'List threadpenalty flavors'
+    doLast {
+        println("--- threadpenalty Flavors ---")
+        /*
+        android.productFlavors.all {
+            flavor -> println("  " + flavor.name + "\t" + android.defaultConfig.applicationId + flavor.applicationIdSuffix)
+        }
+         */
+        printf("   %-20s %-20s %-40s   %s\n", "--Package--", "--Name--", "--Description/Flavor--", "--isMinified--")
+        project.android.applicationVariants.all { variant ->
+            // def applicationId = [variant.mergedFlavor.applicationId, variant.buildType.applicationIdSuffix].findAll().join()
+            printf("   %-20s %-20s %-40s   %b\n", variant.getApplicationId(), variant.name, variant.description, variant.buildType.isMinifyEnabled())
+        }
+    }
+}
+
+tasks.register('listrepos') {
+    description = 'List threadpenalty repositories'
+    doLast {
+        println "threadpenalty Repositories:"
+        project.repositories.each { printf("  %15s %s\n", it.name, it.url) }
+    }
+}
+
+tasks.register('deepClean' /*, Delete */) {
+    description = 'Delete c++ temp files'
+    doLast {
+        println "Delete ${layout.buildDirectory.get()}"
+        delete layout.buildDirectory.get()
+        // delete rootProject.buildDir
+        // delete "${buildDir}/someFile"
+        println "Delete ${projectDir}/.cxx"
+        delete "${projectDir}/.cxx"
+    }
+}
