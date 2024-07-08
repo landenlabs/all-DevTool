@@ -21,6 +21,7 @@
 
 package com.landenlabs.all_devtool;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -123,6 +124,7 @@ import static com.landenlabs.all_devtool.R.id.appName;
  * Display "Package" installed information.
  *
  * @author Dennis Lang
+ * @noinspection DataFlowIssue, DataFlowIssue
  */
 @SuppressWarnings("Convert2Lambda")
 public class PackageFragment extends DevFragment
@@ -454,6 +456,7 @@ public class PackageFragment extends DevFragment
     private float listTouchLastY = -1;
     private int listFirstVisItem = -1;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -660,61 +663,45 @@ public class PackageFragment extends DevFragment
         int pos;
         int id = item.getItemId();
         int show = m_show;
-        switch (id) {
-            case R.id.package_user:
-                show = SHOW_USER;
-                break;
-            case R.id.package_system:
-                show = SHOW_SYS;
-                break;
-            case R.id.package_running:
-                show = SHOW_RUNNING;
-                break;
-            case R.id.package_pref:
-                show = SHOW_PREF;
-                break;
-            case R.id.package_cache:
-                show = SHOW_CACHE;
-                break;
-            case R.id.package_lib:
-                show = SHOW_LIB;
-                break;
-
-            case R.id.package_uninstall:
-                if (m_uninstallResId == R.string.package_del_cache) {
-                    deleteCaches();
-                } else if (m_uninstallResId == R.string.package_stop) {
-                    stopPackages();
-                } else {
-                    uninstallPackages();
-                }
-                break;
-            case R.id.package_uncheck_all:
-                uncheckAll();
-                break;
-
-            case R.id.package_collapseAll:
-                collapseAll();
-                m_expand_collapse_toggle.setChecked(false);
-                break;
-            case R.id.package_expandAll:
-                expandAll();
-                m_expand_collapse_toggle.setChecked(true);
-                break;
-            case R.id.package_uninstall_all:
-                item.setChecked(!item.isChecked());
-                break;
-            case 0:
-                break;
-            default:
-                item.setChecked(true);
-                //noinspection SuspiciousMethodCalls
-                pos = Arrays.asList(getResources().getStringArray(R.array.pkg_sort_array)).indexOf(item.getTitle());
-                m_sortSpinner.setSelection(pos);
-                this.m_sortBy = id;
-                Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
-                m_handler.sendMessage(msgObj);
-                break;
+        if (id == R.id.package_user) {
+            show = SHOW_USER;
+        } else if (id == R.id.package_system) {
+            show = SHOW_SYS;
+        } else if (id == R.id.package_running) {
+            show = SHOW_RUNNING;
+        } else if (id == R.id.package_pref) {
+            show = SHOW_PREF;
+        } else if (id == R.id.package_cache) {
+            show = SHOW_CACHE;
+        } else if (id == R.id.package_lib) {
+            show = SHOW_LIB;
+        } else if (id == R.id.package_uninstall) {
+            if (m_uninstallResId == R.string.package_del_cache) {
+                deleteCaches();
+            } else if (m_uninstallResId == R.string.package_stop) {
+                stopPackages();
+            } else {
+                uninstallPackages();
+            }
+        } else if (id == R.id.package_uncheck_all) {
+            uncheckAll();
+        } else if (id == R.id.package_collapseAll) {
+            collapseAll();
+            m_expand_collapse_toggle.setChecked(false);
+        } else if (id == R.id.package_expandAll) {
+            expandAll();
+            m_expand_collapse_toggle.setChecked(true);
+        } else if (id == R.id.package_uninstall_all) {
+            item.setChecked(!item.isChecked());
+        } else if (id == 0) {
+        } else {
+            item.setChecked(true);
+            //noinspection SuspiciousMethodCalls
+            pos = Arrays.asList(getResources().getStringArray(R.array.pkg_sort_array)).indexOf(item.getTitle());
+            m_sortSpinner.setSelection(pos);
+            this.m_sortBy = id;
+            Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
+            m_handler.sendMessage(msgObj);
         }
 
         if (m_show != show) {
@@ -747,57 +734,49 @@ public class PackageFragment extends DevFragment
     public void onClick(View v) {
 
         int id = v.getId();
-        switch (id) {
-            case R.id.pkgLoadBtn:
-                m_pkgLoadBtn.setVisibility(View.GONE);
-                updateList();
-                break;
-            case R.id.package_uninstall:
-                 if (m_uninstallResId == R.string.package_del_cache) {
-                     deleteCaches();
-                 } else if (m_uninstallResId == R.string.package_stop) {
-                     stopPackages();
-                 } else {
-                     uninstallPackages();
-                 }
-                break;
-            case R.id.pkg_plus_minus_toggle:
-                if (m_expand_collapse_toggle.isChecked())
-                    expandAll();
-                else
-                    collapseAll();
-                break;
-            case R.id.pkg_title:
-                if (TextUtils.isEmpty(m_title.getHint())) {
-                    // m_title.setTag(m_title.getText());
-                    m_title.setText("");
-                    m_title.setHint("Filter");
-                    if (m_list.size() > m_beforeFilter.size()) {
-                        m_beforeFilter.clear();
-                        m_beforeFilter.addAll(m_list);
-                    }
-
-                    m_title.setOnEditorActionListener(new TextView.OnEditorActionListener()
-                    {
-                        @Override
-                        public boolean onEditorAction(TextView edView, int actionId, KeyEvent event)
-                        {
-                            if(actionId == EditorInfo.IME_ACTION_DONE || actionId == 0)
-                            {
-                                String filter = edView.getText().toString();
-                                filterPackages(filter);
-                                // hideKeyboard
-                                InputMethodManager imm= (InputMethodManager) edView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if (imm != null) {
-                                    imm.hideSoftInputFromWindow(edView.getWindowToken(), 0);
-                                }
-                                return true; // consume.
-                            }
-                            return false; // pass on to other listeners.
-                        }
-                    });
+        if (id == R.id.pkgLoadBtn) {
+            m_pkgLoadBtn.setVisibility(View.GONE);
+            updateList();
+        } else if (id == R.id.package_uninstall) {
+            if (m_uninstallResId == R.string.package_del_cache) {
+                deleteCaches();
+            } else if (m_uninstallResId == R.string.package_stop) {
+                stopPackages();
+            } else {
+                uninstallPackages();
+            }
+        } else if (id == R.id.pkg_plus_minus_toggle) {
+            if (m_expand_collapse_toggle.isChecked())
+                expandAll();
+            else
+                collapseAll();
+        } else if (id == R.id.pkg_title) {
+            if (TextUtils.isEmpty(m_title.getHint())) {
+                // m_title.setTag(m_title.getText());
+                m_title.setText("");
+                m_title.setHint("Filter");
+                if (m_list.size() > m_beforeFilter.size()) {
+                    m_beforeFilter.clear();
+                    m_beforeFilter.addAll(m_list);
                 }
-                break;
+
+                m_title.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView edView, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == 0) {
+                            String filter = edView.getText().toString();
+                            filterPackages(filter);
+                            // hideKeyboard
+                            InputMethodManager imm = (InputMethodManager) edView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            if (imm != null) {
+                                imm.hideSoftInputFromWindow(edView.getWindowToken(), 0);
+                            }
+                            return true; // consume.
+                        }
+                        return false; // pass on to other listeners.
+                    }
+                });
+            }
         }
     }
 
@@ -807,10 +786,9 @@ public class PackageFragment extends DevFragment
     @Override
     public boolean onLongClick(View v) {
         int id = v.getId();
-        switch (id) {
-            case R.id.package_uninstall:
-                uncheckAll();
-                return true;
+        if (id == R.id.package_uninstall) {
+            uncheckAll();
+            return true;
         }
 
         return false;

@@ -66,6 +66,9 @@ public class TextFragment extends DevFragment {
     private final ArrayList<TextInfo> m_textInfoList = new ArrayList<>();
     private View m_rootView;
 
+    private final int[] colors = new int[]{0xffe0e0e0, 0xffffe0e0, 0xffe0ffe0, 0xffe0e0ff};
+
+
     /*
     public static final int s_MSG_SHARE_PATH_KEY = 1;
     public static final String s_MSG_SHARE_PATH = "path";
@@ -143,27 +146,43 @@ public class TextFragment extends DevFragment {
         m_tableLayout.removeAllViews();
         m_textInfoList.clear();
 
-        int minSP = 8;
-        int maxSP = 20;
-        int stepSP = 2;
+        final int minSP = 8;
+        final int maxSP = 20;
+        final int stepSP = 2;
+        addTextSamples(TypedValue.COMPLEX_UNIT_SP, "sp ", minSP, maxSP, stepSP); // 6 row
+        final int minDP = 16;
+        final int maxDP = 30;
+        final int stepDP = 2;
+        addTextSamples(TypedValue.COMPLEX_UNIT_DIP, "dp ", minDP, maxDP, stepDP); // 6 rows
+    }
 
-        int[] colors = new int[]{0xffe0e0e0, 0xffffe0e0, 0xffe0ffe0, 0xffe0e0ff};
-
+    private void addTextSamples(int textSizeUnit, String sizePrefix, int minSP, int maxSP, int stepSP) {
+        TextView textView;
+        TableRow tableRow;
+        int textColor = 0xff000000;
         TableLayout.LayoutParams tableLP =
                 new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
         TableRow.LayoutParams rowLP =
                 new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT);
 
-        TextView textView;
-        TableRow tableRow;
-        int textColor = 0xff000000;
+        for (int tfIdx = 0; tfIdx < TextInfo.getCount()+1; tfIdx++) {
+            Typeface typeface;
+            String typefaceStr;
+            if (tfIdx == TextInfo.getCount()) {
+                try {
+                    typeface = getResources().getFont(R.font.roboto);
+                    typefaceStr = "Roboto";
+                } catch (Exception ex) {
+                    break;
+                }
+            } else {
+                typeface = TextInfo.getTypeface(tfIdx);
+                typefaceStr = TextInfo.getTypefaceStr(tfIdx);
+            }
 
-        for (int tfIdx = 0; tfIdx < TextInfo.getCount(); tfIdx++) {
-            Typeface typeface = TextInfo.getTypeface(tfIdx);
-            String typefaceStr = TextInfo.getTypefaceStr(tfIdx);
-
+            final int color = colors[tfIdx % colors.length];
             textView = new TextView(m_context);
-            textView.setBackgroundColor(Utils.blend(colors[tfIdx], 0x20000000));
+            textView.setBackgroundColor(Utils.blend(color, 0x20000000));
             textView.setText(typefaceStr);
             textView.setGravity(Gravity.CENTER);
             textView.setTextColor(textColor);
@@ -171,7 +190,7 @@ public class TextFragment extends DevFragment {
 
             for (int sizeSP = minSP; sizeSP <= maxSP; sizeSP += stepSP) {
                 tableRow = new TableRow(m_context);
-                tableRow.setBackgroundColor(colors[tfIdx]);
+                tableRow.setBackgroundColor(color);
 
                 tableRow.setTag(m_textInfoList.size());
                 m_textInfoList.add(new TextInfo(sizeSP, tfIdx));
@@ -187,7 +206,7 @@ public class TextFragment extends DevFragment {
                 });
 
                 textView = new TextView(m_context);
-                textView.setText(sizeSP + "sp ");
+                textView.setText(sizeSP + sizePrefix);
                 textView.setBackgroundColor(0x20000000);
                 textView.setPadding(8, 0, 8, 0);
                 textView.setGravity(Gravity.CENTER);
@@ -196,7 +215,7 @@ public class TextFragment extends DevFragment {
 
                 textView = new TextView(m_context);
                 textView.setText("Normal");
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSP);
+                textView.setTextSize(textSizeUnit, sizeSP);
                 textView.setTypeface(typeface, Typeface.NORMAL);
                 textView.setGravity(Gravity.CENTER);
                 textView.setTextColor(textColor);
@@ -204,7 +223,7 @@ public class TextFragment extends DevFragment {
 
                 textView = new TextView(m_context);
                 textView.setText("Bold");
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSP);
+                textView.setTextSize(textSizeUnit, sizeSP);
                 textView.setTypeface(typeface, Typeface.BOLD);
                 textView.setPadding(8, 0, 8, 0);
                 textView.setGravity(Gravity.CENTER);
@@ -213,7 +232,7 @@ public class TextFragment extends DevFragment {
 
                 textView = new TextView(m_context);
                 textView.setText("Italic");
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSP);
+                textView.setTextSize(textSizeUnit, sizeSP);
                 textView.setTypeface(typeface, Typeface.ITALIC);
                 textView.setGravity(Gravity.CENTER);
                 textView.setTextColor(textColor);
@@ -223,7 +242,6 @@ public class TextFragment extends DevFragment {
             }
         }
     }
-
     private void showTextDialog(final ArrayList<TextInfo> textInfoList, final int idx) {
         TextInfoDialog.showDialog(this, textInfoList, idx);
     }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ IBM Confidential
+  ~ Copyright IBM Corp. 2016, 2021. Copyright WSI Corporation 1998, 2015
+  -->
+
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- https://developer.android.com/reference/kotlin/androidx/compose/ui/text/font/FontWeight -->
+
+    <font
+        android:font="@font/roboto_black"
+        android:fontStyle="normal"
+        android:fontWeight="900" />
+
+    <!--
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="800"
+        android:font="@font/roboto_bold" />
+    -->
+
+    <font
+        android:font="@font/roboto_bold"
+        android:fontStyle="normal"
+        android:fontWeight="700" />
+
+    <!--
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="600"
+        android:font="@font/roboto_bold" />
+    -->
+
+    <font
+        android:font="@font/roboto_medium"
+        android:fontStyle="normal"
+        android:fontWeight="500" />
+
+    <font
+        android:font="@font/roboto_regular"
+        android:fontStyle="normal"
+        android:fontWeight="400" />
+
+    <font
+        android:font="@font/roboto_light"
+        android:fontStyle="normal"
+        android:fontWeight="300" />
+
+    <font
+        android:font="@font/roboto_thin"
+        android:fontStyle="normal"
+        android:fontWeight="100" />
+
+    <!-- this is mono but only works using style italic selector -->
+    <font
+        android:font="@font/roboto_mono"
+        android:fontStyle="italic"
+        android:typeface="monospace"
+        android:fontWeight="400" />
+
+</font-family>
