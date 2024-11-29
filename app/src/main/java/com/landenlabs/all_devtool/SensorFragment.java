@@ -44,6 +44,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -97,7 +98,10 @@ import static com.landenlabs.all_devtool.R.id.plot;
  */
 @SuppressWarnings({"UnnecessaryLocalVariable", "PointlessArithmeticExpression"})
 public class SensorFragment extends DevFragment
-        implements SensorEventListener, View.OnLayoutChangeListener, AdapterView.OnItemSelectedListener {
+        implements
+        SensorEventListener
+        , View.OnLayoutChangeListener
+        , AdapterView.OnItemSelectedListener {
 
     View m_rootView;
     TextView m_valueTv1;
@@ -804,6 +808,8 @@ public class SensorFragment extends DevFragment
                         setChangeSeries(m_seriesGravity);
                         setRange(m_plot, m_seriesGravity);
                     }
+                } else {
+                    Log.d("test", "sensor name=" + sensorName);
                 }
                 /* TODO
                         Gravity

@@ -825,6 +825,18 @@ public class GpsFragment extends DevFragment implements
         String msg = String.format("%8.6f,%9.6f %5.0fm %s",
                 location.getLatitude(), location.getLongitude(),
                 location.getAccuracy(), location.getProvider());
+        boolean includeGpsDetails = true;
+        if (includeGpsDetails) {
+            msg += String.format("\n  Accuracy= %.2f", location.getAccuracy());
+            msg += String.format("\n  Altitude= %.2f by +/- %.2f", location.getAltitude(),  location.getVerticalAccuracyMeters());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                msg += String.format("\n  Altitude= %.2f by +/- %.2f", location.getMslAltitudeMeters(), location.getMslAltitudeAccuracyMeters());
+                msg += String.format("\n  Age Milli= %d", location.getElapsedRealtimeAgeMillis());
+            }
+            msg += String.format("\n  Bearing = %.2f by +/- %.2f", location.getBearing(), location.getBearingAccuracyDegrees());
+            msg += String.format("\n  speed = %.2f by +/- %.2f", location.getSpeed(), location.getSpeedAccuracyMetersPerSecond());
+        }
+
         GpsItem gpsItem = m_lastUpdates.get(provider);
         if (gpsItem != null) {
             gpsItem.set(location.getTime(), msg);

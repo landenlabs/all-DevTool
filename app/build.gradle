@@ -1,5 +1,4 @@
-import org.gradle.internal.jvm.Jvm
-
+// all-devtool
 apply plugin: 'com.android.application'
 
 // apply plugin: 'com.google.gms.google-services'
@@ -23,16 +22,9 @@ android {
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
         resValue "string", "compileSdkVersion", compileSdkVersion
         resValue "string", "buildToolsVersion", buildToolsVersion
-        resValue "string", "javaVersion", Jvm.current().javaVersion.toString()
-        // resValue "string", "gradleVersion", GradleVersion.current().getVersion()
 
         // Limit languages to following list.
         // resConfigs "en", "es"
-
-        ndk {
-            // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-            abiFilters 'armeabi-v7a', 'arm64-v8a'
-        }
     }
     applicationVariants.configureEach { variant ->
         variant.resValue "string", "versionName", "version " + variant.versionName
@@ -78,6 +70,10 @@ android {
             signingConfig signingConfigs.release
             // productFlavors.legacy.signingConfig signingConfigs.release
             // productFlavors.standard.signingConfig signingConfigs.release
+            ndk {
+                // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+                abiFilters 'armeabi-v7a', 'arm64-v8a'
+            }
         }
         debug {
             minifyEnabled false
@@ -87,11 +83,6 @@ android {
             aaptOptions.cruncherEnabled = false
             splits.abi.enable = false
             splits.density.enable = false
-
-            ndk {
-                // Add x86 to support pc emulator.
-                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
-            }
         }
     }
 
@@ -118,7 +109,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.8.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
 
     if (rootProject.apiSDK > 30) {
         implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -224,9 +215,9 @@ tasks.register('genJavadocs', Javadoc) {
 }
 
 tasks.register('listFlavors') {
-    description = 'List threadpenalty flavors'
+    description = 'List flavors'
     doLast {
-        println("--- threadpenalty Flavors ---")
+        println("--- Flavors ---")
         /*
         android.productFlavors.all {
             flavor -> println("  " + flavor.name + "\t" + android.defaultConfig.applicationId + flavor.applicationIdSuffix)
@@ -241,9 +232,9 @@ tasks.register('listFlavors') {
 }
 
 tasks.register('listrepos') {
-    description = 'List threadpenalty repositories'
+    description = 'List repositories'
     doLast {
-        println "threadpenalty Repositories:"
+        println " Repositories:"
         project.repositories.each { printf("  %15s %s\n", it.name, it.url) }
     }
 }
