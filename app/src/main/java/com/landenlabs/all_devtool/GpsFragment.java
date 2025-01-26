@@ -830,7 +830,8 @@ public class GpsFragment extends DevFragment implements
             msg += String.format("\n  Accuracy= %.2f", location.getAccuracy());
             msg += String.format("\n  Altitude= %.2f by +/- %.2f", location.getAltitude(),  location.getVerticalAccuracyMeters());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                msg += String.format("\n  Altitude= %.2f by +/- %.2f", location.getMslAltitudeMeters(), location.getMslAltitudeAccuracyMeters());
+                if (location.hasMslAltitude() && location.hasMslAltitudeAccuracy())
+                    msg += String.format("\n  Altitude= %.2f by +/- %.2f", location.getMslAltitudeMeters(), location.getMslAltitudeAccuracyMeters());
                 msg += String.format("\n  Age Milli= %d", location.getElapsedRealtimeAgeMillis());
             }
             msg += String.format("\n  Bearing = %.2f by +/- %.2f", location.getBearing(), location.getBearingAccuracyDegrees());

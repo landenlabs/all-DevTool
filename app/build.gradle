@@ -15,8 +15,8 @@ android {
         minSdkVersion rootProject.minSDK
         targetSdkVersion rootProject.apiSDK
 
-        versionCode 50626
-        versionName '5.06.26'
+        versionCode 51219
+        versionName '5.12.19'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
