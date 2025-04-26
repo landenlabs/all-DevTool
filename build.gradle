@@ -26,10 +26,10 @@ plugins {
 }
 
 ext {
-    apiSDK = 34
+    apiSDK = 35
     minSDK = 26
 
-    okHttpVersion = "4.10.0"
+    okHttpVersion = "4.12.0"
     // https://square.github.io/okhttp/changelog/
     // https://github.com/square/okhttp/releases
     // https://pangea.weather.com/android/docs/installation
@@ -44,7 +44,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()   // Readonly as of March 31, 2021 - switch to mavenCentral
+        // jcenter()   // Readonly as of March 31, 2021 - switch to mavenCentral
         // Used for com.halfhp.fig:figlib
     }
 }

@@ -15,8 +15,8 @@ android {
         minSdkVersion rootProject.minSDK
         targetSdkVersion rootProject.apiSDK
 
-        versionCode 51219
-        versionName '5.12.19'
+        versionCode 60424
+        versionName '6.04.24'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -112,7 +112,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.9.1'
 
     if (rootProject.apiSDK > 30) {
-        implementation 'androidx.appcompat:appcompat:1.6.1'
+        implementation 'androidx.appcompat:appcompat:1.7.0'
     } else {
         implementation 'androidx.appcompat:appcompat:1.3.1'
     }
@@ -154,9 +154,9 @@ dependencies {
     //releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
 
     // https://mvnrepository.com/artifact/com.androidplot/androidplot-core
-    implementation 'com.androidplot:androidplot-core:1.5.10'
+    implementation 'com.androidplot:androidplot-core:1.5.11'
     // https://mvnrepository.com/artifact/net.danlew/android.joda
-    implementation 'net.danlew:android.joda:2.12.7'
+    implementation 'net.danlew:android.joda:2.13.1'
 }
 
 // Rename app
