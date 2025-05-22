@@ -47,6 +47,12 @@
 
     <uses-permission android:name="android.permission.GET_TASKS" /> <!-- get running packages -->
 
+    <!--
+    java.lang.SecurityException: The caller is neither a device owner, nor holding the DEVICE_POWER permission, nor the current VrListener.
+        Only available system apps.
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+        -->
+
     <!--  System apps only.
     <uses-permission android:name="android.permission.DUMP" />
     -->
@@ -66,6 +72,8 @@
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
     <uses-permission android:name="android.permission.VIBRATE" />
+
+
 
     <!--
         https://developer.android.com/training/data-storage/use-cases

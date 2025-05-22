@@ -97,9 +97,10 @@ android {
 
     // Generates build warning, but is required to use lamba Java 1.8 features.
     // "Jack is disabled, but one of the plugins you are using supports Java 8 language features."
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     lint {
         abortOnError false

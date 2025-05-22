@@ -261,7 +261,7 @@ public class ProcFragment extends DevFragment {
                             temperatureItems.put(" CPU", String.format("%.1f", tcpu[0]));
                             temperatureItems.put(" GPU", String.format("%.1f", tgpu[0]));
                             temperatureItems.put(" Battery", String.format("%.1f", tbat[0]));
-                            addMap("Temperaures", temperatureItems);
+                            addMap("Temperatures", temperatureItems);
                         } catch (Throwable tr) {
                             Log.e("Hardware properties", "access failed", tr);
                         }
