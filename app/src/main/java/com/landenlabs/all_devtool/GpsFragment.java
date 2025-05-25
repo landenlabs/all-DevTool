@@ -546,7 +546,8 @@ public class GpsFragment extends DevFragment implements
                 isDupLoc = isLocDup(location, gpsLoc);
             }
         } catch (Exception ex) {
-            Toast.makeText(this.getActivitySafe(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            // Toast.makeText(this.getActivitySafe(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            return;
         }
 
         try {
