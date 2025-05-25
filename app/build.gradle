@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 
 // apply plugin: 'com.google.gms.google-services'
 
-File javaDocDstDir = file('../javadoc')
+// File javaDocDstDir = file('../javadoc')
 
 android {
     namespace 'com.landenlabs.all_devtool'
@@ -94,6 +94,12 @@ android {
         }
     }
     */
+
+    // Required to use advance switch statements
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 
     lint {
         abortOnError false

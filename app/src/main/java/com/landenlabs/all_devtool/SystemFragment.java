@@ -94,6 +94,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -505,51 +506,108 @@ public class SystemFragment extends DevFragment {
         }
 
         // --------------- Battery -------------
-        if (Build.VERSION.SDK_INT >= 21) {
-            BatteryManager mBatteryManager = getServiceSafe(Context.BATTERY_SERVICE);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                Integer avgCurrent = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE);
-                Integer currentNow = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
-            //    Integer capPer = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        BatteryManager mBatteryManager = getServiceSafe(Context.BATTERY_SERVICE);
+        Map<String, String> listStr = new LinkedHashMap<>();
 
-                // Battery remaining energy in nanowatt-hours, as a long integer.
-                // Long nanowattHours = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER);
+        int avgCurrent = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE);
+        int currentNow = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
+        //    Integer capPer = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
-                Map<String, String> listStr = new LinkedHashMap<>();
-                if (avgCurrent != 0) {
-                    listStr.put("Current (avg)", String.format("%.3f mA", avgCurrent / 1e3));
-                }
-                listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));
-            //    listStr.put("Percent", String.format("%d%%", capPer.intValue()));
-            //    listStr.put("Remain", String.format("%.4f Hours", nanowattHours/1e9));
+        int microAmpHours = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+        if (microAmpHours > 0)
+            listStr.put("Capacity ", String.format("%.2f Amp Hrs", microAmpHours / 1e6));
 
-                IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-                Intent batteryStatus = ContextCompat.registerReceiver(requireContext(), null, ifilter, ContextCompat.RECEIVER_NOT_EXPORTED);
-
-                // Are we charging / charged?
-                int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                        status == BatteryManager.BATTERY_STATUS_FULL;
-
-                int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-                boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-                boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
-                String charging = isCharging ? "Yes" : "No";
-                charging = (isCharging && usbCharge) ? "USB" : charging;
-                charging = (isCharging && acCharge) ? "AC" : charging;
-                listStr.put("Charging", charging);
-
-                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                float batteryPct = level / (float)scale;
-                listStr.put("Percent", String.format("%.1f%%", batteryPct*100));
-
-                int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
-                listStr.put("Voltage", String.format("%d mV", voltage));
-
-                addBuild("Battery...", listStr);
+        // Battery remaining energy in nanowatt-hours, as a long integer.
+        // Long nanowattHours = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER);
+        if (Build.VERSION.SDK_INT >= 28 /* Build.VERSION_CODES.P */) {
+            long milliToFull = mBatteryManager.computeChargeTimeRemaining();
+            if (milliToFull > 0) {
+                listStr.put("Full in ", fmtMilli(milliToFull));
             }
         }
+
+        if (avgCurrent != 0) {
+            listStr.put("Current (avg)", String.format("%.3f mA", avgCurrent / 1e3));
+        }
+        listStr.put("Current (now)", String.format("%.3f mA", currentNow/1e3));
+        //    listStr.put("Percent", String.format("%d%%", capPer.intValue()));
+        //    listStr.put("Remain", String.format("%.4f Hours", nanowattHours/1e9));
+
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = ContextCompat.registerReceiver(requireContext(), null, ifilter, ContextCompat.RECEIVER_NOT_EXPORTED);
+
+        // Are we charging / charged?
+        int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                status == BatteryManager.BATTERY_STATUS_FULL;
+
+        int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+        boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+        String charging = isCharging ? "Yes" : "No";
+        charging = (isCharging && usbCharge) ? "USB" : charging;
+        charging = (isCharging && acCharge) ? "AC" : charging;
+        listStr.put("Charging", charging);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        float batteryPct = level / (float)scale;
+        listStr.put("Percent", String.format("%.1f%%", batteryPct*100));
+
+        int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+        listStr.put("Voltage", String.format("%d mV", voltage));
+
+        int tempC = batteryStatus.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1);
+        listStr.put("Temp", String.format("%.1f °C", tempC/10.0f));
+
+
+        if (Build.VERSION.SDK_INT >= 34 /* Build.VERSION_CODES.UPSIDE_DOWN_CAKE */) {
+            int cycles = batteryStatus.getIntExtra(BatteryManager.EXTRA_CYCLE_COUNT, -1);
+            listStr.put("Cycles", String.format("%d", cycles));
+
+            int chargingSt = batteryStatus.getIntExtra(BatteryManager.EXTRA_CHARGING_STATUS, -1);
+            String chargeStr = switch (chargingSt) {
+                default -> "";
+                case BatteryManager.BATTERY_STATUS_UNKNOWN -> "";
+                case BatteryManager.BATTERY_STATUS_CHARGING -> "Charging";
+                case BatteryManager.BATTERY_STATUS_DISCHARGING -> "Discharging";
+                case BatteryManager.BATTERY_STATUS_NOT_CHARGING -> "";
+                case BatteryManager.BATTERY_STATUS_FULL -> "Full";
+            };
+            if (chargeStr.length() > 0)
+                listStr.put("Charging", chargeStr);
+
+            int health = batteryStatus.getIntExtra(BatteryManager.EXTRA_HEALTH, -1);
+            String healthStr = switch(health) {
+                default -> "";
+                case BatteryManager.BATTERY_HEALTH_UNKNOWN -> "";
+                case BatteryManager.BATTERY_HEALTH_GOOD -> "Good";
+                case BatteryManager.BATTERY_HEALTH_OVERHEAT -> "OverHeat";
+                case BatteryManager.BATTERY_HEALTH_DEAD -> "Dead";
+                case BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE-> "OverVolt";
+                case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE -> "Failure";
+                case BatteryManager.BATTERY_HEALTH_COLD-> "Cold";
+            };
+            if (healthStr.length() > 0)
+                listStr.put("Health", healthStr);
+
+            int plugged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+            String pluggedStr = switch(plugged) {
+                default -> "";
+                case BatteryManager.BATTERY_PLUGGED_AC  -> "AC";  // = 1
+                case BatteryManager.BATTERY_PLUGGED_USB  -> "USB";  // = 2
+                case BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"; // = 4
+                case BatteryManager.BATTERY_PLUGGED_DOCK -> "Docked"; // = 8
+            };
+            if (pluggedStr.length() > 0)
+                listStr.put("Plugged", pluggedStr);
+
+            String technology = batteryStatus.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY);
+            if (technology.length() > 0)
+                listStr.put("Technology", technology);
+        }
+
+        addBuild("Battery...", listStr);
 
         // --------------- Application Info -------------
         ApplicationInfo appInfo = getActivity().getApplicationInfo();
@@ -721,6 +779,15 @@ public class SystemFragment extends DevFragment {
         }
 
         m_adapter.notifyDataSetChanged();
+    }
+
+    private String fmtMilli(long milliToFull) {
+        if (milliToFull < 60*1_000 )
+            return String.format("%.2f sec", milliToFull/1_000f);
+        else if (milliToFull < 60*60_000)
+            return String.format("%.2f min", milliToFull/60_000f);
+        else
+            return String.format("%.2f hr", milliToFull/(60*60_000f));
     }
 
     void addBuildIf(String name, String value, boolean ifValue) {
