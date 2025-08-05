@@ -339,7 +339,7 @@ public class SensorFragment extends DevFragment
     public void onStart() {
         super.onStart();
         if (m_soundMeter != null)
-            m_soundMeter.start();
+            m_soundMeter.start(getContext());
         for (Sensor sensor : m_sensorList) {
             if (sensor != null) {
                 m_sensorMgr.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
@@ -430,7 +430,7 @@ public class SensorFragment extends DevFragment
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (permissions[0].equals(Manifest.permission.RECORD_AUDIO)) {
                         m_soundMeter = new SoundMeter();
-                        m_soundMeter.start();
+                        m_soundMeter.start(getContext());
                     }
                 }
             }
@@ -542,7 +542,7 @@ public class SensorFragment extends DevFragment
 
                 if (m_soundMeter == null && checkPermissions(Manifest.permission.RECORD_AUDIO)) {
                     m_soundMeter = new SoundMeter();
-                    m_soundMeter.start();
+                    m_soundMeter.start(getContext());
                 }
 
                 m_plot.setRangeBoundaries(0, m_maxAudio, FIXED);

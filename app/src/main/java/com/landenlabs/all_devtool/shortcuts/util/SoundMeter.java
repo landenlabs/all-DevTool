@@ -21,7 +21,11 @@
 
 package com.landenlabs.all_devtool.shortcuts.util;
 
+import android.content.Context;
 import android.media.MediaRecorder;
+import android.util.Log;
+
+import java.io.File;
 
 /**
  * Created by Dennis Lang on 2/10/2015.
@@ -30,17 +34,31 @@ public class SoundMeter {
 
     private MediaRecorder mRecorder = null;
 
-    public void start()  {
+    public void start(Context context)  {
         if (mRecorder == null) {
+            // Alternate approach is to use AudioRecorder
             mRecorder = new MediaRecorder();
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOutputFile("/dev/null");
+            // Must be a real file, this no longer works.
+            // mRecorder.setOutputFile("/dev/null");
+
             try {
+                try {
+                    File tempFile = File.createTempFile("temp_audio", ".dat", context.getCacheDir());
+                    // IMPORTANT: Schedule for deletion when the JVM terminates.
+                    // This is a best-effort mechanism.
+                    tempFile.deleteOnExit();
+                    mRecorder.setOutputFile(tempFile);
+                } catch (Exception ignore) {
+                    mRecorder.setOutputFile("temp_audio.dat");
+                }
+
                 mRecorder.prepare();
                 mRecorder.start();
-            } catch (Exception ignore) {
+            } catch (Exception ex) {
+                Log.e("soundMeter", "getMaxAmplitude", ex);
             }
         }
     }
@@ -55,7 +73,12 @@ public class SoundMeter {
 
     public double getAmplitude() {
         if (mRecorder != null)
-            return  mRecorder.getMaxAmplitude();
+            try {
+                return mRecorder.getMaxAmplitude();
+            } catch (Exception ex) {
+                Log.e("soundMeter", "getMaxAmplitude", ex);
+                return 0;
+            }
         else
             return 0;
     }

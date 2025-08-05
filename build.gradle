@@ -11,10 +11,10 @@ buildscript {
     dependencies {
         // https://developer.android.com/studio/releases/gradle-plugin?buildsystem=ndk-build#updating-gradle
         // https://mvnrepository.com/artifact/com.android.tools.build/gradle?repo=google
-        classpath 'com.android.tools.build:gradle:8.10.0'
+        classpath 'com.android.tools.build:gradle:8.11.1'
 
         // Firebase
-        classpath 'com.google.gms:google-services:4.4.2'
+        classpath 'com.google.gms:google-services:4.4.3'
     }
 }
 
@@ -22,7 +22,7 @@ buildscript {
 // https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin
 // ./gradlew buildHealth
 plugins {
-    id("com.autonomousapps.dependency-analysis") version "0.52.0"
+    id("com.autonomousapps.dependency-analysis") version "2.19.0"
 }
 
 ext {
