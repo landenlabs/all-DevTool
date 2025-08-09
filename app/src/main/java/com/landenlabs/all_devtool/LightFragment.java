@@ -313,11 +313,13 @@ public class LightFragment extends DevFragment
     }
 
     private void requestSystemWritePermission() {
+        /*
         if (Build.VERSION.SDK_INT >= 23) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
             intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
             getActivitySafe().startActivity(intent);
         }
+         */
     }
 
     // =============================================================================================
