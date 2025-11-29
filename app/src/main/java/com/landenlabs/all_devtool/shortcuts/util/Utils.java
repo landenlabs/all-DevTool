@@ -579,7 +579,7 @@ public class Utils {
 
         try {
             ContentValues values = new ContentValues(1);
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
             Uri uri = context.getContentResolver()
                     .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             // context.grantUriPermission(mContext.getPackageName(), uri,
@@ -663,7 +663,8 @@ public class Utils {
                         Uri uri = Uri.fromFile(new File(screenImgFilename));
                         */
                         Uri uri = Utils.getUriForBitmap(context, bitmap, bmIdx + imageName);
-                        uris.add(uri);
+                        if (uri != null)
+                            uris.add(uri);
                         bitmap.recycle();
                     } else
                         s_log.e("invalid bitmap");

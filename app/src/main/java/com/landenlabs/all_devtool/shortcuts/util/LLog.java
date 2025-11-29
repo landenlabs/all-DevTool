@@ -33,6 +33,8 @@ import com.landenlabs.all_devtool.GlobalInfo;
  */
 public class LLog {
 
+    public static final String LOG_PREFIX = "all_dev";
+
     // LLog states OFF or ON, use DBG to auto enable in Debug build.
     private static final LLog OFF = new LLog(false);
     private static final LLog ON = new LLog(true);
@@ -77,17 +79,17 @@ public class LLog {
 
     public final void d(String msg) {
         if (isOn())
-            Log.d(getTag(), msg);
+            Log.d(LOG_PREFIX, getTag() +  msg);
     }
 
     public final void i(String msg) {
         if (isOn())
-            Log.i(getTag(), msg);
+            Log.i(LOG_PREFIX, getTag() +  msg);
     }
 
     public final void e(String msg) {
         if (isOn())
-            Log.e(getTag(), msg);
+            Log.e(LOG_PREFIX, getTag() + msg);
     }
 
     private static String fmt(String msg) {
@@ -98,22 +100,22 @@ public class LLog {
 
     public final void d(String msg, Object... args) {
         if (isOn())
-            Log.d(getTag(), fmt(msg, args));
+            Log.d(LOG_PREFIX, getTag() + fmt(msg, args));
     }
 
     public final void i(String msg, Object... args) {
         if (isOn())
-            Log.i(getTag(), fmt(msg, args));
+            Log.i(LOG_PREFIX, getTag() + fmt(msg, args));
     }
 
 
     public final void e(String msg, Exception ex) {
         if (isOn())
-            Log.e(getTag(), fmt(msg), ex);
+            Log.e(LOG_PREFIX, getTag() + fmt(msg), ex);
     }
 
     public final void e(String msg, Object... args) {
         if (isOn())
-            Log.e(getTag(), fmt(msg, args));
+            Log.e(LOG_PREFIX, getTag() + fmt(msg, args));
     }
 }

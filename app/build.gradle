@@ -15,8 +15,8 @@ android {
         minSdkVersion rootProject.minSDK
         targetSdkVersion rootProject.apiSDK
 
-        versionCode 60808
-        versionName '6.08.08'
+        versionCode 71129
+        versionName '7.11.29'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -50,10 +50,12 @@ android {
     flavorDimensions "std"
 
     productFlavors {
+        /*
         legacy {
             dimension = "std"
             resourceConfigurations += ['en', 'xhdpi']
         }
+         */
         standard {
             dimension = "std"
         }
@@ -67,7 +69,7 @@ android {
             minifyEnabled true
             debuggable false
             jniDebuggable false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
 
             signingConfig signingConfigs.release
             // productFlavors.legacy.signingConfig signingConfigs.release
@@ -86,19 +88,22 @@ android {
         }
     }
 
-    /*  TODO - add -p switch to enable this.
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            // Enable verbose lint reporting during build.
-            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
         }
     }
-    */
 
-    // Required to use advance switch statements
+    /*
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+     */
+
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/DEPENDENCIES'
     }
 
     lint {
@@ -106,6 +111,20 @@ android {
         checkReleaseBuilds false
         disable 'DefaultLocale', 'SimpleDateFormat', 'InflateParams', 'SpUsage', 'UseCompoundDrawables', 'HandlerLeak', 'ViewConstructor', 'SetTextI18n', 'RtlSymmetry', 'RtlHardcoded', 'ContentDescription', 'MissingTranslation', 'ValidFragment', 'UnusedAttribute', 'Convert2Lambda', 'Anonymous2MethodRef', 'SpellCheckingInspection', 'HardcodedText'
     }
+
+
+    // Note - Slows build down, -Pqc=1  to enable
+    if (project.hasProperty("qc")) {
+        gradle.projectsEvaluated {
+            tasks.withType(JavaCompile).tap {
+                configureEach {
+                    // Enable verbose lint reporting during build.
+                    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+                }
+            }
+        }
+    }
+
 }
 
 dependencies {
@@ -119,9 +138,9 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
 
     // Import the Firebase BoM
-    //   implementation platform('com.google.firebase:firebase-bom:29.0.4')
+    implementation platform('com.google.firebase:firebase-bom:34.6.0')
     // When using the BoM, don't specify versions in Firebase dependencies
-    //   implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-analytics'
 
     // Standard flavor
     // standardImplementation "com.google.android.gms:play-services-auth:20.4.1"
@@ -134,9 +153,23 @@ dependencies {
  //   legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
 
     // implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
-    // implementation "com.google.android.gms:play-services-analytics:18.0.2"
+    // implementation "com.google.android.gms:play-services-analytics:18.1.1"
+
     implementation "com.google.android.gms:play-services-location:21.3.0"
-    // implementation "com.google.android.gms:play-services-drive:17.0.0"
+
+    /*
+        // Google Drive API services
+        // https://developers.google.com/workspace/drive/api/guides/search-files
+        // https://drive.google.com/drive/folders/1_e1xWGOnEiu47e2KeaEj9q2yQZoeUUu_?usp=sharing
+        // https://developers.google.com/workspace/drive/api/guides/manage-uploads
+        implementation 'com.google.android.gms:play-services-auth:21.4.0'
+        implementation 'com.google.api-client:google-api-client-android:2.8.1'
+        // implementation "com.google.android.gms:play-services-drive:17.0.0"
+        implementation('com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0') {
+            exclude group: 'org.apache.httpcomponents'
+        }
+    */
+
     // implementation "com.google.android.gms:play-services-safetynet:$legacyPlayServiceVersion"
 
 
@@ -155,16 +188,16 @@ dependencies {
 // Rename app
 //  {project}-{flavor}-{buildType}.apk -> {parentProject}-{versionNameSuffix}-{buildType}-{versionStr}.apk
 //  Ex:
-//           app-release.apk -> threadpenalty -release-1.02.3456.apk
-//           app-release.aab -> threadpenalty -release-1.4.27.aab
+//           app-release.apk -> allDevTool-release-X.YY.ZZZ.apk
+//           app-release.aab -> allDevTool-release-X.Y.ZZZ.aab
 android.applicationVariants.configureEach {
     variant -> variant.outputs.configureEach {
-        def ourname = project.parent.name
+        def ourName = project.parent.name
         def buildType = outputFileName.replaceAll(".*(debug|release).*", '$1')
         def versionStr = versionName.replaceAll("-.*", "")
         def flavor = variant.mergedFlavor.versionNameSuffix.toString().replace("null", "")
         // ext.flavorName = variant.name
-        def newNameRoot = "${ourname}${flavor}-${buildType}-${versionStr}"
+        def newNameRoot = "${ourName}${flavor}-${buildType}-${versionStr}"
         outputFileName = "${newNameRoot}.apk"
 
         // sign{flavor}{buildType}Bundle

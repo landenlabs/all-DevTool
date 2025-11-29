@@ -42,10 +42,12 @@ import androidx.core.os.ConfigurationCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.landenlabs.all_devtool.shortcuts.ShortcutUtil;
 import com.landenlabs.all_devtool.shortcuts.util.ALogNotification;
 import com.landenlabs.all_devtool.shortcuts.util.AppCrash;
 import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.UncaughtExceptionHandler;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
@@ -84,19 +86,17 @@ import java.util.Locale;
 public class DevToolActivity extends FragmentActivity {
 
     protected String m_startFrag;
+    private FirebaseAnalytics firebaseAnalytics;
 
 
     @SuppressWarnings({"FieldCanBeLocal"})
     private UncaughtExceptionHandler m_uncaughtExceptionHandler;
-
-    // private FirebaseAnalytics mFirebaseAnalytics;
 
     @SuppressLint("DefaultLocale")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // m_uncaughtExceptionHandler = new UncaughtExceptionHandler(getApplicationContext());
         boolean DEBUG = (getApplicationInfo().flags & 2) != 0;
         AppCrash.initalize(getApplication(), DEBUG);
 
@@ -111,6 +111,8 @@ public class DevToolActivity extends FragmentActivity {
             GlobalInfo.s_globalInfo.version = "1.3";
         }
 
+        LLog.DBG.d("startup");  // call after global info setup completed.
+
         /*
         // See build.gradle to add
         // debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
@@ -122,13 +124,13 @@ public class DevToolActivity extends FragmentActivity {
         // See ClockFragment
         JodaTimeAndroid.init(this); // Load TimeZone database.
 
-        /* TODO - Deprecated
-        GoogleAnalyticsHelper.init(this);
-         */
-
 
         // Obtain the FirebaseAnalytics instance.
-   //xx     mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        // Optionally -  enable verbose logging
+        //     adb shell setprop log.tag.FA VERBOSE
+        //     adb shell setprop log.tag.FA-SVC VERBOSE
+        //     adb logcat -v time -s FA FA-SVC
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Utils.onActivityCreateSetTheme(this);
 
         setContentView(R.layout.main);
@@ -137,8 +139,7 @@ public class DevToolActivity extends FragmentActivity {
 
         // Initialization
         ViewPager viewPager = Ui.viewById(this, R.id.pager);
-        GlobalInfo.s_globalInfo.tabAdapter =
-                new TabPagerAdapter(getSupportFragmentManager(), viewPager, getActionBar());
+        GlobalInfo.s_globalInfo.tabAdapter = new TabPagerAdapter(getSupportFragmentManager(), viewPager, getActionBar());
 
         GlobalInfo.grabThemeSetings(this);
 
