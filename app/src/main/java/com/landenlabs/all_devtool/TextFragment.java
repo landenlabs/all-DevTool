@@ -68,24 +68,7 @@ public class TextFragment extends DevFragment {
 
     private final int[] colors = new int[]{0xffe0e0e0, 0xffffe0e0, 0xffe0ffe0, 0xffe0e0ff};
 
-
-    /*
-    public static final int s_MSG_SHARE_PATH_KEY = 1;
-    public static final String s_MSG_SHARE_PATH = "path";
-
-    public final Handler m_handler = new Handler() {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case s_MSG_SHARE_PATH_KEY:
-                    TabPagerAdapter.sharePage(msg.getData().getString(s_MSG_SHARE_PATH));
-                    break;
-            }
-        }
-    };
-    */
-
-    public TextFragment() {
-    }
+    public TextFragment() { }
 
     public static TextFragment create() {
         return new TextFragment();
@@ -98,9 +81,7 @@ public class TextFragment extends DevFragment {
         fontScale.setText(  getString( R.string.text_font_scale, getResources().getConfiguration().fontScale));
     }
 
-    // ============================================================================================
     // DevFragment methods
-
     @Override
     public String getName() {
         return s_name;

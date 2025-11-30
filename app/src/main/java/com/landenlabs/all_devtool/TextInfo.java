@@ -34,24 +34,21 @@ import android.os.Parcelable;
 public class TextInfo implements Parcelable {
     public final int m_sizeSP;
     private final int m_typefaceIdx;
-    // public final String m_style;
 
     private static final Typeface[] s_typefaces = new Typeface[]
             {Typeface.DEFAULT, Typeface.SANS_SERIF, Typeface.SERIF, Typeface.MONOSPACE};
     private static final String[] s_typefaceStr = new String[]
             {"Default", "Sans Serif", "Serif", "Monospace"};
 
-    TextInfo(int sizeSP, int typefaceIdx /*, String style */) {
+    TextInfo(int sizeSP, int typefaceIdx ) {
         m_sizeSP = sizeSP;
         m_typefaceIdx = typefaceIdx;
-        // m_style = style;
     }
 
     // Construct from Parcel
     private TextInfo(Parcel in) {
         m_sizeSP = in.readInt();
         m_typefaceIdx = in.readInt();
-        // m_style = in.readString();
     }
 
     public static final Creator<TextInfo> CREATOR = new Creator<TextInfo>() {
@@ -75,7 +72,6 @@ public class TextInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(m_sizeSP);
         dest.writeInt(m_typefaceIdx);
-        // dest.writeString(m_style);
     }
 
     public static String getTypefaceStr(int idx) {
@@ -97,11 +93,5 @@ public class TextInfo implements Parcelable {
     public Typeface getTypeface() {
         return s_typefaces[m_typefaceIdx];
     }
-    
-    /*
-    public String getStyle() {
-    	return m_style;
-    }
-    */
 }
 

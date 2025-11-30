@@ -36,12 +36,11 @@ import com.google.firebase.analytics.FirebaseAnalytics;
  *
  * https://console.firebase.google.com/project/all-devtool/analytics/
  *
- * 
+ *
  * @author Dennis Lang
  */
 public class SendAnalytics {
     private static FirebaseAnalytics firebaseAnalytics;
-
 
     public static void init(final Activity activity) {
         // Obtain the FirebaseAnalytics instance.
@@ -51,6 +50,7 @@ public class SendAnalytics {
         //     adb logcat -v time -s FA FA-SVC
         firebaseAnalytics = FirebaseAnalytics.getInstance(activity);
     }
+
     public static void event(String category, String action, String label) {
         if (firebaseAnalytics != null) {
             Bundle params = new Bundle();

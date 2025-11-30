@@ -312,7 +312,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
         actualWidthsDp[0] = widthsDp[0];
         widthDp -=  widthsDp[0] + padLeftDp;
         for (int col=1; col != numCol; col++) {
-            int colWidthDp = (widthsDp[col] < widthDp) ? widthsDp[col] : widthDp;
+            int colWidthDp = Math.min(widthsDp[col], widthDp);
             colViews.add(addTextView(systemLayout, belowId, -colViews.get(col-1).getId(), colWidthDp, dashHeight, padLeftDp));
             actualWidthsDp[col] = colWidthDp;
             widthDp -=  colWidthDp + padLeftDp;

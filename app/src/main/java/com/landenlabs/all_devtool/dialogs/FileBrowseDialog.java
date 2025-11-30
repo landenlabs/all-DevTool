@@ -54,7 +54,6 @@ import java.util.List;
 @SuppressWarnings("FieldCanBeLocal")
 public class FileBrowseDialog {
 
-    // ============================================================================================
     private static final int DARK_GRAY = 0xff444444;
     private final int FileOpen = 0;
     private final int FileSave = 1;
@@ -90,10 +89,10 @@ public class FileBrowseDialog {
     private ArrayAdapter<String> m_listAdapter = null;
     private final int m_dialogHeight;
 
-    // ============================================================================================
     // Constructor for File/Dir selection dialog.
-    public FileBrowseDialog(Context context, String file_select_type, int dialogHeight,
-                            SimpleFileDialogListener SimpleFileDialogListener) {
+    public FileBrowseDialog(
+            Context context, String file_select_type, int dialogHeight,
+            SimpleFileDialogListener SimpleFileDialogListener) {
 
         m_dialogHeight = dialogHeight;
         switch (file_select_type) {
@@ -275,20 +274,13 @@ public class FileBrowseDialog {
         //m_titleView.setTextAppearance(m_context, android.R.style.TextAppearance_Large);
         //m_titleView.setTextColor( m_context.getResources().getColor(android.R.color.black) );
 
-        String prompt = "";
-        switch (m_selectType) {
-            case FileOpen:
-                prompt = "Open:";
-                break;
-            case FileSave:
-                prompt = "Save As:";
-                break;
-            case FolderChoose:
-                prompt = "Folder Select:";
-                break;
-            case Browser:
-                prompt = "Browse";
-        }
+        String prompt = switch (m_selectType) {
+            case FileOpen -> "Open:";
+            case FileSave -> "Save As:";
+            case FolderChoose -> "Folder Select:";
+            case Browser -> "Browse";
+            default -> "";
+        };
 
         m_titleView.setText(prompt);
 

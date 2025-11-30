@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -59,31 +60,30 @@ import java.util.ArrayList;
  * Swipe to increase/decrease point size.
  *
  * @author Dennis Lang
- *
  */
 @SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef"})
 public class TextInfoDialog extends DialogFragment {
 
-    static final int MSG_GET_UI_SIZE = 1;
-    static final String STATE_LIST = "my_list";
-    static final String STATE_IDX = "my_idx";
-    ArrayList<TextInfo> m_textInfoList;
-    int m_idx;
-    TextView m_textHeight;
-    LinearLayout m_textGroup;
-    View m_dialogLayout;
-    TextView m_charMaxText;
-    TextView m_charMaxWidth;
-    LinearLayout m_charGroup;
+    private static final int MSG_GET_UI_SIZE = 1;
+    private static final String STATE_LIST = "my_list";
+    private static final String STATE_IDX = "my_idx";
+    private ArrayList<TextInfo> m_textInfoList;
+    private int m_idx;
+    private TextView m_textHeight;
+    private LinearLayout m_textGroup;
+    private View m_dialogLayout;
+    private TextView m_charMaxText;
+    private TextView m_charMaxWidth;
+    private LinearLayout m_charGroup;
 
-    private final Handler m_handler = new Handler() {
-
+    private final Handler m_handler = new Handler(Looper.getMainLooper()) {
         public void handleMessage(Message msg) {
             if (msg.what == MSG_GET_UI_SIZE) {
                 setTextSize();
             }
         }
     };
+
     char m_charMaxRange;
     float m_lastTouchX, m_lastTouchY;
     // boolean m_setDownStart = true;

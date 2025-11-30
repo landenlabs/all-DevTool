@@ -359,7 +359,7 @@ public class NetstatFragment extends DevFragment {
             // --------------- Network connections ------------
 
             NetUtils.NetConnections netConnections =
-                    NetUtils.getConnetions(requireContext());
+                    NetUtils.getConnections(requireContext());
             if (netConnections.size() > 0) {
                 Map<String, ArrayListPairString> pkgConnections = new TreeMap<>();
 

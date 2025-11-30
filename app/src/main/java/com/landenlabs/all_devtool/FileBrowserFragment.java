@@ -30,7 +30,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -107,8 +106,7 @@ import java.util.Map;
 public class FileBrowserFragment extends DevFragment
         implements  View.OnClickListener
         , View.OnLayoutChangeListener
-        , AdapterView.OnItemSelectedListener
-        , FileUtil.ExecCallback {
+        , AdapterView.OnItemSelectedListener  {
 
 
     final ArrayList<FileUtil.FileInfo> m_list = new ArrayList<>();
@@ -1000,11 +998,6 @@ public class FileBrowserFragment extends DevFragment
         m_handler.sendMessage(msgObj);
     }
 
-    @Override
-    public void Exec(StringBuilder result, int flag) {
-        Ui.ShowMessage(FileBrowserFragment.this.requireActivity(), result.toString());
-    }
-    
     void updateDeleteBtn() {
         m_fbDeletelBtn.setEnabled(m_checkCnt != 0);
         if (m_checkCnt != 0)

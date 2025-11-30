@@ -54,8 +54,7 @@ import java.util.List;
  */
 
 @SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal"})
-public class ThemeFragment extends DevFragment implements OnItemSelectedListener,
-        OnClickListener {
+public class ThemeFragment extends DevFragment implements OnItemSelectedListener, OnClickListener {
 
     public static final String s_name = "Theme";
 
@@ -65,14 +64,12 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
     private Spinner m_dialog_style_spinner;
     private Button m_dialogBtn;
 
-    public ThemeFragment() {
-    }
+
+    public ThemeFragment() {  }
 
     public static ThemeFragment create() {
         return new ThemeFragment();
     }
-    // ============================================================================================
-    // DevFragment methods
 
     @Override
     public String getName() {
@@ -94,8 +91,6 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
     public List<String> getListAsCsv() {
         return null;
     }
-
-    // private SendAnalytics mAnalyticsHelper;
 
     /** Called when the activity is first created. */
     @Override
@@ -203,5 +198,4 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
         // show it
         alertDialog.show();
     }
-
 }

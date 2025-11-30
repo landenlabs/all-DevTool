@@ -69,9 +69,7 @@ public class BuildFragment extends DevFragment {
         return new BuildFragment();
     }
 
-    // ============================================================================================
-    // DevFragment methods
-
+    // --- DevFragment methods
     @Override
     public String getName() {
         return s_name;
@@ -87,9 +85,7 @@ public class BuildFragment extends DevFragment {
         return Utils.getListViewAsCSV(m_listView);
     }
 
-// ============================================================================================
-    // Fragment methods
-
+    // --- Fragment methods
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,14 +98,13 @@ public class BuildFragment extends DevFragment {
         return rootView;
     }
 
-    // Coming into foreground - update list.
+    // --- Coming into foreground - update list.
     @Override
     public void onResume() {
         super.onResume();
         updateList();
     }
 
-    // ============================================================================================
     // Internal methods
 
     /**

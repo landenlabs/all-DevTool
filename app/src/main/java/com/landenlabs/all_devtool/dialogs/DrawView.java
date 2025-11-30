@@ -33,8 +33,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.landenlabs.all_devtool.shortcuts.util.ObjUtil;
-
 import java.util.ArrayList;
 
 /**
@@ -49,6 +47,7 @@ public class DrawView extends View {
     private static final int MAX_POINTS = 10000;
     private static final int mDurationMsec = 3000;
     private static final int TIMER_MSEC = 100;
+
     private final Runnable m_pruneTimerTask = new Runnable() {
         public void run() {
             prunePath();
@@ -129,7 +128,7 @@ public class DrawView extends View {
 
         m_pathPoints.add(new PointfTime(touchX, touchY));
 
-        if (ObjUtil.notNull(m_touchInfo))
+        if (m_touchInfo != null)
             m_touchInfo.onTouchInfo(event);
 
         switch (event.getAction()) {

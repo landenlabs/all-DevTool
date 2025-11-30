@@ -210,7 +210,7 @@ public class NetUtils {
     /**
      * Create list of all active TCP4 and TCP6 connections.
      */
-    public static NetConnections getConnetions(Context context) {
+    public static NetConnections getConnections(Context context) {
         NetConnections netConnections = new NetConnections();
 
         MutableBoolean hasIPv4 = new MutableBoolean(false);
@@ -251,19 +251,22 @@ public class NetUtils {
     // 6 = tx queue
     // 7 = rx quque
     // 8 = uid
+    @SuppressWarnings("DataFlowIssue")
     private static void extractInfo(Matcher m6, NetConnection netConnection) {
-        netConnection.localAddrHexStr = m6.group(1);
-        netConnection.localPort = Integer.parseInt(m6.group(2), 16);
-        netConnection.remoteAddrHexStr = m6.group(3);
-        netConnection.remotePort = Integer.parseInt(m6.group(4), 16);
+        if (m6.groupCount() > 7) {
+            netConnection.localAddrHexStr = m6.group(1);
+            netConnection.localPort = Integer.parseInt(m6.group(2), 16);
+            netConnection.remoteAddrHexStr = m6.group(3);
+            netConnection.remotePort = Integer.parseInt(m6.group(4), 16);
 
-        netConnection.status = Integer.parseInt(m6.group(5), 16);
-        netConnection.netStatus = NetStatus.getFor(netConnection.status & 0xf);
+            netConnection.status = Integer.parseInt(m6.group(5), 16);
+            netConnection.netStatus = NetStatus.getFor(netConnection.status & 0xf);
 
-        netConnection.txQueue = Integer.parseInt(m6.group(6), 16);
-        netConnection.rxQueue = Integer.parseInt(m6.group(7), 16);
+            netConnection.txQueue = Integer.parseInt(m6.group(6), 16);
+            netConnection.rxQueue = Integer.parseInt(m6.group(7), 16);
 
-        netConnection.pidEntry = Integer.valueOf(m6.group(8));
+            netConnection.pidEntry = Integer.parseInt(m6.group(8));
+        }
 
         netConnection.localAddr = parseHexAddrStr(netConnection.localAddrHexStr, netConnection.type);
         netConnection.remoteAddr = parseHexAddrStr(netConnection.remoteAddrHexStr, netConnection.type);
@@ -298,8 +301,6 @@ public class NetUtils {
         return addr;
     }
 
-
-
     @NonNull
     public String formatIp(int ipAddrss) {
         byte[] myIPAddress = BigInteger.valueOf(ipAddrss).toByteArray();
@@ -323,6 +324,7 @@ public class NetUtils {
     //  Len = 3, half = 1
     //  0 -> 2   2 -> 0
     //  1 -> 1
+    @SuppressWarnings("UnusedReturnValue")
     private static byte[] htonb(byte[] bytes) {
         if (ByteOrder.nativeOrder() != ByteOrder.BIG_ENDIAN) {
             int len = bytes.length;
@@ -335,6 +337,7 @@ public class NetUtils {
         return bytes;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private static byte[] flipHex4(byte[] bytes) {
         int len = bytes.length;
         for (int idx = 0; idx < len; idx +=4) {
@@ -404,9 +407,9 @@ public class NetUtils {
                 PackageInfo pInfo = manager.getPackageInfo( netConnection.packageName, 0);
                 netConnection.appName = pInfo.applicationInfo.loadLabel(manager).toString();
                 netConnection.appVersion = pInfo.versionName;
-            } catch (PackageManager.NameNotFoundException ignore) {
+            } catch (Exception ex) {
+                LLOG.w("addPkg exception ", ex.getMessage());
             }
-
         }
     }
 
@@ -426,7 +429,7 @@ public class NetUtils {
                             } else if (inetAddress instanceof Inet6Address) {
                                 String sAddr = inetAddress.getHostAddress().toUpperCase();
                                 // skipping link-local addresses
-                                if (!sAddr.startsWith("fe80") && !sAddr.startsWith("FE80")) {
+                                if ( !sAddr.startsWith("FE80")) {
                                     haveIp6.value = true;
                                 }
                             }

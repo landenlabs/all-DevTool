@@ -21,18 +21,15 @@
 
 package com.landenlabs.all_devtool.shortcuts.util;
 
-import static android.content.ContentValues.TAG;
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.system.StructStat;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * Created by Dennis Lang on 7/13/16.
@@ -133,7 +130,8 @@ public class FileUtil {
             try {
                 StructStat st = android.system.Os.stat(this.getCanonicalPath());
                 return st.st_atime * 1000L;
-            } catch (Exception ignore) {
+            } catch (Exception ex) {
+                LLOG.w( " stat failed ", ex.getMessage());
             }
 
             return 0;
@@ -205,67 +203,4 @@ public class FileUtil {
             return m_dir;
         }
     }
-
-    // =============================================================================================
-
-    public interface ExecCallback {
-        void Exec(StringBuilder result, int flag);
-    }
-
-    /**
-     * Async Task which continuously reads LogCat output and updates TextView and advances scrollView.
-     * Call must call execute() to start task.
-     *
-     * @param callable - callback when command is done.
-     * @return Created async task.
-     */
-    public static AsyncTask<Void, String, Void> getAsyncExec(
-            final ExecCallback callable,
-            final StringBuilder resultSb,
-            final String[] cmd)  {
-        AsyncTask<Void, String, Void> asyncLogCat =
-                new AsyncTask<Void, String, Void>() {
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        try {
-                            Process process = Runtime.getRuntime().exec(cmd);
-                            BufferedReader bufferedReader = new BufferedReader(
-                                    new InputStreamReader(process.getInputStream()));
-                            BufferedReader bufferedReaderErr = new BufferedReader(
-                                    new InputStreamReader(process.getErrorStream()));
-
-                            String line;
-                            while ((line = bufferedReader.readLine()) != null) {
-                                if (line.trim().length() > 2) {
-                                    publishProgress(line);
-                                }
-                            }
-
-                            while ((line = bufferedReaderErr.readLine()) != null) {
-                                if (line.trim().length() > 2) {
-                                    publishProgress(line);
-                                }
-                            }
-                        }
-                        catch (IOException ex) {
-                            Log.e(TAG, ex.getMessage());
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onProgressUpdate(String... values) {
-                        resultSb.append(values[0]).append("\n");
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        callable.Exec(resultSb, 0);
-                    }
-                };
-
-        return asyncLogCat;
-    }
-
 }

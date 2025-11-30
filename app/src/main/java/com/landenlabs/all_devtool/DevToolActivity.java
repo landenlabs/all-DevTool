@@ -88,7 +88,6 @@ public class DevToolActivity extends AppCompatActivity {
     protected String startFrag;
 
 
-    @SuppressLint("DefaultLocale")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +107,7 @@ public class DevToolActivity extends AppCompatActivity {
             GlobalInfo.s_globalInfo.version = pInfo.versionName;
             // GlobalInfo.s_globalInfo.appName = pInfo.applicationInfo.name;
         } catch (Exception ex) {
-            GlobalInfo.s_globalInfo.version = "1.3";
+            GlobalInfo.s_globalInfo.version = "7.11.29";
         }
 
         LLOG.d("startup");  // call after global info setup completed.
@@ -180,11 +179,7 @@ public class DevToolActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menus, menu);
-
-        MenuItem m_shareMenuItem = menu.findItem(R.id.menu_share);
-        // GlobalInfo.s_globalInfo.shareActionProvider = MenuItemCompat.getActionProvider(m_shareMenuItem);
         menu.findItem( R.id.menu_lock_orientation).setChecked(GlobalInfo.s_globalInfo.isLockedOrientation);
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -238,8 +233,13 @@ public class DevToolActivity extends AppCompatActivity {
         super.onStart();
         GlobalInfo.s_globalInfo.mainFragActivity = this;
         new UncaughtExceptionHandler(this);
-        // Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
         ALogNotification.init(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ALogNotification.updateNotification(this, "AllDevTool");
     }
 
     @Override

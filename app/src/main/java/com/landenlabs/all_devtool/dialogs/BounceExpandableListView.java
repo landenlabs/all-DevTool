@@ -88,8 +88,7 @@ public class BounceExpandableListView extends ExpandableListView {
     }
 
     /** @noinspection resource*/
-    private void initBounceExpandableListView(Context context,
-                                              AttributeSet attrs, int defStyle) {
+    private void initBounceExpandableListView(Context context,  AttributeSet attrs, int defStyle) {
         // Get the density of the screen and do some maths with it on the max
         // overscroll distance
         // variable so that you get similar behaviors no matter what the screen
@@ -112,9 +111,10 @@ public class BounceExpandableListView extends ExpandableListView {
     }
 
     @Override
-    protected boolean overScrollBy(int deltaX, int deltaY, int scrollX,
-                                   int scrollY, int scrollRangeX, int scrollRangeY,
-                                   int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
+    protected boolean overScrollBy(
+            int deltaX, int deltaY, int scrollX,
+            int scrollY, int scrollRangeX, int scrollRangeY,
+            int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
 
         // This is where the magic happens, we have replaced the incoming
         // maxOverScrollY with our
@@ -145,5 +145,4 @@ public class BounceExpandableListView extends ExpandableListView {
         }
         super.dispatchDraw(canvas);
     }
-
 }

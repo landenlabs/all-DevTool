@@ -47,29 +47,28 @@ import java.util.ArrayList;
 
 /**
  * Show Files/Directories to delete and then delete them.
- *
  * @author Dennis Lang
- *
  */
 @SuppressWarnings("Convert2Lambda")
 public class DeleteDialog extends DialogFragment   {
 
-    Context m_context;
-    ArrayList<String> m_fileList;
-    int m_idx;
-    LinearLayout m_fileGroup;
-    View m_dialogLayout;
-    View m_deleteBtn;
-    View m_cancelBtn;
-    ArrayList<CheckBox> m_checkBoxes;
-    Dialog.OnDismissListener m_onDismissListener;
+    private Context m_context;
+    private ArrayList<String> m_fileList;
+    private int m_idx;
+    private LinearLayout m_fileGroup;
+    private View m_dialogLayout;
+    private View m_deleteBtn;
+    private View m_cancelBtn;
+    private ArrayList<CheckBox> m_checkBoxes;
+    private Dialog.OnDismissListener m_onDismissListener;
 
     public DeleteDialog() {
         m_fileList = null;
         m_idx = -1;
     }
 
-    public static DeleteDialog create(DevFragment devFragment,  final ArrayList<String> fileList, final int idx) {
+    public static DeleteDialog create(
+            DevFragment devFragment, final ArrayList<String> fileList, final int idx) {
         DeleteDialog deleteDialog = new DeleteDialog();
         deleteDialog.m_context = devFragment.getActivity();
         deleteDialog.m_fileList = fileList;

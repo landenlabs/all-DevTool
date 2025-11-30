@@ -51,31 +51,28 @@ public class ALogNotification {
     private static final String CHANNEL_ID = "AlarmId";
     private static final String channel_name = "Alarm";
     private static String channel_description;
+    private static final ArrayList<String> msgList = new ArrayList<>(List.of("\n"));
+
 
     public static void init(Context context) {
         channel_description = context.getPackageName();
 
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        CharSequence name = channel_name;
-        String description = channel_description;
-        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-        channel.setDescription(description);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channel_name, NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(channel_description);
         // Register the channel with the system; you can't change the importance
         // or other notification behaviors after this
         NotificationManager notificationManager = SysUtils.getServiceSafe(context, Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(channel);
     }
 
-    static final ArrayList<String> prevMsgs = new ArrayList<>(List.of("\n"));
-
     public static void updateNotification(Context context, Object... msgs) {
 
         String newMsg = TextUtils.join(" ", msgs);
-        prevMsgs.add(newMsg);
-        if (prevMsgs.size() > 4) {
-            prevMsgs.remove(0);
+        msgList.add(newMsg);
+        if (msgList.size() > 4) {
+            msgList.remove(0);
         }
 
         Bitmap largeBitmap =
@@ -87,7 +84,7 @@ public class ALogNotification {
                 .setContentTitle(channel_description)
                 .setContentText(newMsg)
                 .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(TextUtils.join("\n", prevMsgs)))
+                        .bigText(TextUtils.join("\n", msgList)))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         // Create an explicit intent for an Activity in your app
@@ -100,7 +97,7 @@ public class ALogNotification {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
-    // notificationId is a unique int for each notification that you must define
+        // notificationId is a unique int for each notification that you must define
         notificationManager.notify(notificationId, mBuilder.build());
     }
 }
