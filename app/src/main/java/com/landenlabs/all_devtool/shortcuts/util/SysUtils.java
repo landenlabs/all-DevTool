@@ -21,6 +21,8 @@
 
 package com.landenlabs.all_devtool.shortcuts.util;
 
+import static android.system.Os.sysconf;
+
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
@@ -42,8 +44,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static android.system.Os.sysconf;
 
 
 /**

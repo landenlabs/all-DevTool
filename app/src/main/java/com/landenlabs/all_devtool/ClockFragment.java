@@ -21,6 +21,8 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -41,7 +43,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -53,7 +54,6 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
@@ -76,9 +76,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ClockFragment extends DevFragment implements View.OnClickListener  {
 
-    private final LLog m_log = LLog.DBG;
     public static final String s_name = "Clock";
-    SubMenu m_menu;
     final Date m_date = new Date();
     TimeZone m_timeZone = TimeZone.getDefault();
 
@@ -138,7 +136,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     }
 
     AlarmManager getAlarmMgr() {
-        return (AlarmManager)getActivitySafe().getSystemService(Context.ALARM_SERVICE);
+        return (AlarmManager)requireActivity().getSystemService(Context.ALARM_SERVICE);
     }
 
     // ============================================================================================
@@ -152,7 +150,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
         List<Bitmap> bitmapList = new ArrayList<>();
-        bitmapList.add(Utils.grabScreen(getActivitySafe()));
+        bitmapList.add(Utils.grabScreen(requireActivity()));
         return bitmapList;
     }
 
@@ -163,7 +161,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
 
     @Override
     public void onSelected() {
-        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -176,9 +174,9 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null)
-            m_log.e("onViewCreated savedInstanceState");
+            LLOG.e("onViewCreated savedInstanceState");
 
-        setHasOptionsMenu(true);
+
 
         View m_rootView = inflater.inflate(R.layout.clock_tab, container, false);
 
@@ -243,7 +241,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.gps_clock_12) {
             s_timeFormat = s_time12Format;
@@ -259,20 +257,13 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
 
     @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("Clock Format");
-        inflater.inflate(R.menu.clock_menu, m_menu);
-        m_menu.findItem(R.id.gps_clock_12).setChecked(true);
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        subMenu = menu.addSubMenu("Clock Format");
+        inflater.inflate(R.menu.clock_menu, subMenu);
+        subMenu.findItem(R.id.gps_clock_12).setChecked(true);
     }
-
-
 
     // ============================================================================================
     // OnClick
@@ -466,7 +457,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     }
 
     private void showTimezoneMap() {
-        String htmlStr = Utils.LoadData(getContextSafe(), "timezone.html");
+        String htmlStr = Utils.LoadData(requireContext(), "timezone.html");
 
         Ui.showWebMessage(getContext(), Ui.HTML_CENTER_BOX, htmlStr);
         // Ui.showWebImage(getContext(), "file:///android_asset/world_timezone_map.png");
@@ -511,7 +502,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
             ALogNotification.updateNotification(this.getActivity(), "Alarm " + alarmStr);
             m_alarmTextView.setText(alarmStr);
 
-            m_log.i("Alarm On " + alarmStr);
+            LLOG.i("Alarm On " + alarmStr);
         } else */ {
             if (m_pendingIntent != null) {
                 m_alarmManager.cancel(m_pendingIntent);
@@ -529,19 +520,19 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
                 // RingtoneManager ringMan = new RingtoneManager(getActivity());
                 Ringtone ringtone = RingtoneManager.getRingtone(requireContext(), alarmUri);
                 if (ringtone != null) {
-                    m_log.i("Alarm ringtone stop");
+                    LLOG.i("Alarm ringtone stop");
                     ringtone.stop();
                 }
             } else {
                 MediaPlayer mediaPlayer = MediaPlayer.create(requireContext(), alarmUri);
                 if (mediaPlayer != null) {
                     mediaPlayer.stop();
-                    m_log.i("Alarm media stop");
+                    LLOG.i("Alarm media stop");
                 }
             }
 
             m_alarmTextView.setText("");
-            m_log.i("Alarm Off");
+            LLOG.i("Alarm Off");
         }
     }
 

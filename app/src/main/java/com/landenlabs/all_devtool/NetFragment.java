@@ -21,6 +21,23 @@
 
 package com.landenlabs.all_devtool;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_1xRTT;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_CDMA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EDGE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EHRPD;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_0;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_A;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_B;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_GPRS;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSDPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPAP;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_IDEN;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -61,7 +78,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -77,7 +93,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
 import com.landenlabs.all_devtool.shortcuts.util.SearchList;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
@@ -99,22 +114,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static android.telephony.TelephonyManager.NETWORK_TYPE_1xRTT;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_CDMA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EDGE;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EHRPD;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_0;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_A;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_B;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_GPRS;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSDPA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPAP;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_IDEN;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
-
 
 /**
  * Display "Network" system information.
@@ -123,19 +122,16 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
  */
 @SuppressWarnings({"StatementWithEmptyBody", "Convert2Lambda"})
 public class NetFragment extends DevFragment {
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
+    private final ArrayList<ListInfo> m_list = new ArrayList<>();
+    private ExpandableListView m_listView;
+    private TextView m_titleTime;
+    private ImageButton m_search;
+    private View m_refresh;
+    private String m_filter;
+    private final SearchList m_searchList = new SearchList();
 
-    final ArrayList<ListInfo> m_list = new ArrayList<>();
-    ExpandableListView m_listView;
-    TextView m_titleTime;
-    ImageButton m_search;
-    View m_refresh;
-    String m_filter;
-    final SearchList m_searchList = new SearchList();
+    private BuildArrayAdapter m_adapter;
 
-    BuildArrayAdapter m_adapter;
-    SubMenu m_menu;
 
     public static final String s_name = "Network";
     private static final int m_rowColor1 = 0;
@@ -245,7 +241,6 @@ public class NetFragment extends DevFragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         View rootView = inflater.inflate(R.layout.build_tab, container, false);
 
@@ -320,7 +315,7 @@ public class NetFragment extends DevFragment {
         });
 
         m_listView = Ui.viewById(rootView, R.id.buildListView);
-        m_adapter = new BuildArrayAdapter(getActivitySafe());
+        m_adapter = new BuildArrayAdapter(requireActivity());
         m_listView.setAdapter(m_adapter);
 
         wifiMgr = getServiceSafe(Context.WIFI_SERVICE);
@@ -337,35 +332,27 @@ public class NetFragment extends DevFragment {
         }
     }
 
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        //noinspection SwitchStatementWithTooFewBranches
+    protected boolean  onMenuSelected(@NonNull MenuItem menuItem) {
+        int id = menuItem.getItemId();
         if (id == R.id.net_clean_networks) {
             clearNetworks();
+            return true;
         }
-
-        return super.onOptionsItemSelected(item);
+        return super.onMenuSelected(menuItem);
     }
 
     @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
-
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("Net Options");
-        inflater.inflate(R.menu.net_menu, m_menu);
-        // m_menu.findItem(m_sortBy).setChecked(true);
+    protected void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+        subMenu = menu.addSubMenu("Net Options");
+        menuInflater.inflate(R.menu.net_menu, subMenu);
     }
 
     private void collapseAll() {
         int count = m_listView.getAdapter().getCount(); // m_list.size();
         for (int position = 0; position < count; position++) {
-            // m_log.d("Collapse " + position);
+            // LLOG.d("Collapse " + position);
             m_listView.collapseGroup(position);
         }
     }
@@ -633,14 +620,14 @@ public class NetFragment extends DevFragment {
                                 }
                             }
                         } catch (Exception ex) {
-                            m_log.e("Network %s", ex.getMessage());
+                            LLOG.e("Network ", ex.getMessage());
                         }
                     }
 
                 }
             }
         } catch (Exception ex) {
-            m_log.e("Network %s", ex.getMessage());
+            LLOG.e("Network ", ex.getMessage());
             netListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
         }
         addBuild("Network...", netListStr);
@@ -679,7 +666,7 @@ public class NetFragment extends DevFragment {
             }
             */
         } catch (Exception ex) {
-            m_log.e("Cell %s", ex.getMessage());
+            LLOG.e("Cell ", ex.getMessage());
             phoneListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
         }
 
@@ -741,7 +728,7 @@ public class NetFragment extends DevFragment {
 
             if (mNetBroadcastReceiver == null) {
                 mNetBroadcastReceiver = new NetBroadcastReceiver(wifiMgr);
-                // getActivitySafe().unregisterReceiver(mNetBroadcastReceiver);
+                // requireActivity().unregisterReceiver(mNetBroadcastReceiver);
                 ContextCompat.registerReceiver(requireContext(), mNetBroadcastReceiver,
                         INTENT_FILTER_SCAN_AVAILABLE, ContextCompat.RECEIVER_NOT_EXPORTED);
             }
@@ -801,7 +788,7 @@ public class NetFragment extends DevFragment {
                 }
 
             } catch (Exception ex) {
-                m_log.e("Wifi %s", ex.getMessage());
+                LLOG.e("Wifi ", ex.getMessage());
                 wifiListStr.put(ex.getClass().getSimpleName(), ex.getMessage());
             }
 
@@ -842,7 +829,7 @@ public class NetFragment extends DevFragment {
                     }
                 }
             } catch (Exception ex) {
-                m_log.e("WifiList %s", ex.getMessage());
+                LLOG.e("WifiList ", ex.getMessage());
             }
 
             addConfigNetworks();
@@ -966,7 +953,7 @@ public class NetFragment extends DevFragment {
             }
 
         } catch (Exception ex) {
-            m_log.e("Wifi Cfg List %s", ex.getMessage());
+            LLOG.e("Wifi Cfg List ", ex.getMessage());
         }
     }
 
@@ -1047,7 +1034,7 @@ public class NetFragment extends DevFragment {
     @Override
     public void onStop() {
         if (mNetBroadcastReceiver != null) {
-            getActivitySafe().unregisterReceiver(mNetBroadcastReceiver);
+            requireActivity().unregisterReceiver(mNetBroadcastReceiver);
             mNetBroadcastReceiver = null;
         }
         super.onStop();
@@ -1063,7 +1050,7 @@ public class NetFragment extends DevFragment {
     @Override
     public void onDetach() {
         if (mNetBroadcastReceiver != null) {
-            getActivitySafe().unregisterReceiver(mNetBroadcastReceiver);
+            requireActivity().unregisterReceiver(mNetBroadcastReceiver);
             mNetBroadcastReceiver = null;
         }
         super.onDetach();

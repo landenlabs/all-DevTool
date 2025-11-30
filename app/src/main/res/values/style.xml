@@ -21,28 +21,45 @@
   -->
 
 <resources>
-    <style name="AppTheme" parent="@style/Theme_06">
-
-        <!--
-
-   	  	  <item name="android:actionBarTabTextStyle">@style/ActionBarTabTextWhite</item>
-   	  	
-   	  	  <item name="android:actionBarTabStyle">@style/CustomTabPageIndicator</item>
-          <item name="android:actionMenuTextColor">#ffff00</item>
-          <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
-            <item name="android:windowActionBarOverlay">true</item>
-     	-->
+    <!--
+        Theme.AppCompat.CompactMenu
+        Theme.AppCompat.CompactMenu</item>
+        Theme.AppCompat.DayNight
+        Theme.AppCompat.Dialog
+        Theme.AppCompat.Dialog.Alert
+        Theme.AppCompat.Dialog.Alert</item>
+        Theme.AppCompat.Dialog.FixedSize
+        Theme.AppCompat.Dialog.MinWidth
+        Theme.AppCompat.DialogWhenLarge
+        Theme.AppCompat.Empty
+        Theme.AppCompat.Light
+        Theme.AppCompat.Light.DarkActionBar
+        Theme.AppCompat.Light.DarkActionBar
+        Theme.AppCompat.Light.Dialog
+        Theme.AppCompat.Light.Dialog.Alert
+        Theme.AppCompat.Light.Dialog.FixedSize
+        Theme.AppCompat.Light.Dialog.MinWidth
+        Theme.AppCompat.Light.DialogWhenLarge
+        Theme.AppCompat.Light.NoActionBar
+        Theme.AppCompat.Light.NoActionBar</item>
+        Theme.AppCompat.Light</item>
+        Theme.AppCompat.NoActionBar
+        Theme.AppCompat.NoActionBar</item>
+        Theme.AppCompat</item>
+        ThemeOverlay.AppCompat.ActionBar
+        ThemeOverlay.AppCompat.Dark
+        ThemeOverlay.Material.Dark.ActionBar
+    -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
         <item name="android:windowActionBarOverlay">true</item>
    	</style>
 
-    <!--
-   <style name="MyActionBarTitleText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title" />
-  	-->
+
    <style name="ActionBarTabTextWhite" parent="@android:style/Widget.Holo.ActionBar.TabText" >
           <item name="android:textColor">@android:color/white</item>
    </style>
 
-      <!--  ======Theme_x  must be kept in order with nothing inbetween======== -->
+      <!--  ======Theme_x  must be kept in order with nothing in between ======== -->
     <style name="Theme_00" parent="@android:style/Theme" />
     <style name="Theme_01" parent="@android:style/Theme.Black">
 		<!-- Fix radio buttons so they are visible -->

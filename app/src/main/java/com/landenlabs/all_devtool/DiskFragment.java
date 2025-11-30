@@ -21,6 +21,10 @@
 
 package com.landenlabs.all_devtool;
 
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import static com.landenlabs.all_devtool.FileBrowserFragment.isBit;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -31,7 +35,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
@@ -55,9 +58,9 @@ import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
-import com.landenlabs.all_devtool.util.OsUtils;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
+import com.landenlabs.all_devtool.util.OsUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,10 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
-
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static com.landenlabs.all_devtool.FileBrowserFragment.isBit;
-import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
 
 /**
  * Display "Disk" system information.
@@ -232,10 +231,10 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
 
                 AppOpsManager appOps = getServiceSafe(Context.APP_OPS_SERVICE);
                 int mode = appOps.checkOpNoThrow("android:get_usage_stats",
-                        Process.myUid(), getContextSafe().getPackageName());
+                        Process.myUid(), requireContext().getPackageName());
                 boolean granted = (mode == AppOpsManager.MODE_ALLOWED);
                 if (!granted)
-                    Toast.makeText(getContextSafe(), "Don't have Usage Stat Access",
+                    Toast.makeText(requireContext(), "Don't have Usage Stat Access",
                         Toast.LENGTH_LONG).show();
 
                 // CheckPermissions calls updateList if permission granted.
@@ -259,7 +258,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
                 final TextView field = Ui.viewById(view, R.id.buildField);
                 final TextView value = Ui.viewById(view, R.id.buildValue);
                 if (field != null && value != null) {
-                    Button btn = Ui.ShowMessage(DiskFragment.this.getActivitySafe(),
+                    Button btn = Ui.ShowMessage(DiskFragment.this.requireActivity(),
                             field.getText() + "\n" + value.getText()).getButton(
                             AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
@@ -313,7 +312,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
     }
 
     private boolean hasWritePermission() {
-        return getContextSafe().checkSelfPermission(
+        return requireContext().checkSelfPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -326,7 +325,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
     protected boolean checkPermissions(String ... needPermissions) {
         boolean havePermissions = true;
         for (String needPermission : needPermissions) {
-            boolean gotThisPermission = getContextSafe()
+            boolean gotThisPermission = requireContext()
                     .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED;
             havePermissions &= gotThisPermission;
             if (needPermission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -376,7 +375,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
             } else {
                 Intent intent = new Intent(
                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
+                intent.setData(Uri.parse("package:" + requireActivity().getPackageName()));
                 startActivity(intent);
             }
         } else if (id == R.id.diskUsageCb || id == R.id.fileSystemCb || id == R.id.mountsCb || id == R.id.storageCb) {
@@ -407,22 +406,22 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
         if (true) {
             m_javaDirList = new LinkedHashMap<>();
             try {
-                addFile("getFilesDir", getActivitySafe().getApplicationContext().getDataDir());
+                addFile("getFilesDir", requireActivity().getApplicationContext().getDataDir());
 
                 try {
                     //noinspection deprecation
                     addFile("getDir(null)",
-                            getContextSafe().getDir(null, Context.MODE_WORLD_READABLE));
+                            requireContext().getDir(null, Context.MODE_WORLD_READABLE));
                 } catch (Exception ignored) {
                 }
 
                 try {
-                    addFile("getFilesDir", getActivitySafe().getFilesDir());
+                    addFile("getFilesDir", requireActivity().getFilesDir());
                 } catch (Exception ignored) {
                 }
 
                 try {
-                    addFile("getCacheDir", getActivitySafe().getCacheDir());
+                    addFile("getCacheDir", requireActivity().getCacheDir());
                 } catch (Exception ignored) {
                 }
 
@@ -432,7 +431,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
                         String string = "hello world!";
 
                         FileOutputStream fos =
-                                getContextSafe().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+                                requireContext().openFileOutput(FILENAME, Context.MODE_PRIVATE);
                         fos.write(string.getBytes());
                         addString("openFileOutput", fos.toString());
                         fos.close();
@@ -443,13 +442,13 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
                 addString("External State", Environment.getExternalStorageState());
 
                 try {
-                    addFile("getExternalCacheDir", getActivitySafe().getExternalCacheDir());
+                    addFile("getExternalCacheDir", requireActivity().getExternalCacheDir());
                 } catch (Exception ignored) {
                 }
 
                 try {
                     // getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-                    addFile("getExternalCacheDir", getActivitySafe().getExternalFilesDir(null));
+                    addFile("getExternalCacheDir", requireActivity().getExternalFilesDir(null));
                 } catch (Exception ignored) {
                 }
 
@@ -484,7 +483,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
                             Map<String, String> volumeList = new HashMap<>();
 
                             volumeList.put("Description",
-                                    volume.getDescription(getContextSafe()));
+                                    volume.getDescription(requireContext()));
                             volumeList.put("State", volume.getState());
                             volumeList.put("Primary", String.valueOf(volume.isPrimary()));
                             volumeList.put("Removable", String.valueOf(volume.isRemovable()));
@@ -602,7 +601,7 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof BaseExpandableListAdapter)) {
             final DiskFragment.DiskArrayAdapter adapter =
-                    new DiskFragment.DiskArrayAdapter(this.getActivitySafe());
+                    new DiskFragment.DiskArrayAdapter(this.requireActivity());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -729,18 +728,18 @@ public class DiskFragment extends DevFragment implements View.OnClickListener {
                 // startActivity(Intent.createChooser(intent, "Open folder"));
 
                 */
-                m_fileOpenDialog = new FileBrowseDialog(this.getActivitySafe(), "Browse",
-                        this.getActivitySafe().getWindow().getDecorView().getHeight(), null);
+                m_fileOpenDialog = new FileBrowseDialog(this.requireActivity(), "Browse",
+                        this.requireActivity().getWindow().getDecorView().getHeight(), null);
 
                 m_fileOpenDialog.DefaultFileName = root.getPath();
                 m_fileOpenDialog.choose(root.getPath());
             } else {
                 ArrayList<String> responseList = runShellCmd(new String[]{"ls", "-l", value});
-                Toast.makeText(getActivitySafe(), TextUtils.join("\n", responseList),
+                Toast.makeText(requireActivity(), TextUtils.join("\n", responseList),
                         Toast.LENGTH_LONG).show();
             }
         } catch (Exception ex) {
-            Toast.makeText(getActivitySafe(), ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireActivity(), ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 

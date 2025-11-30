@@ -39,8 +39,8 @@ import android.widget.TextView;
 
 import com.landenlabs.all_devtool.DevFragment;
 import com.landenlabs.all_devtool.R;
-import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
 import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings({"BooleanMethodIsAlwaysInverted", "Convert2Lambda"})
 public class UninstallDialog extends DialogFragment {
-    private final LLog mLog = LLog.DBG;
+    private final LLog mLog = LLog.LLOG;
 
     Context m_context;
     ArrayList<PackageInfo> m_pkgInfoList;
@@ -92,7 +92,7 @@ public class UninstallDialog extends DialogFragment {
         uninstallDialog.m_idx = idx;
         uninstallDialog.m_allUsers = allUsers;
 
-        GoogleAnalyticsHelper.event(uninstallDialog.getActivity(), "", "dialog", uninstallDialog.getClass().getName());
+        SendAnalytics.event("TextInfoDialog", "dialog", "");
         return uninstallDialog;
     }
 
@@ -101,7 +101,7 @@ public class UninstallDialog extends DialogFragment {
             final int idx,
             boolean allUsers) {
         DialogFragment newFragment =  UninstallDialog.create(devFragment, pkgInfoList, idx, allUsers);
-        newFragment.show(devFragment.getActivitySafe().getFragmentManager(), "dialog");
+        newFragment.show(devFragment.requireActivity().getFragmentManager(), "dialog");
     }
 
     /**

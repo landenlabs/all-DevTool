@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.text.TextUtils;
 
 import androidx.core.app.NotificationCompat;
@@ -41,6 +40,7 @@ import com.landenlabs.all_devtool.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Manage Notification draw
@@ -68,7 +68,7 @@ public class ALogNotification {
         notificationManager.createNotificationChannel(channel);
     }
 
-    static final ArrayList<String> prevMsgs = new ArrayList<>(Arrays.asList("\n"));
+    static final ArrayList<String> prevMsgs = new ArrayList<>(List.of("\n"));
 
     public static void updateNotification(Context context, Object... msgs) {
 

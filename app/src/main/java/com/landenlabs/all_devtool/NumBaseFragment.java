@@ -21,6 +21,8 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -39,7 +41,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
@@ -56,8 +57,6 @@ import java.util.List;
  */
 @SuppressWarnings("Convert2Lambda")
 public abstract class NumBaseFragment extends DevFragment {
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
 
     final ArrayList<NumInfo> m_list = new ArrayList<>();
     ListView m_listView;
@@ -122,7 +121,7 @@ public abstract class NumBaseFragment extends DevFragment {
         m_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContextSafe(), String.format("Item click pos=%d", position),
+                Toast.makeText(requireContext(), String.format("Item click pos=%d", position),
                         Toast.LENGTH_LONG).show();
                 m_list.get(position).m_selected = !m_list.get(position).m_selected;
                 m_listView.invalidateViews();
@@ -132,7 +131,7 @@ public abstract class NumBaseFragment extends DevFragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
                     long id) {
-                Toast.makeText(getContextSafe(), String.format("Item LONG click pos=%d", position), Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), String.format("Item LONG click pos=%d", position), Toast.LENGTH_LONG).show();
                 m_list.get(position).m_zoom = !m_list.get(position).m_zoom;
                 m_listView.invalidateViews();
                 return false;
@@ -215,7 +214,7 @@ public abstract class NumBaseFragment extends DevFragment {
                     }
                 }
             } catch (Exception ex) {
-                m_log.e("peekValue", ex);
+                LLOG.e("peekValue", ex.getMessage());
             }
 
             typedArray.recycle();

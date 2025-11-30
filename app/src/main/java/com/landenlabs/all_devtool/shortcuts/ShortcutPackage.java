@@ -34,6 +34,6 @@ public class ShortcutPackage extends DevToolActivity {
      * Short cut to Package page.
      */
     public ShortcutPackage() {
-        m_startFrag = PackageFragment.s_name;
+        startFrag = PackageFragment.s_name;
     }
 }

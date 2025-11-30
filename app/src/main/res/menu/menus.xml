@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,52 +20,46 @@
   ~ @author Dennis Lang
   ~ @see https://LanDenLabs.com/
   -->
-
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/menu_more"
         android:icon="@drawable/ic_more"
-        app:showAsAction="always"
-        android:title="General">
-        
+        android:title="General"
+        app:showAsAction="always">
+
         <menu>
             <item
                 android:id="@+id/menu_about"
                 android:icon="@drawable/about"
-                android:title="@string/menu_about"/>
+                android:title="@string/menu_about" />
             <item
                 android:id="@+id/menu_web"
                 android:icon="@drawable/web"
-                android:title="@string/menu_web"/>
-             <item
-	            android:id="@+id/menu_share"
-	            android:title="@string/menu_share"
-	            android:icon="@drawable/share"
-                 app:actionProviderClass="android.widget.ShareActionProvider" />
+                android:title="@string/menu_web" />
+            <item
+                android:id="@+id/menu_share"
+                android:icon="@drawable/share"
+                android:title="@string/menu_share"
+                 />
 
+            <item android:title="" />
             <item
-                android:title=""/>
-            <item
-                android:icon="@android:drawable/ic_lock_lock"
                 android:id="@+id/menu_lock_orientation"
                 android:checkable="true"
                 android:checked="false"
-                android:title="Lock Orientation"
-                />
+                android:icon="@android:drawable/ic_lock_lock"
+                android:title="Lock Orientation" />
+            <item android:title="" />
             <item
-                android:title=""/>
-            <item
-                android:icon="@drawable/dev_tool_ic"
                 android:id="@+id/menu_shortcuts_on"
-                android:title="@string/menu_shortcuts_on"/>
-            <item
                 android:icon="@drawable/dev_tool_ic"
+                android:title="@string/menu_shortcuts_on" />
+            <item
                 android:id="@+id/menu_shortcuts_off"
-                android:title="@string/menu_shortcuts_off"/>
+                android:icon="@drawable/dev_tool_ic"
+                android:title="@string/menu_shortcuts_off" />
         </menu>
     </item>
 

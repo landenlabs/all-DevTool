@@ -1,3 +1,5 @@
+package com.landenlabs.all_devtool;
+
 /*
  * Copyright (c) 2020 Dennis Lang (LanDen Labs) landenlabs@gmail.com
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,25 +21,24 @@
  * @see https://LanDenLabs.com/
  */
 
-package com.landenlabs.all_devtool;
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Parcelable;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
 import java.util.List;
@@ -54,22 +55,18 @@ import java.util.List;
  * @author Dennis Lang
  */
 @SuppressWarnings({"UnnecessaryLocalVariable"})
-public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.TabListener {
-
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
+public class TabPagerAdapter extends FragmentStateAdapter {
 
     private static final int SHARE_MAX_IMAGE_HEIGHT = 3000;
-    private final ViewPager m_viewPager;
-    private final ActionBar m_actionBar;
+    private final ViewPager2 m_viewPager;
+    private final FragmentManager m_fm;
 
     public interface Creator {
         DevFragment creator();
-
         String name();
     }
 
-    private Creator[] m_tabList = new Creator[]{
+    private Creator[] m_tabList = new Creator[] {
             // Build
             new Creator() {
                 public DevFragment creator() {
@@ -86,7 +83,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return PropFragment.create();
                 }
-
                 public String name() {
                     return PropFragment.s_name;
                 }
@@ -97,7 +93,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return ProcFragment.create();
                 }
-
                 public String name() {
                     return ProcFragment.s_name;
                 }
@@ -109,7 +104,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return DiskFragment.create();
                 }
-
                 public String name() {
                     return DiskFragment.s_name;
                 }
@@ -120,7 +114,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return NetstatFragment.create();
                 }
-
                 public String name() {
                     return NetstatFragment.s_name;
                 }
@@ -131,12 +124,10 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return NetFragment.create();
                 }
-
                 public String name() {
                     return NetFragment.s_name;
                 }
             },
-
 
 
             // System
@@ -144,7 +135,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return SystemFragment.create();
                 }
-
                 public String name() {
                     return SystemFragment.s_name;
                 }
@@ -155,7 +145,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return PackageFragment.create();
                 }
-
                 public String name() {
                     return PackageFragment.s_name;
                 }
@@ -166,7 +155,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return FileBrowserFragment.create();
                 }
-
                 public String name() {
                     return FileBrowserFragment.s_name;
                 }
@@ -177,7 +165,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return ConsoleFragment.create();
                 }
-
                 public String name() {
                     return ConsoleFragment.s_name;
                 }
@@ -188,7 +175,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return SensorFragment.create();
                 }
-
                 public String name() {
                     return SensorFragment.s_name;
                 }
@@ -199,7 +185,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return ThemeFragment.create();
                 }
-
                 public String name() {
                     return ThemeFragment.s_name;
                 }
@@ -210,7 +195,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return LightFragment.create();
                 }
-
                 public String name() {
                     return LightFragment.s_name;
                 }
@@ -221,7 +205,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return ClockFragment.create();
                 }
-
                 public String name() {
                     return ClockFragment.s_name;
                 }
@@ -232,7 +215,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return GpsFragment.create();
                 }
-
                 public String name() {
                     return GpsFragment.s_name;
                 }
@@ -243,7 +225,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return ScreenFragment.create();
                 }
-
                 public String name() {
                     return ScreenFragment.s_name;
                 }
@@ -254,7 +235,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
                 public DevFragment creator() {
                     return TextFragment.create();
                 }
-
                 public String name() {
                     return TextFragment.s_name;
                 }
@@ -312,8 +292,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
         return outArray;
     }
 
-    TabPagerAdapter(FragmentManager fm, ViewPager viewPager, ActionBar actionBar) {
-        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+    TabPagerAdapter(FragmentActivity fa, ViewPager2 viewPager, TabLayout tabLayout) {
+        super(fa);
+        m_fm = fa.getSupportFragmentManager();
 
         if (Build.VERSION.SDK_INT >= 29) {
             // https://developer.android.com/about/versions/10/privacy/changes
@@ -326,61 +307,46 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
         }
 
         m_viewPager = viewPager;
-        m_actionBar = actionBar;
         m_viewPager.setAdapter(this);
 
-        // Keep all fragments cached.
-        //   m_viewPager.setOffscreenPageLimit(this.getCount());
+        // Disable smooth scrolling
+        boolean smoothScroll = false;
+        new TabLayoutMediator(tabLayout, m_viewPager, true, smoothScroll,
+                (tab, position) -> tab.setText(getTabName(position))
+        ).attach();
 
-        if (m_actionBar != null) {
-            m_actionBar.setHomeButtonEnabled(false);
-            m_actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-            // Adding Tabs
-            for (int tabIdx = 0; tabIdx < this.getCount(); tabIdx++) {
-                m_actionBar.addTab(m_actionBar.newTab()
-                        .setText(this.getTabName(tabIdx)).setTabListener(this));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int tabIdx = tab.getPosition();
+                DevFragment devFragment = (DevFragment) m_fm.findFragmentByTag("f" + tabIdx);
+                if (devFragment != null) {
+                    devFragment.onSelected();
+                }
             }
-        }
 
-        /*
-         * On swiping the viewpager sets respective tab selected.
-         */
-        if (m_actionBar != null) {
-            // TODO - need to remove this listener in detach
-            m_viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            // m_viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
 
-                @Override
-                public void onPageSelected(int position) {
-                    if (m_actionBar != null) {
-                        m_actionBar.setSelectedNavigationItem(position);
-                    }
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                int tabIdx = tab.getPosition();
+                DevFragment devFragment = (DevFragment) m_fm.findFragmentByTag("f" + tabIdx);
+                if (devFragment != null) {
+                    devFragment.onSelected();
                 }
-
-                @Override
-                public void onPageScrolled(int arg0, float arg1, int arg2) {
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int arg0) {
-                }
-            });
-
-            m_actionBar.setSelectedNavigationItem(0);
-        }
+            }
+        });
     }
 
-    @Override
-    public void restoreState(Parcelable state, ClassLoader loader) {
-        super.restoreState(state, loader);
-    }
 
     // ========================================================================
     // Implement FragmentPagerAdapter
 
+    @NonNull
     @Override
-    public Fragment getItem(int tabIdx) {
+    public Fragment createFragment(int tabIdx) {
 
         DevFragment devFragment;
 
@@ -393,37 +359,12 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return m_tabList.length;
     }
 
     // ========================================================================
-    // Override ActionBar.TabListener
-
-    @Override
-    public void onTabSelected(Tab tab, FragmentTransaction ft) {
-        int tabIdx = tab.getPosition();
-        m_viewPager.setCurrentItem(tabIdx);
-        getFragment(tabIdx).onSelected();
-    }
-
-    @Override
-    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void onTabReselected(Tab tab, FragmentTransaction ft) {
-        int tabIdx = tab.getPosition();
-        getFragment(tabIdx).onSelected();
-    }
-
-    // ========================================================================
     // Implement TabsPagerAdapter
-
-    private DevFragment getFragment(int index) {
-        return (DevFragment) getItem(index);
-    }
 
     private String getTabName(int tabIdx) {
         String name = m_tabList[tabIdx].name();
@@ -453,16 +394,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
         return defIdx;   // No match
     }
 
-
-    public int getCurrentTabIdx() {
-        int tabIdx = m_viewPager.getCurrentItem();
-        return tabIdx;
-    }
-
-    public void setCurrentTabIdx(int tabIdx) {
-        m_viewPager.setCurrentItem(tabIdx);
-    }
-
     /**
      * Execute sharing for current page.
      */
@@ -473,30 +404,24 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
             String fragName = getFragName(tabIdx);
             String imageName = fragName.toLowerCase() + ".png";
 
-            DevFragment devFrag = getFragment(tabIdx);
+            DevFragment devFrag = (DevFragment) m_fm.findFragmentByTag("f" + tabIdx);
             try {
                 if (null != devFrag) {
                     List<String> shareCSV = devFrag.getListAsCsv();
                     List<Bitmap> shareImages = devFrag.getBitmaps(SHARE_MAX_IMAGE_HEIGHT);
-                    // if (null != shareImages && shareImages.size() != 0) {
-                        Utils.shareList(devFrag.getContext(), shareImages, shareCSV, fragName, imageName,
-                                GlobalInfo.s_globalInfo.shareActionProvider);
-                    /*} else {
-                        Toast.makeText(devFrag.getActivity(),
-                                "Unable to share\nFailed to grab screen", Toast.LENGTH_LONG).show();
-                    }*/
+                    Utils.shareList(devFrag.getContext(), shareImages, shareCSV, fragName, imageName);
                 } else {
                     Toast.makeText(GlobalInfo.s_globalInfo.mainFragActivity,
-                            "Unable to share\nSwitch screens\nand try again", Toast.LENGTH_LONG).show();
+                            "Unable to share, switch screens and try again", Toast.LENGTH_LONG).show();
                 }
 
             } catch (Exception ex) {
-                m_log.e("share failed - " + ex.getMessage());
+                LLOG.e("share failed - ", ex.getMessage());
                 Toast.makeText(GlobalInfo.s_globalInfo.mainFragActivity,
-                        "Unable to share\nSwitch screens\nand try again", Toast.LENGTH_LONG).show();
+                        "Unable to share, switch screens and try again", Toast.LENGTH_LONG).show();
             }
         } catch (Exception ex) {
-            m_log.e("share failed - " + ex.getMessage());
+            LLOG.e("share failed - ", ex.getMessage());
         }
     }
 
@@ -506,6 +431,5 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements ActionBar.T
         shareIntent.setType(IMAGE_TYPE);
         Uri uri = Uri.parse(mediaPath);
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        GlobalInfo.s_globalInfo.shareActionProvider.setShareIntent(shareIntent);
     }
 }

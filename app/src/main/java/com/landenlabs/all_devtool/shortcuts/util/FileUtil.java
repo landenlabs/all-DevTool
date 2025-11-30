@@ -21,9 +21,10 @@
 
 package com.landenlabs.all_devtool.shortcuts.util;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.system.StructStat;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -32,8 +33,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Dennis Lang on 7/13/16.

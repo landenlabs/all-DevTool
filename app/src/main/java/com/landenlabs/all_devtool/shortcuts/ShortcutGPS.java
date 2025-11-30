@@ -34,6 +34,6 @@ public class ShortcutGPS extends DevToolActivity {
      * Short cut to GPS page.
      */
     public ShortcutGPS() {
-        m_startFrag = GpsFragment.s_name;
+        startFrag = GpsFragment.s_name;
     }
 }

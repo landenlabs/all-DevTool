@@ -34,7 +34,7 @@ public class ShortcutScreen extends DevToolActivity {
      * Short cut to Screen page.
      */
     public ShortcutScreen() {
-        m_startFrag = ScreenFragment.s_name;
+        startFrag = ScreenFragment.s_name;
     }
 }
 

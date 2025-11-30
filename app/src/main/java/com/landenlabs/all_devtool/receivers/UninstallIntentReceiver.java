@@ -37,7 +37,7 @@ import com.landenlabs.all_devtool.shortcuts.util.LLog;
 
 public class UninstallIntentReceiver extends BroadcastReceiver {
 
-    private final LLog mLog = LLog.DBG;
+    private final LLog mLog = LLog.LLOG;
 
     // Intent.ACTION_UNINSTALL_PACKAGE;        // "android.intent.action.UNINSTALL_PACKAGE"
     // Intent.ACTION_PACKAGE_FULLY_REMOVED;    // "android.intent.action.PACKAGE_FULLY_REMOVED"

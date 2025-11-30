@@ -23,9 +23,13 @@ package com.landenlabs.all_devtool;
 
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -42,6 +46,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.landenlabs.all_devtool.dialogs.DrawView;
@@ -73,11 +81,12 @@ public class ScreenFragment extends DevFragment {
     private TextView m_horzWindowText;
     private TextView m_vertPanelText;
     private DrawView m_drawPoints;
+    private Drawable m_actionBarBackground;
 
     private DisplayMetrics m_displayMetrics;
 
     private static final int MSG_GET_UI_SIZE = 1;
-    private final Handler m_handler = new Handler() {
+    private final Handler m_handler = new Handler(Looper.getMainLooper()) {
 
         @SuppressWarnings("SwitchStatementWithTooFewBranches")
         public void handleMessage(Message msg) {
@@ -108,7 +117,7 @@ public class ScreenFragment extends DevFragment {
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
         List<Bitmap> bitmapList = new ArrayList<>();
-        bitmapList.add(Utils.grabScreen(getActivitySafe()));
+        bitmapList.add(Utils.grabScreen(requireActivity()));
         return bitmapList;
     }
 
@@ -135,20 +144,68 @@ public class ScreenFragment extends DevFragment {
     // ============================================================================================
     // Override DevFragment(Fragment)
 
+
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        
+
+
+        // This tells the app to draw behind the system bars (draw edge-to-edge)
+        // WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
         m_context = this.getActivity();
         //	m_context.setTheme(R.style.Theme_TranslucentActionBar_ActionBar_Overlay);
         m_rootView = inflater.inflate(R.layout.screen_tab, container, false);
+
+
+        // Apply a listener to the root view of the fragment's layout
+        ViewCompat.setOnApplyWindowInsetsListener(m_rootView, (v, windowInsets) -> {
+            // Get the insets for the system bars (Status Bar + Navigation Bar)
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+            int topPad = ScreenFragment.s_name.equals(getName()) ? 0 : insets.top;
+
+            // Apply padding to the top of your view to avoid the Status Bar
+            v.setPadding(v.getPaddingLeft(), topPad, v.getPaddingRight(), v.getPaddingBottom());
+
+            // You might need to apply padding/margin to the bottom to avoid the Navigation Bar
+            // v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
+
+            // Return the insets so they can be consumed by the system
+            return windowInsets;
+        });
 
         updateView();
 
         return m_rootView;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (requireActivity() instanceof AppCompatActivity appCompatActivity) {
+            if (appCompatActivity.getSupportActionBar() != null) {
+                // appCompatActivity.getSupportActionBar().hide();
+                // m_actionBarBackground = appCompatActivity.getSupportActionBar().getCustomView().getBackground();
+                appCompatActivity.getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
+        }
+        // WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(), false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (requireActivity() instanceof AppCompatActivity appCompatActivity) {
+            if (appCompatActivity.getSupportActionBar() != null) {
+                // appCompatActivity.getSupportActionBar().show();
+                // appCompatActivity.getSupportActionBar().setBackgroundDrawable(m_actionBarBackground);
+            }
+        }
+        // WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(), true);
+    }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -163,7 +220,7 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.screen_clear_menu) {
             m_drawPoints.clear();
@@ -179,13 +236,7 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.screen_menu, menu.addSubMenu("Screen Options"));
 
         menu.findItem(R.id.screen_prune_menu).setChecked(m_drawPoints.getAutoPrune());

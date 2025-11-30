@@ -69,7 +69,7 @@ public class SearchList {
                 }
             }
         }
-        Log.d("search", "matches=" + matchCnt);
+        Log.d("search", "matches="+ matchCnt);
     }
 
 }

@@ -21,6 +21,10 @@
 
 package com.landenlabs.all_devtool;
 
+import static android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP;
+import static com.landenlabs.all_devtool.R.id.appName;
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -95,7 +99,6 @@ import com.landenlabs.all_devtool.dialogs.FileBrowseDialog;
 import com.landenlabs.all_devtool.dialogs.UninstallDialog;
 import com.landenlabs.all_devtool.receivers.UninstallIntentReceiver;
 import com.landenlabs.all_devtool.shortcuts.util.ArrayListPair;
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.SysUtils;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
@@ -116,9 +119,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP;
-import static com.landenlabs.all_devtool.R.id.appName;
-
 
 /**
  * Display "Package" installed information.
@@ -133,9 +133,6 @@ public class PackageFragment extends DevFragment
         , View.OnLayoutChangeListener
         , AdapterView.OnItemSelectedListener {
     
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
-
     final ArrayList<PackingItem> m_list = new ArrayList<>();
     ArrayList<PackingItem> m_workList;
     final ArrayList<PackingItem> m_beforeFilter = new ArrayList<>();
@@ -297,7 +294,7 @@ public class PackageFragment extends DevFragment
                             // ((BaseAdapter) m_listView.getAdapter()).notifyDataSetChanged();
                             ((BaseExpandableListAdapter) m_listView.getExpandableListAdapter()).notifyDataSetChanged();
                         } catch (Exception ex) {
-                            m_log.e(ex.getMessage());
+                            LLOG.e(ex.getMessage());
                         }
                     }
                     break;
@@ -313,7 +310,7 @@ public class PackageFragment extends DevFragment
     @NonNull
     NotificationManager getNotificationMgr() {
         NotificationManager notificationManager =
-                (NotificationManager) getActivitySafe().getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) requireActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         return Objects.requireNonNull(notificationManager);
     }
 
@@ -321,7 +318,7 @@ public class PackageFragment extends DevFragment
     private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            m_log.i(" mMessageReceiver onReceive");
+            LLOG.i(" mMessageReceiver onReceive");
 
             // Extract data included in the Intent
             String packageName = intent.getStringExtra("package");
@@ -391,7 +388,7 @@ public class PackageFragment extends DevFragment
                 }
             }
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -461,12 +458,12 @@ public class PackageFragment extends DevFragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+
 
         m_rootView = inflater.inflate(R.layout.package_tab, container, false);
 
         m_listView = Ui.viewById(m_rootView, R.id.pkgListView);
-        final PkgArrayAdapter adapter = new PkgArrayAdapter(getActivitySafe());
+        final PkgArrayAdapter adapter = new PkgArrayAdapter(requireActivity());
         m_listView.setAdapter(adapter);
 
         AppWidgetManager appWidMgr = AppWidgetManager.getInstance(getContext());
@@ -638,7 +635,7 @@ public class PackageFragment extends DevFragment
         super.onDestroyView();
 
         // Unregister since the activity is not visible
-        LocalBroadcastManager.getInstance(getContextSafe()).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
@@ -648,7 +645,7 @@ public class PackageFragment extends DevFragment
 
     @Override
     public void onSelected() {
-        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         // updateList();
         // m_listView.invalidateViews();
     }
@@ -659,7 +656,7 @@ public class PackageFragment extends DevFragment
      * <li>android.nonFinalResIds=false
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuSelected(MenuItem item) {
         int pos;
         int id = item.getItemId();
         int show = m_show;
@@ -713,15 +710,10 @@ public class PackageFragment extends DevFragment
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
 
 
     @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         m_menu = menu.addSubMenu("Pkg Options");
         inflater.inflate(R.menu.package_menu, m_menu);
         m_menu.findItem(m_sortBy).setChecked(true);
@@ -882,7 +874,7 @@ public class PackageFragment extends DevFragment
     private void collapseAll() {
         int count = m_listView.getAdapter().getCount(); // m_list.size();
         for (int position = 0; position < count; position++) {
-            // m_log.d("Collapse " + position);
+            // LLOG.d("Collapse " + position);
             m_listView.collapseGroup(position);
         }
     }
@@ -1048,7 +1040,7 @@ public class PackageFragment extends DevFragment
                 @Override
                 public void run() {
                     String dumpStr = Ui.dumpViews(m_listView, 0).toString();
-                    m_log.d(dumpStr);
+                    LLOG.d(dumpStr);
                 }
             });
         }
@@ -1132,7 +1124,7 @@ public class PackageFragment extends DevFragment
                                         break;
                                     }
                                 } catch (Exception ex) {
-                                    m_log.d(ex.getMessage());
+                                    LLOG.d(ex.getMessage());
                                 }
                             }
                         }
@@ -1141,12 +1133,12 @@ public class PackageFragment extends DevFragment
                             List<String> deletedFiles = Utils.deleteFiles(cacheDirectory);
                             if (deletedFiles != null && !deletedFiles.isEmpty()) {
                                 String fileMsg = TextUtils.join("\n", deletedFiles.toArray());
-                                Toast.makeText(getContextSafe(), packageItem.m_appName + "\n" + fileMsg, Toast.LENGTH_LONG).show();
+                                Toast.makeText(requireContext(), packageItem.m_appName + "\n" + fileMsg, Toast.LENGTH_LONG).show();
                             }
                         }
                     }
                 } catch (Exception ex) {
-                    m_log.e(ex.getLocalizedMessage());
+                    LLOG.e(ex.getLocalizedMessage());
                 }
 
                 try {
@@ -1419,7 +1411,7 @@ public class PackageFragment extends DevFragment
                         addWidgetInfo(pkgName, pkgList);
                         m_workList.add(new PackingItem(pkgName.trim(), pkgList, packInfo, orderCnt++, appName, actType));
                     } catch (Exception ex) {
-                        m_log.e(ex.getMessage());
+                        LLOG.e(ex.getMessage());
                     }
                 }
             }
@@ -1638,7 +1630,7 @@ public class PackageFragment extends DevFragment
             m_handler.sendMessage(msgObj);
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -1676,7 +1668,7 @@ public class PackageFragment extends DevFragment
             m_handler.sendMessage(msgObj);
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -1746,7 +1738,7 @@ public class PackageFragment extends DevFragment
             pkgSize = file.length();
             addList(pkgList, "FileSize", NumberFormat.getNumberInstance(Locale.getDefault()).format(pkgSize));
         } catch (Exception ex) {
-            m_log.d("package filesize " + ex.getLocalizedMessage());
+            LLOG.d("package filesize " + ex.getLocalizedMessage());
         }
 
         PackingItem packingItem = new PackingItem(packInfo.packageName.trim(), pkgList, packInfo, pkgSize, appName);
@@ -1902,10 +1894,10 @@ public class PackageFragment extends DevFragment
 
                     Context pkgContext;
                     try {
-                        m_log.d(String.format("%3d/%d : %s", idx, packList.size(), packInfo.packageName));
+                        LLOG.d(String.format("%3d/%d : %s", idx, packList.size(), packInfo.packageName));
                         pkgContext = getActivity().createPackageContext(packInfo.packageName, Context.CONTEXT_IGNORE_SECURITY);
                     } catch (Exception ex) {
-                        m_log.e(ex.getLocalizedMessage());
+                        LLOG.e(ex.getLocalizedMessage());
                         continue;   // Bad package
                     }
 
@@ -1958,11 +1950,11 @@ public class PackageFragment extends DevFragment
                                     }
                                 }
                             } catch (Exception ex) {
-                                m_log.d(ex.getMessage());
+                                LLOG.d(ex.getMessage());
                             }
                         }
                     } else {
-                        m_log.d(packInfo.packageName + " missing cache dir");
+                        LLOG.d(packInfo.packageName, " missing cache dir");
                     }
 
                     Utils.DirSizeCount datDirSize = null;
@@ -1970,7 +1962,7 @@ public class PackageFragment extends DevFragment
                         try {
                             datDirSize = Utils.getDirectorySize(new File(packInfo.applicationInfo.dataDir));
                         } catch (Exception ex) {
-                            m_log.d(ex.getMessage());
+                            LLOG.d(ex.getMessage());
                         }
                     }
 
@@ -2004,7 +1996,7 @@ public class PackageFragment extends DevFragment
                         try {
                             appName = packInfo.applicationInfo.loadLabel(getActivity().getPackageManager()).toString().trim();
                         } catch (Exception ex) {
-                            m_log.e(ex.getLocalizedMessage());
+                            LLOG.e(ex.getLocalizedMessage());
                         }
                         long pkgSize = 0;
 
@@ -2045,7 +2037,7 @@ public class PackageFragment extends DevFragment
                             File file = new File(packInfo.applicationInfo.sourceDir);
                             pkgSize = file.length();
                         } catch (Exception ex) {
-                            m_log.e(ex.getMessage());
+                            LLOG.e(ex.getMessage());
                         }
 
                         addList(pkgList, "Apk File", packInfo.applicationInfo.publicSourceDir);
@@ -2097,7 +2089,7 @@ public class PackageFragment extends DevFragment
                 }
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -2170,8 +2162,8 @@ public class PackageFragment extends DevFragment
             }
 
             // Getting status
-            // int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivitySafe());
-            int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContextSafe());
+            // int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(requireActivity());
+            int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(requireContext());
 
             if(status == ConnectionResult.SUCCESS) {
                 // String GOOGLE_PLAY_SERVICES_PACKAGE = "com.google.android.gms";
@@ -2189,7 +2181,7 @@ public class PackageFragment extends DevFragment
             */
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 

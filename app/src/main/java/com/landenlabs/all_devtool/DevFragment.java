@@ -21,23 +21,27 @@
 
 package com.landenlabs.all_devtool;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.MenuCompat;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 
-import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -52,48 +56,69 @@ import java.util.Objects;
  * @author Dennis Lang
  */
 public abstract class DevFragment extends Fragment {
+    protected SubMenu subMenu;
 
-    static final Map<String, WeakReference<DevFragment>> s_devFragmentCache = new HashMap<>();
+    protected static final Map<String, WeakReference<DevFragment>> s_devFragmentCache = new HashMap<>();
 
-    /**
-     * @return name of fragment.
-     */
     public abstract String getName();
 
-    /**
-     * @return Bitmaps of full content
-     */
+    // Export methods
     public abstract List<Bitmap> getBitmaps(int maxHeight);
-
     public abstract  List<String> getListAsCsv();
 
-    /**
-     * Called when fragment selected (visible)
-     */
-    public void onSelected() {
-        GoogleAnalyticsHelper.event(this.getActivity(), "activity", "selected", getName());
-        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        GlobalInfo.s_globalInfo.mainFragActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
+    // Menu methods
+    protected MenuProvider menuProvider = new MenuProvider() {
+        @Override
+        public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+            MenuCompat.setGroupDividerEnabled(menu, true);
+            // menuInflater.inflate(menuRes, menu);    // R.menu.menus
+            onMenuCreate(menu, menuInflater);
+        }
 
-// ============================================================================================
+        @Override
+        public void onPrepareMenu(@NonNull Menu menu) {
+            // This is called right before the menu is shown.
+            // You can access and modify items from the activity's menu.
+        }
+
+        @Override
+        public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+            // Return true if handled, false to allow the activity to handle it.
+            return onMenuSelected(menuItem);
+        }
+    };
+    protected void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater menuInflater) { }
+    protected boolean onMenuSelected(@NonNull MenuItem menuItem) { return false; }
+
+
+    // ============================================================================================
     // Fragment methods
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        if (GlobalInfo.s_globalInfo.isLockedOrientation) {
-            getActivitySafe().setRequestedOrientation(GlobalInfo.s_globalInfo.lockedOrientation);
-        }
-
         cacheFragment();
 
-        // this.setRetainInstance(true);
-        if (GlobalInfo.s_globalInfo.haveActionBarOverlay) {
-            // ViewPager.LayoutParams viewParams = (ViewPager.LayoutParams)view.getLayoutParams();
-            view.setPadding(0, GlobalInfo.s_globalInfo.actionBarHeight * 2, 0, 0);
+        requireActivity().addMenuProvider(menuProvider, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
+        // Apply padding to the top of your view to avoid the Status Bar
+        // Apply padding to view pager bottom to avoid navigation buttons
+        boolean fullScreen = "Screen".equals(getName());
+        int topDecor = fullScreen ? 0 : GlobalInfo.s_insets.top;
+        int botDecor = fullScreen ? 0 : GlobalInfo.s_insets.bottom;
+        int tabHeightPx = 40;   // fallback guess.
+
+        View tabBar = GlobalInfo.s_globalInfo.mainFragActivity.findViewById(R.id.tabs);
+        if (tabBar != null) {
+            tabBar.setY(topDecor);
+            // tabBar.setPadding(tabBar.getPaddingLeft(), topDecor , tabBar.getPaddingRight(),  tabBar.getPaddingBottom());
+            tabHeightPx = Math.max(tabHeightPx,  tabBar.getHeight());
+            if (!fullScreen)
+                topDecor += tabHeightPx;
         }
+
+        view.setPadding(view.getPaddingLeft(), topDecor , view.getPaddingRight(),  botDecor);
+
     }
 
     // Coming into foreground - update analytics
@@ -101,21 +126,29 @@ public abstract class DevFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (this.isVisible())
-            GoogleAnalyticsHelper.event(getActivitySafe(), getClass().getName(), "onResume", "");
+            SendAnalytics.event(getClass().getSimpleName(), "onResume", "");
     }
 
     @Override
     public void onStop() {
-        GoogleAnalyticsHelper.event(this.getActivitySafe(), "", "stop", this.getClass().getName());
+        SendAnalytics.event(getClass().getSimpleName(), "onStop","");
         super.onStop();
+    }
+
+    /**
+     * Called when fragment selected (visible)
+     */
+    public void onSelected() {
+        SendAnalytics.event( getClass().getSimpleName(), "selected", getName());
+        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+        // GlobalInfo.s_globalInfo.mainFragActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     // ============================================================================================
     // DevFragment methods
 
-    // Deprecated - nolonger used
     protected void cacheFragment() {
-        // m_log.i(String.format("set %s %08x", getName(), System.identityHashCode(this)));
+        // LLOG.i(String.format("set %s %08x", getName(), System.identityHashCode(this)));
         if (this.getActivity() != null)
             s_devFragmentCache.put(getName(), new WeakReference<>(this));
     }
@@ -126,22 +159,14 @@ public abstract class DevFragment extends Fragment {
     }
 
     @NonNull
-    protected Context getContextSafe() {
-        return requireContext();
-    }
-    @NonNull
-    public Activity getActivitySafe() {
-        return requireActivity();
-    }
-    @NonNull
     public <T> T getServiceSafe(String service) {
         //noinspection unchecked
-        return (T)Objects.requireNonNull(getActivitySafe().getSystemService(service));
+        return (T)Objects.requireNonNull(requireActivity().getSystemService(service));
     }
 
     @NonNull
     Window getWindow() {
-        return Objects.requireNonNull(getActivitySafe().getWindow());
+        return Objects.requireNonNull(requireActivity().getWindow());
     }
 
     // ============================================================================================
@@ -151,7 +176,7 @@ public abstract class DevFragment extends Fragment {
         boolean okay = true;
         List<String> requestPermissions = new ArrayList<>();
         for (String needPermission : needPermissions) {
-            if (getContextSafe()
+            if (requireContext()
                     .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions.add(needPermission);
             }

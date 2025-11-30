@@ -34,7 +34,7 @@ public class ShortcutNetwork extends DevToolActivity {
      * Short cut to Properties page.
      */
     public ShortcutNetwork() {
-        m_startFrag = NetFragment.s_name;
+        startFrag = NetFragment.s_name;
     }
 }
 

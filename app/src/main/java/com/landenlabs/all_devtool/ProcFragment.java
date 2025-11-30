@@ -21,6 +21,13 @@
 
 package com.landenlabs.all_devtool;
 
+import static android.content.Context.HARDWARE_PROPERTIES_SERVICE;
+import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_BATTERY;
+import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU;
+import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_GPU;
+import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -57,13 +64,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-
-import static android.content.Context.HARDWARE_PROPERTIES_SERVICE;
-import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_BATTERY;
-import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU;
-import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_GPU;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
-import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
 
 /**
  * Display "Process"  information.
@@ -315,7 +315,7 @@ public class ProcFragment extends DevFragment {
 
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
-            final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
+            final BuildArrayAdapter adapter = new BuildArrayAdapter(requireActivity());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -400,7 +400,7 @@ public class ProcFragment extends DevFragment {
     private void collapseAll() {
         int count = m_listView.getAdapter().getCount(); // m_list.size();
         for (int position = 0; position < count; position++) {
-            // m_log.d("Collapse " + position);
+            // LLOG.d("Collapse " + position);
             m_listView.collapseGroup(position);
         }
     }

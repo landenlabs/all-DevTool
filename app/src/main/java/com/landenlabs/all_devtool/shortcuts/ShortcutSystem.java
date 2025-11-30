@@ -34,7 +34,7 @@ public class ShortcutSystem extends DevToolActivity {
      * Short cut to System page.
      */
     public ShortcutSystem() {
-        m_startFrag = SystemFragment.s_name;
+        startFrag = SystemFragment.s_name;
     }
 }
 

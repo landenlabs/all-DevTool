@@ -143,7 +143,7 @@ public class BuildFragment extends DevFragment {
             addBuild("PRODUCT", Build.PRODUCT);
             // addBuild("RADIO", Build.RADIO);
             try {
-                if (ActivityCompat.checkSelfPermission(getContextSafe(),
+                if (ActivityCompat.checkSelfPermission(requireContext(),
                         Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     addBuild("SERIAL", Build.getSerial());
                 } else {
@@ -175,7 +175,7 @@ public class BuildFragment extends DevFragment {
             // activity.getWindow().setSustainedPerformanceMode(true)
 
         }
-        final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
+        final BuildArrayAdapter adapter = new BuildArrayAdapter(requireActivity());
         m_listView.setAdapter(adapter);
 
         int count = adapter.getGroupCount();

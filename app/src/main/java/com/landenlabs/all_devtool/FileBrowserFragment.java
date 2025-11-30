@@ -21,6 +21,10 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.FileUtil.getMimeType;
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -38,7 +42,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -51,7 +54,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -74,13 +76,11 @@ import androidx.core.content.FileProvider;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.landenlabs.all_devtool.dialogs.DeleteDialog;
-import com.landenlabs.all_devtool.dialogs.DrawView;
 import com.landenlabs.all_devtool.shortcuts.util.FileUtil;
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
-import com.landenlabs.all_devtool.util.OsUtils;
 import com.landenlabs.all_devtool.shortcuts.util.SysUtils;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
+import com.landenlabs.all_devtool.util.OsUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,9 +94,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import static com.landenlabs.all_devtool.shortcuts.util.FileUtil.getMimeType;
-import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.runShellCmd;
 
 // import android.system.Os;
 
@@ -113,8 +110,6 @@ public class FileBrowserFragment extends DevFragment
         , AdapterView.OnItemSelectedListener
         , FileUtil.ExecCallback {
 
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
 
     final ArrayList<FileUtil.FileInfo> m_list = new ArrayList<>();
     final ArrayList<FileUtil.FileInfo> m_workList = new ArrayList<>();
@@ -138,7 +133,6 @@ public class FileBrowserFragment extends DevFragment
     int m_checkCnt = 0;
 
     View m_rootView;
-    SubMenu m_menu;
 
     PackageManager m_packageManager;
 
@@ -167,7 +161,7 @@ public class FileBrowserFragment extends DevFragment
                         m_title.setText("No files");
 
                     if (m_errMsg != null && m_errMsg.length() > 0) {
-                        Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(), m_errMsg.toString());
+                        Ui.ShowMessage(FileBrowserFragment.this.requireActivity(), m_errMsg.toString());
                         m_errMsg = null;
                     }
                     // m_fbDeletelBtn.setEnabled(m_list.size() > 0);
@@ -266,13 +260,13 @@ public class FileBrowserFragment extends DevFragment
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
-        m_packageManager = getActivitySafe().getPackageManager();
+
+        m_packageManager = requireActivity().getPackageManager();
         m_rootView = inflater.inflate(R.layout.file_browser_tab, container, false);
 
         m_listView = Ui.viewById(m_rootView, R.id.fb_listview);
-        final FileArrayAdapter adapter = new FileArrayAdapter(this.getActivitySafe());
+        final FileArrayAdapter adapter = new FileArrayAdapter(this.requireActivity());
         m_listView.setAdapter(adapter);
 
         m_dirBar = Ui.viewById(m_rootView, R.id.fb_dirBar);
@@ -286,7 +280,7 @@ public class FileBrowserFragment extends DevFragment
                 final TextView field = Ui.viewById(view, R.id.buildField);
                 final TextView value = Ui.viewById(view, R.id.buildValue);
                 if (field != null && value != null) {
-                    Button btn = Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(), field.getText() + "\n" + value.getText()).getButton(AlertDialog.BUTTON_POSITIVE);
+                    Button btn = Ui.ShowMessage(FileBrowserFragment.this.requireActivity(), field.getText() + "\n" + value.getText()).getButton(AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -325,7 +319,7 @@ public class FileBrowserFragment extends DevFragment
         m_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContextSafe(), String.format("Item click pos=%d", position),
+                Toast.makeText(requireContext(), String.format("Item click pos=%d", position),
                         Toast.LENGTH_LONG).show();
                 m_list.get(position).isChecked = !m_list.get(position).isChecked;
                 m_listView.invalidateViews();
@@ -334,7 +328,7 @@ public class FileBrowserFragment extends DevFragment
 
         adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                // Toast.makeText(getActivitySafe(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
+                // Toast.makeText(requireActivity(), String.format("Long Press on %d id:%d ", pos, id), Toast.LENGTH_LONG).show();
                 // int grpPos = (Integer) view.getTag();
                 if (pos >= 0 && pos < m_list.size()) {
                     final FileUtil.FileInfo fileInfo = m_list.get(pos);
@@ -379,8 +373,8 @@ public class FileBrowserFragment extends DevFragment
 
                     AlertDialog fileInfoDlg =
                             fileInfo.isDirectory()
-                                    ? Ui.ShowFileDlg(FileBrowserFragment.this.getActivitySafe(),fileSb.toString())
-                                    : Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(),fileSb.toString());
+                                    ? Ui.ShowFileDlg(FileBrowserFragment.this.requireActivity(),fileSb.toString())
+                                    : Ui.ShowMessage(FileBrowserFragment.this.requireActivity(),fileSb.toString());
 
                     Button btn = fileInfoDlg.getButton(AlertDialog.BUTTON_POSITIVE);
                     if (btn != null) {
@@ -398,8 +392,8 @@ public class FileBrowserFragment extends DevFragment
 
                                 // New way - use file provider
                                 Uri apkURI = FileProvider.getUriForFile(
-                                        getContextSafe(),
-                                        getContextSafe().getApplicationContext()
+                                        requireContext(),
+                                        requireContext().getApplicationContext()
                                                 .getPackageName() + ".provider", fileInfo);
                                 viewIntent.setDataAndType(apkURI, getMimeType(fileInfo.getAbsolutePath()));
                                 viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -409,7 +403,7 @@ public class FileBrowserFragment extends DevFragment
                                 try {
                                     startActivity(openIntent);
                                 } catch (Exception ex) {
-                                    Toast.makeText(getContextSafe(), "Failed to start intent on\n"
+                                    Toast.makeText(requireContext(), "Failed to start intent on\n"
                                                     + fileInfo.getName()
                                                     + "\n" + ex.getLocalizedMessage(),
                                             Toast.LENGTH_LONG).show();
@@ -441,7 +435,7 @@ public class FileBrowserFragment extends DevFragment
                                                         parts[1]));
                                             }
                                         }
-                                        Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(),
+                                        Ui.ShowMessage(FileBrowserFragment.this.requireActivity(),
                                                 sb.toString());
                                     }
                                 }
@@ -481,8 +475,8 @@ public class FileBrowserFragment extends DevFragment
 
 
         m_sortSpinner = Ui.viewById(m_rootView, R.id.fb_sort_spinner);
-        if (m_menu != null) {
-            MenuItem sortBy = m_menu.findItem(m_sortBy);
+        if (subMenu != null) {
+            MenuItem sortBy = subMenu.findItem(m_sortBy);
             if (sortBy != null) {
                 int pos = Arrays.asList(getResources().getStringArray(R.array.fb_sort_array))
                         .indexOf(sortBy.getTitle().toString());
@@ -620,11 +614,11 @@ public class FileBrowserFragment extends DevFragment
 
     @Override
     public void onSelected() {
-        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuSelected(MenuItem item) {
         int pos;
         int id = item.getItemId();
         int show = m_show;
@@ -683,21 +677,15 @@ public class FileBrowserFragment extends DevFragment
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
-
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("File Options");
-        inflater.inflate(R.menu.filebrowser_menu, m_menu);
+    public void onMenuCreate(Menu menu, MenuInflater inflater) {
+        subMenu = menu.addSubMenu("File Options");
+        inflater.inflate(R.menu.filebrowser_menu, subMenu);
 
-        m_menu.findItem(R.id.filebrowser_show_extra).setVisible(true);
+        subMenu.findItem(R.id.filebrowser_show_extra).setVisible(true);
 
-        MenuItem sortByItem = m_menu.findItem(m_sortBy);
+        MenuItem sortByItem = subMenu.findItem(m_sortBy);
         if (sortByItem != null)
             sortByItem.setChecked(true);
     }
@@ -738,7 +726,7 @@ public class FileBrowserFragment extends DevFragment
     // implement onItemSelectedListener (spinner)
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        if (m_menu == null)
+        if (subMenu == null)
             return;
         // String itemStr = parent.getItemAtPosition(pos).toString();
         if (parent == m_loadSpinner) {
@@ -782,7 +770,7 @@ public class FileBrowserFragment extends DevFragment
 
             m_show = menu_id;
             setShowDir();
-            m_menu.findItem(menu_id).setChecked(true);
+            subMenu.findItem(menu_id).setChecked(true);
             updateList();
         } else if (parent == m_sortSpinner) {
             int menuId = -1;
@@ -802,7 +790,7 @@ public class FileBrowserFragment extends DevFragment
             }
 
             if (id != -1) {
-                m_menu.findItem(menuId).setChecked(true);
+                subMenu.findItem(menuId).setChecked(true);
                 m_sortBy = menuId;
                 Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
                 m_handler.sendMessage(msgObj);
@@ -883,7 +871,7 @@ public class FileBrowserFragment extends DevFragment
                 break;
         }
 
-        m_log.d(m_dir.getAbsolutePath());
+        LLOG.d(m_dir.getAbsolutePath());
     }
 
     private void deleteFiles() {
@@ -1014,7 +1002,7 @@ public class FileBrowserFragment extends DevFragment
 
     @Override
     public void Exec(StringBuilder result, int flag) {
-        Ui.ShowMessage(FileBrowserFragment.this.getActivitySafe(), result.toString());
+        Ui.ShowMessage(FileBrowserFragment.this.requireActivity(), result.toString());
     }
     
     void updateDeleteBtn() {

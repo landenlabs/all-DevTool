@@ -21,6 +21,11 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.androidplot.xy.BoundaryMode.AUTO;
+import static com.androidplot.xy.BoundaryMode.FIXED;
+import static com.androidplot.xy.BoundaryMode.GROW;
+import static com.landenlabs.all_devtool.R.id.plot;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -51,7 +56,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -84,11 +88,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.androidplot.xy.BoundaryMode.AUTO;
-import static com.androidplot.xy.BoundaryMode.FIXED;
-import static com.androidplot.xy.BoundaryMode.GROW;
-import static com.landenlabs.all_devtool.R.id.plot;
 
 /**
  * Display "Sensor" information.
@@ -255,7 +254,7 @@ public class SensorFragment extends DevFragment
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
         List<Bitmap> bitmapList = new ArrayList<>();
-        bitmapList.add(Utils.grabScreen(getActivitySafe()));
+        bitmapList.add(Utils.grabScreen(requireActivity()));
         return bitmapList;
     }
 
@@ -266,7 +265,7 @@ public class SensorFragment extends DevFragment
 
     @Override
     public void onSelected() {
-        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -275,7 +274,7 @@ public class SensorFragment extends DevFragment
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+
         //  getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         m_sensorMgr = getServiceSafe(Context.SENSOR_SERVICE);
@@ -359,7 +358,7 @@ public class SensorFragment extends DevFragment
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuSelected(MenuItem item) {
         int id = item.getItemId();
         int itemId = item.getItemId();
         if (itemId == R.id.sensor_menu_100_msec
@@ -378,19 +377,10 @@ public class SensorFragment extends DevFragment
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-
+    public void onMenuCreate(Menu menu, MenuInflater inflater) {
+        subMenu = menu.addSubMenu("Sensor");
+        inflater.inflate(R.menu.sensor_menu, subMenu);
         menu.findItem(m_menuSelected).setChecked(true);
-    }
-
-    SubMenu m_menu;
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("Sensor");
-        inflater.inflate(R.menu.sensor_menu, m_menu);
     }
 
     // ============================================================================================
@@ -870,7 +860,7 @@ public class SensorFragment extends DevFragment
             m_plotValues.put(AUDIO_STR, String.format("%.0f Avg:%.0f", dbValue, avgDb));
         }
 
-        WifiManager wifiMgr = (WifiManager) getContextSafe().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiMgr = (WifiManager) requireContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifiMgr != null && wifiMgr.isWifiEnabled() && wifiMgr.getDhcpInfo() != null && m_seriesWifi != null) {
             WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
             int numberOfLevels = 10;
@@ -883,7 +873,7 @@ public class SensorFragment extends DevFragment
             }
         }
 
-        Intent batteryIntent = getActivitySafe().getApplicationContext()
+        Intent batteryIntent = requireActivity().getApplicationContext()
                 .registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (batteryIntent != null && m_seriesBatteryPercent != null) {
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);

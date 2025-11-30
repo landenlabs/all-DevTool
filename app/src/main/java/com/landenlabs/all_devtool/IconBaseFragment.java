@@ -30,7 +30,6 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -209,7 +208,7 @@ public abstract class IconBaseFragment extends DevFragment {
         }
 
         public Drawable getDrawable() {
-            return hasValue() ? getDrawable2(getContextSafe(), getValue()) : m_drawable;
+            return hasValue() ? getDrawable2(requireContext(), getValue()) : m_drawable;
         }
     }
 

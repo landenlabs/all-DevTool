@@ -21,6 +21,8 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
@@ -53,7 +55,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
@@ -75,8 +76,6 @@ import java.util.Map;
  */
 @SuppressWarnings("Convert2Lambda")
 public class ConsoleFragment extends DevFragment implements View.OnClickListener {
-    private final LLog m_log = LLog.DBG;
-
     CheckBox m_refreshCb;
 
     public static final String s_name = "Console";
@@ -151,7 +150,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
         List<Bitmap> bitmapList = new ArrayList<>();
-        bitmapList.add(Utils.grabScreen(getActivitySafe()));
+        bitmapList.add(Utils.grabScreen(requireActivity()));
         return bitmapList;
     }
 
@@ -341,7 +340,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
         try {
             // ----- System -----
-            ApplicationInfo appInfo = getActivitySafe().getApplicationInfo();
+            ApplicationInfo appInfo = requireActivity().getApplicationInfo();
 
             mSystemViews.get(SYSTEM_PACKAGE).get(1).setText(appInfo.packageName);
             mSystemViews.get(SYSTEM_MODEL).get(1).setText(Build.MODEL);
@@ -350,8 +349,8 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             int lines = 0;
             final StringBuilder permSb = new StringBuilder();
             try {
-                PackageInfo pi = getContextSafe().getPackageManager().getPackageInfo(
-                        getContextSafe().getPackageName(), PackageManager.GET_PERMISSIONS);
+                PackageInfo pi = requireContext().getPackageManager().getPackageInfo(
+                        requireContext().getPackageName(), PackageManager.GET_PERMISSIONS);
                 for (int i = 0; i < pi.requestedPermissions.length; i++) {
                     if ((pi.requestedPermissionsFlags[i] & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0) {
                         permSb.append(pi.requestedPermissions[i]).append("\n");
@@ -359,7 +358,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
                     }
                 }
             } catch (Exception ex) {
-                m_log.e(ex.getMessage());
+                LLOG.e(ex.getMessage());
             }
             final int lineCnt = lines;
             mSystemViews.get(SYSTEM_PERM).get(1).setText(String.format("%d perms [press]", lines));
@@ -390,12 +389,12 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             mSystemViews.get(SYSTEM_PROCESSES).get(1).setText(String.format("%d", consoleState.processCnt));
             mSystemViews.get(SYSTEM_PROCESSES).get(2).setText(String.format("%d", processCnt));
             // mSystemViews.get(SYSTEM_BATTERY).get(1).setText(String.format("%d%%", consoleState.batteryLevel));
-            mSystemViews.get(SYSTEM_BATTERY).get(2).setText(String.format("%%%d", calculateBatteryLevel(getActivitySafe())));
+            mSystemViews.get(SYSTEM_BATTERY).get(2).setText(String.format("%%%d", calculateBatteryLevel(requireActivity())));
             // long cpuNano = Debug.threadCpuTimeNanos();
             // mSystemViews.get(SYSTEM_CPU).get(2).setText(String.format("%d%%", cpuNano));
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
 
         try {
@@ -417,7 +416,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
                 mNetworkViews.get(NETWORK_WIFI_SIGNAL).get(1).setText(String.format("%%%d", 100 * level / numberOfLevels));
             }
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
         try {
             // ----- Network Traffic-----
@@ -438,7 +437,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             mNetworkViews.get(NETWORK_SND_PACK).get(3).setText(String.format("%d", TrafficStats.getTotalRxPackets()- consoleState.netTxPacks));
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
 
         // ----- Memory -----
@@ -474,7 +473,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             totalViews.get(3).setText(String.format("%d", mi.totalMem - consoleState.totalMemory));
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -496,9 +495,9 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
 
             ActivityManager actMgr = getServiceSafe(Context.ACTIVITY_SERVICE);
             consoleState.processCnt = actMgr.getRunningAppProcesses().size();
-            consoleState.batteryLevel = calculateBatteryLevel(getActivitySafe());
+            consoleState.batteryLevel = calculateBatteryLevel(requireActivity());
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -538,7 +537,7 @@ public class ConsoleFragment extends DevFragment implements View.OnClickListener
             try {
                 Thread.sleep(360);
             } catch (Exception e) {
-                m_log.e(e.getMessage());
+                LLOG.e(e.getMessage());
             }
 
             reader.seek(0);

@@ -21,20 +21,17 @@
 
 package com.landenlabs.all_devtool.receivers;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
-
 /**
  * Created by Dennis Lang on 6/19/2015.
  */
 public class GpsReceiver  extends BroadcastReceiver {
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
-
     /**
      * Broadcast intent action indicating that the GPS has either been
      * enabled or disabled. An intent extra provides this state as a boolean,
@@ -58,7 +55,7 @@ public class GpsReceiver  extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent != null) {
             Toast.makeText(context, intent.toString(), Toast.LENGTH_LONG).show();
-            m_log.i("GpsReceiver " + intent.toString());
+            LLOG.i("GpsReceiver ", intent.toString());
         }
     }
 }

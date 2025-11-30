@@ -20,17 +20,28 @@
   ~ @see https://LanDenLabs.com/
   -->
 
-<LinearLayout
+<!--
+    android:fitsSystemWindows="true"
+-->
+<FrameLayout
+    android:id="@+id/main_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:minWidth="300dp"
-    android:orientation="vertical" >
+    android:tag="main">
 
-    <androidx.viewpager.widget.ViewPager
+    <!-- Under tab bar -->
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </androidx.viewpager.widget.ViewPager>
+        android:layout_height="match_parent" />
 
-</LinearLayout>
+    <!-- over pager -->
+    <com.google.android.material.tabs.TabLayout
+        android:background="#000"
+        android:id="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="scrollable" />
+</FrameLayout>

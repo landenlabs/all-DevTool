@@ -45,7 +45,7 @@ public class AlarmService extends IntentService {
 
     /*
     public void sendNotification(String msg) {
-        m_log.i("Preparing to send notification...: " + msg);
+        LLOG.i("Preparing to send notification...: " + msg);
         alarmNotificationManager = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -63,7 +63,7 @@ public class AlarmService extends IntentService {
 
         alamNotificationBuilder.setContentIntent(contentIntent);
         alarmNotificationManager.notify(1, alamNotificationBuilder.build());
-        m_log.i("Notification sent.");
+        LLOG.i("Notification sent.");
     }
 
     */

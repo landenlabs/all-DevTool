@@ -39,7 +39,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
@@ -82,7 +82,7 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
     @Override
     public List<Bitmap> getBitmaps(int maxHeight) {
         List<Bitmap> bitmapList = new ArrayList<>();
-        Bitmap bitmap = Utils.grabScreen(getActivitySafe());
+        Bitmap bitmap = Utils.grabScreen(requireActivity());
         if (null != bitmap && !bitmap.isRecycled())
             bitmapList.add(bitmap);
         else
@@ -95,7 +95,7 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
         return null;
     }
 
-    // private GoogleAnalyticsHelper mAnalyticsHelper;
+    // private SendAnalytics mAnalyticsHelper;
 
     /** Called when the activity is first created. */
     @Override
@@ -145,7 +145,7 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
         if (parent == m_theme_spinner) {
             // m_title.setText(selectionStr);
             Utils.changeToTheme(this.getActivity(), pos, themeName.substring(2));
-            GoogleAnalyticsHelper.event(this.getActivity(), "", "ThemeApp", themeName);
+            SendAnalytics.event(this.getClass().getSimpleName(),  "ThemeApp", themeName);
         } else if (id == R.id.dialogBtn) {
             openDialog(pos, themeName);
         }
@@ -161,7 +161,7 @@ public class ThemeFragment extends DevFragment implements OnItemSelectedListener
     }
 
     private void openDialog(int style, String title) {
-        GoogleAnalyticsHelper.event(this.getActivity(), "", "ThemeDialog", title);
+        SendAnalytics.event(this.getClass().getSimpleName(), "ThemeDialog", title);
 
         AlertDialog.Builder alertDialogBuilder;
 

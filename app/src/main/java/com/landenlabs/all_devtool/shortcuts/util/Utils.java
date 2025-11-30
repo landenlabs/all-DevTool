@@ -23,6 +23,8 @@ package com.landenlabs.all_devtool.shortcuts.util;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -39,7 +41,6 @@ import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -51,12 +52,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
 import androidx.core.app.NotificationCompat;
-import androidx.fragment.app.FragmentActivity;
+import androidx.core.view.ActionProvider;
 
 import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.GlobalInfo;
@@ -76,9 +76,6 @@ public class Utils {
         double latitude;
         double longitude;
     }
-
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private static final LLog s_log = LLog.DBG;
 
     // =============================================================================================
     // Theme
@@ -129,7 +126,7 @@ public class Utils {
     public static void onActivityCreateSetTheme(Activity activity) {
         if (sThemeIdx != sNoThemeIdx) {
             activity.setTheme(GlobalInfo.getThemeResId(sThemeIdx));  // R.style.Theme_00 + sThemeId);
-            GlobalInfo.grabThemeSetings(activity);
+            GlobalInfo.grabThemeSettings(activity);
         }
     }
 
@@ -466,7 +463,7 @@ public class Utils {
         for (int idx = 0; idx < itemBms.size(); idx++) {
             Bitmap bmp = itemBms.get(idx);
             if (!isBitmapValid(bmp)) {
-                s_log.e("invalid bitmap");
+                LLOG.e("invalid bitmap");
                 continue;
             }
 
@@ -537,7 +534,7 @@ public class Utils {
         for (int idx = 0; idx < itemBms.size(); idx++) {
             Bitmap bmp = itemBms.get(idx);
             if (!isBitmapValid(bmp)) {
-                s_log.e("invalid bitmap");
+                LLOG.e("invalid bitmap");
                 continue;
             }
 
@@ -591,7 +588,7 @@ public class Utils {
             ostream.close();
             return uri;
         } catch (Exception ex) {
-            s_log.e("Save bitmap failed " , ex.getMessage());
+            LLOG.e("Save bitmap failed ",  ex.getMessage());
         }
         return null;
     }
@@ -600,25 +597,27 @@ public class Utils {
     /**
      * Share screen capture
      */
-    public static void shareScreen(FragmentActivity activity, String what, ShareActionProvider shareActionProvider) {
+    public static void shareScreen(View view, String what, ActionProvider shareActionProvider) {
+        Bitmap screenBitmap = getBitmap(view);
+        List<Bitmap> bitmapList = new ArrayList<>();
+        bitmapList.add(screenBitmap);
+        shareList(view.getContext(), bitmapList, null, what, "screenshot.png");
+    }
+
+    /*
+    public static void shareScreen(FragmentActivity activity, String what, ActionProvider shareActionProvider) {
         Bitmap screenBitmap = Utils.grabScreen(activity);
         List<Bitmap> bitmapList = new ArrayList<>();
         bitmapList.add(screenBitmap);
         shareList(activity, bitmapList, null, what, "screenshot.png", shareActionProvider);
-        GoogleAnalyticsHelper.event(activity, "share", "screen", activity.getClass().getName());
-    }
-
-    public static void shareScreen(View view, String what, ShareActionProvider shareActionProvider) {
-        Bitmap screenBitmap = getBitmap(view);
-        List<Bitmap> bitmapList = new ArrayList<>();
-        bitmapList.add(screenBitmap);
-        shareList(view.getContext(), bitmapList, null, what, "screenshot.png", shareActionProvider);
+        SendAnalytics.event(activity, "share", "screen", activity.getClass().getName());
     }
 
     public static String getScreenImagePath(View view, Activity activity) {
         Bitmap viewBitmap = getBitmap(view);
         return Images.Media.insertImage(activity.getContentResolver(), viewBitmap, "view.png", null);
     }
+    */
 
     private static boolean isBitmapValid(Bitmap bitmap) {
         return bitmap != null && !bitmap.isRecycled() && bitmap.getHeight() * bitmap.getWidth() > 0;
@@ -628,8 +627,7 @@ public class Utils {
             Context context,
             List<Bitmap> shareImages,
             List<String> shareCsv,
-            String what, String imageName,
-            ShareActionProvider shareActionProvider) {
+            String what, String imageName ) {
 
         final String IMAGE_TYPE = "image/png";
         final String TEXT_TYPE = "text/plain";
@@ -667,7 +665,7 @@ public class Utils {
                             uris.add(uri);
                         bitmap.recycle();
                     } else
-                        s_log.e("invalid bitmap");
+                        LLOG.e("invalid bitmap");
                 }
                 shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
             }
@@ -701,7 +699,7 @@ public class Utils {
         GlobalInfo.s_globalInfo.mainFragActivity.startActivity(Intent.createChooser(shareIntent, "Share"));
         //	}
 
-        GoogleAnalyticsHelper.event(GlobalInfo.s_globalInfo.mainFragActivity, "", "share-screen", imageName);
+        SendAnalytics.event("Share", "share-screen", imageName);
     }
 
     /*
@@ -722,13 +720,13 @@ public class Utils {
         Uri myUri = Uri.parse("file://" + path);
         emailIntent.putExtra(Intent.EXTRA_STREAM, myUri);
         activity.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
-        GoogleAnalyticsHelper.event(GlobalInfo.s_globalInfo.mainFragActivity, "", "share-email", activity.getClass().getName());
+        SendAnalytics.event("Share", "share-email", activity.getClass().getName());
     }
 
     public static final int CLOCK_NOTIFICATION_ID = 1;
 
     public static void showAlarmNotification(Context context, int id, String msg) {
-        s_log.i("Preparing to send notification...: " + msg);
+        LLOG.i("Preparing to send notification...: ",  msg);
         NotificationManager notificationManager = SysUtils.getServiceSafe(context, Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
@@ -746,11 +744,11 @@ public class Utils {
         notificationBuilder.setContentIntent(contentIntent);
         notificationManager.notify(id, notificationBuilder.build());
 
-        s_log.i("Notification sent.");
+        LLOG.i("Notification sent.");
     }
 
     public static void cancelNotification(Context context, int id) {
-        s_log.i("Cancel notification");
+        LLOG.i("Cancel notification");
         NotificationManager notificationManager = SysUtils.getServiceSafe(context, Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(id);
     }

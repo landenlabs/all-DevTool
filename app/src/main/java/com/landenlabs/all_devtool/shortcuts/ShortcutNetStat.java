@@ -34,7 +34,7 @@ public class ShortcutNetStat extends DevToolActivity {
      * Short cut to Properties page.
      */
     public ShortcutNetStat() {
-        m_startFrag = NetstatFragment.s_name;
+        startFrag = NetstatFragment.s_name;
     }
 }
 

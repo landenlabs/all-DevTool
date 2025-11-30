@@ -22,6 +22,7 @@
 package com.landenlabs.all_devtool;
 
 import static androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED;
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -49,7 +50,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -78,7 +78,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.landenlabs.all_devtool.receivers.GpsReceiver;
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.SysUtils;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
@@ -108,11 +107,7 @@ public class GpsFragment extends DevFragment implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On to always log.
-    private final LLog m_log = LLog.DBG;
-
     public static final String s_name = "GPS";
-    SubMenu m_menu;
 
     private static final int s_providersRow = 0;
     private static final int s_lastUpdateRow = 1;
@@ -218,7 +213,7 @@ public class GpsFragment extends DevFragment implements
 
     @Override
     public void onSelected() {
-        GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         GlobalInfo.s_globalInfo.mainFragActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -240,7 +235,7 @@ public class GpsFragment extends DevFragment implements
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+
 
         View rootView = inflater.inflate(R.layout.gps_tab, container, false);
         m_statusIcon = Ui.viewById(rootView, R.id.gpsStatus);
@@ -267,7 +262,7 @@ public class GpsFragment extends DevFragment implements
         m_list.set(s_detailRow, new GpsInfo(new GpsItem("Detail History")));
 
         m_listView = Ui.viewById(rootView, R.id.gpsListView);
-        final GpsArrayAdapter adapter = new GpsArrayAdapter(getActivitySafe());
+        final GpsArrayAdapter adapter = new GpsArrayAdapter(requireActivity());
         m_listView.setAdapter(adapter);
 
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -287,7 +282,7 @@ public class GpsFragment extends DevFragment implements
         m_gpsTv = Ui.viewById(rootView, R.id.gps);
         if (isGooglePlayServicesAvailable()) {
             // google_app_id
-            m_googleApiClient = new GoogleApiClient.Builder(this.getActivitySafe())
+            m_googleApiClient = new GoogleApiClient.Builder(this.requireActivity())
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
@@ -321,7 +316,7 @@ public class GpsFragment extends DevFragment implements
 
 
 
-        if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             addGpsListener();
         }
@@ -386,7 +381,7 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.gps_clock_12) {
             s_hourFormat = s_hour12Format;
@@ -447,16 +442,10 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("GPS Settings");
-        inflater.inflate(R.menu.gps_menu, m_menu);
-        m_menu.findItem(R.id.gps_clock_12).setChecked(true);
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        subMenu = menu.addSubMenu("GPS Settings");
+        inflater.inflate(R.menu.gps_menu, subMenu);
+        subMenu.findItem(R.id.gps_clock_12).setChecked(true);
     }
 
     // ============================================================================================
@@ -523,7 +512,7 @@ public class GpsFragment extends DevFragment implements
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Ui.ToastBig(this.getActivitySafe(), "GPS error\n" + connectionResult.describeContents());
+        Ui.ToastBig(this.requireActivity(), "GPS error\n" + connectionResult.describeContents());
         addMsgToDetailRow(s_colorMsg, "GPS error");
     }
 
@@ -546,14 +535,14 @@ public class GpsFragment extends DevFragment implements
                 isDupLoc = isLocDup(location, gpsLoc);
             }
         } catch (Exception ex) {
-            // Toast.makeText(this.getActivitySafe(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            // Toast.makeText(this.requireActivity(), "GPS " + ex.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
 
         try {
-            if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
                 Location netLoc = m_locMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -563,7 +552,7 @@ public class GpsFragment extends DevFragment implements
                 }
             }
         } catch (Exception ex) {
-            Toast.makeText(this.getActivitySafe(), "GPS needs location permission\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.requireActivity(), "GPS needs location permission\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         try {
@@ -573,7 +562,7 @@ public class GpsFragment extends DevFragment implements
                 isDupLoc = isDupLoc || isLocDup(location, passiveLoc);
             }
         } catch (Exception ex) {
-            Toast.makeText(this.getActivitySafe(), "Passive " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.requireActivity(), "Passive " + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         if (!isDupLoc) {
@@ -623,7 +612,7 @@ public class GpsFragment extends DevFragment implements
 
     private void getLocation() {
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION);
-        if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             if (m_gpsCb.isChecked() && m_locationRequest.getPriority() == LocationRequest.PRIORITY_HIGH_ACCURACY) {
                 try {
@@ -632,12 +621,12 @@ public class GpsFragment extends DevFragment implements
                     addMsgToDetailRow(s_colorMsg, "GPS request made");
                 } catch (Exception ex) {
                     String errMsg = "Unable to access gps\n" + ex.getMessage() + "\n" + ex.getCause();
-                    Ui.ShowMessage(this.getActivitySafe(), errMsg);
+                    Ui.ShowMessage(this.requireActivity(), errMsg);
                     addMsgToDetailRow(s_colorMsg, errMsg);
                 }
             } else {
                 try {
-                    Task<Void> task = LocationServices.getFusedLocationProviderClient(getContextSafe())
+                    Task<Void> task = LocationServices.getFusedLocationProviderClient(requireContext())
                             .requestLocationUpdates(m_locationRequest, m_fuseCallback, Looper.getMainLooper());
 
                     if (task.getException() != null)
@@ -649,7 +638,7 @@ public class GpsFragment extends DevFragment implements
 
                 } catch (Exception ex) {
                     String errMsg = "Unable to access gps\n" + ex.getMessage() + "\n" + ex.getCause();
-                    Ui.ShowMessage(this.getActivitySafe(), errMsg);
+                    Ui.ShowMessage(this.requireActivity(), errMsg);
                     addMsgToDetailRow(s_colorMsg, errMsg);
                 }
             }
@@ -678,9 +667,9 @@ public class GpsFragment extends DevFragment implements
 
         List<String> gpsProviders = m_locMgr.getAllProviders();
         for (String providerName : gpsProviders) {
-            if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 try {
                     LocationProvider provider = m_locMgr.getProvider(providerName);
@@ -693,7 +682,7 @@ public class GpsFragment extends DevFragment implements
                         itemList.add(new GpsItem(s_noTime, msg, color));
                     }
                 } catch (SecurityException ex) {
-                    m_log.e(ex.getLocalizedMessage());
+                    LLOG.e(ex.getLocalizedMessage());
             //        m_gpsTv.setEnabled(false);
                     addMsgToDetailRow(s_colorMsg, "GPS not available");
                     addMsgToDetailRow(s_colorMsg, ex.getLocalizedMessage());
@@ -741,13 +730,13 @@ public class GpsFragment extends DevFragment implements
 
         stopLocationUpdates();
 
-        if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
             if (m_locMgr != null) {
-                if (ActivityCompat.checkSelfPermission(getContextSafe(), Manifest.permission.ACCESS_FINE_LOCATION)
+                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
                     // m_locMgr.addGpsStatusListener(this);
                     addGpsListener();
@@ -757,17 +746,17 @@ public class GpsFragment extends DevFragment implements
             getLocation();
         } else {
             String errMsg = "start GPS ignore, missing permissions";
-            Ui.ShowMessage(this.getActivitySafe(), errMsg);
+            Ui.ShowMessage(this.requireActivity(), errMsg);
             addMsgToDetailRow(s_colorMsg, errMsg);
-            // Toast.makeText(getContextSafe(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
+            // Toast.makeText(requireContext(), "start GPS ignore, missing permissions", Toast.LENGTH_LONG).show();
         }
 
         //noinspection ConstantConditions,ConstantIfStatement
         if (true) {
             FusedLocationProviderClient fusedLocationProviderClient =
-                    LocationServices.getFusedLocationProviderClient(getActivitySafe());
+                    LocationServices.getFusedLocationProviderClient(requireActivity());
             fusedLocationProviderClient.getLastLocation()
-                    .addOnSuccessListener(getActivitySafe(), new OnSuccessListener<Location>() {
+                    .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
                             // Got last known location. In some rare situations this can be null.
@@ -786,8 +775,8 @@ public class GpsFragment extends DevFragment implements
     }
 
     private boolean isGooglePlayServicesAvailable() {
-        // int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivitySafe());
-        int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContextSafe());
+        // int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(requireActivity());
+        int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(requireContext());
 
         if (ConnectionResult.SUCCESS == status) {
             addMsgToDetailRow(s_colorMsg, "GooglePlay Available");
@@ -795,7 +784,7 @@ public class GpsFragment extends DevFragment implements
         } else {
             // String errMsg = GooglePlayServicesUtil.getErrorString(status);
             String errMsg = GoogleApiAvailability.getInstance().getErrorString(status);
-            Ui.ShowMessage(this.getActivitySafe(), errMsg);
+            Ui.ShowMessage(this.requireActivity(), errMsg);
             addMsgToDetailRow(s_colorMsg, "GooglePlay Unavailable");
             return false;
         }
@@ -844,7 +833,7 @@ public class GpsFragment extends DevFragment implements
             gpsItem.set(location.getTime(), msg);
             listChanged();
         }  else {
-            Ui.ShowMessage(this.getActivitySafe(), "null text for " + provider);    // DEBUG
+            Ui.ShowMessage(this.requireActivity(), "null text for " + provider);    // DEBUG
         }
     }
 
@@ -884,7 +873,7 @@ public class GpsFragment extends DevFragment implements
                 currLoc.getLatitude(), currLoc.getLongitude(), km * 1000, feet,
                 currLoc.getProvider()));
 
-        Address address = getGeocoderAddress(getContextSafe(), currLoc.getLatitude(), currLoc.getLongitude());
+        Address address = getGeocoderAddress(requireContext(), currLoc.getLatitude(), currLoc.getLongitude());
         if (address != null) {
             if (address.getMaxAddressLineIndex() >= 0) {
                 for (int idx = 0; idx <= address.getMaxAddressLineIndex(); idx++) {
@@ -899,7 +888,7 @@ public class GpsFragment extends DevFragment implements
             msg.append("\n  Geocoder not available, reboot");
         }
 
-        m_log.i("GPS "+ msg);
+        LLOG.i("GPS "+ msg);
         GpsItem item = new GpsItem(currLoc.getTime(), msg.toString(), color);
 
         return updateDetailRow(item);

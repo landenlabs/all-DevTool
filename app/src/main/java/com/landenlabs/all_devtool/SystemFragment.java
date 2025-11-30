@@ -21,6 +21,8 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -58,7 +60,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
@@ -76,7 +77,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.ConfigurationCompat;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
 import com.landenlabs.all_devtool.shortcuts.util.SearchList;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
@@ -94,7 +94,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -112,8 +111,6 @@ public class SystemFragment extends DevFragment {
     private static final SimpleDateFormat m_timeFormat = new SimpleDateFormat("HH:mm:ss zz");
     final ArrayList<ListInfo> m_list = new ArrayList<>();
 
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
     ExpandableListView m_listView;
     TextView m_titleTime;
     ImageButton m_search;
@@ -122,7 +119,6 @@ public class SystemFragment extends DevFragment {
     final SearchList m_searchList = new SearchList();
 
     BuildArrayAdapter m_adapter;
-    SubMenu m_menu;
     int m_advertisingIdIdx = 0;
     final String m_advertisingId = "no ad id";
 
@@ -162,7 +158,7 @@ public class SystemFragment extends DevFragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+
 
         View rootView = inflater.inflate(R.layout.build_tab, container, false);
 
@@ -248,7 +244,7 @@ public class SystemFragment extends DevFragment {
                     // TODO - refresh displaying of list.
                 } catch (Exception ex) {
                     // exception.printStackTrace();
-                    m_log.e("ad id", ex.getMessage());
+                    LLOG.e("ad id", ex.getMessage());
                 }
             }
         };
@@ -271,27 +267,15 @@ public class SystemFragment extends DevFragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
+    protected boolean onMenuSelected(MenuItem item) {
+        return super.onMenuSelected(item);
     }
 
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("Sys Options");
-        inflater.inflate(R.menu.sys_menu, m_menu);
+    protected void onMenuCreate(Menu menu, MenuInflater inflater) {
+        subMenu = menu.addSubMenu("Sys Options");
+        inflater.inflate(R.menu.sys_menu, subMenu);
     }
 
     public void updateList() {
@@ -340,7 +324,7 @@ public class SystemFragment extends DevFragment {
             }
             */
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
 
         try {
@@ -366,7 +350,7 @@ public class SystemFragment extends DevFragment {
             listStr.put("HeapMax (large)", String.format(sFmtMB, (double) largHeapMb));
             addBuild("Memory...", listStr);
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
 
         try {
@@ -386,7 +370,7 @@ public class SystemFragment extends DevFragment {
             //	listStr.put("#Tasks",  String.valueOf(taskCnt));
             addBuild("Processes...", listStr);
         } catch (Exception ex) {
-            m_log.e("System-Processes %s", ex.getMessage());
+            LLOG.e("System-Processes ", ex.getMessage());
         }
 
         try {
@@ -398,7 +382,7 @@ public class SystemFragment extends DevFragment {
             putIf(listStr, "isUserAMonkey", "Yes", ActivityManager.isUserAMonkey());
             addBuild("Misc...", listStr);
         } catch (Exception ex) {
-            m_log.e("System-Misc %s", ex.getMessage());
+            LLOG.e("System-Misc ", ex.getMessage());
         }
 
         // --------------- Locale / Timezone -------------
@@ -434,7 +418,7 @@ public class SystemFragment extends DevFragment {
 
             addBuild("Locale TZ...", localeListStr);
         } catch (Exception ex) {
-            m_log.e("Locale/TZ %s", ex.getMessage());
+            LLOG.e("Locale/TZ ", ex.getMessage());
         }
 
         // --------------- Caption Manager ---------
@@ -501,7 +485,7 @@ public class SystemFragment extends DevFragment {
             } else
                 addBuild("GPS", "Off");
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
             addBuild("GPS", ex.getLocalizedMessage());
         }
 
@@ -639,7 +623,7 @@ public class SystemFragment extends DevFragment {
                     strList.put(account.name, account.type);
                 }
             } catch (Exception ex) {
-                m_log.e(ex.getMessage());
+                LLOG.e(ex.getMessage());
             }
             addBuild("Accounts...", strList);
         }
@@ -667,7 +651,7 @@ public class SystemFragment extends DevFragment {
                     strList.put(sensor.getName(), sensor.getVendor());
                 }
             } catch (Exception ex) {
-                m_log.e(ex.getMessage());
+                LLOG.e(ex.getMessage());
             }
             addBuild("Sensors...", strList);
         }
@@ -708,7 +692,7 @@ public class SystemFragment extends DevFragment {
                 try {
                     addBuild("UserName", userMgr.getUserName());
                 } catch (Exception ex) {
-                    m_log.e(ex.getMessage());
+                    LLOG.e(ex.getMessage());
                 }
             }
         } catch (Exception ignore) {
@@ -725,7 +709,7 @@ public class SystemFragment extends DevFragment {
             strList.put("AdbEnabled", String.valueOf(adb));
             strList.put("ByteOrder", ByteOrder.nativeOrder().toString());
 
-            int nightModeFlags = getContextSafe().getResources().getConfiguration().uiMode &
+            int nightModeFlags = requireContext().getResources().getConfiguration().uiMode &
                             Configuration.UI_MODE_NIGHT_MASK;
             String nightMode = "unknown";
             switch (nightModeFlags) {
@@ -802,7 +786,7 @@ public class SystemFragment extends DevFragment {
     private void collapseAll() {
         int count = m_listView.getAdapter().getCount(); // m_list.size();
         for (int position = 0; position < count; position++) {
-            // m_log.d("Collapse " + position);
+            // LLOG.d("Collapse " + position);
             m_listView.collapseGroup(position);
         }
     }

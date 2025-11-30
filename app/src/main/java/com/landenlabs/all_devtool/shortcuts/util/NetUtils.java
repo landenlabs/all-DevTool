@@ -21,10 +21,11 @@
 
 package com.landenlabs.all_devtool.shortcuts.util;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -387,7 +388,7 @@ public class NetUtils {
         } catch (Exception ex) {
             // Android Q - privacy changes.
             //  https://developer.android.com/about/versions/10/privacy/changes
-            Log.e("NetUtils", "Failed to read " + filePath + " ex=" + ex.getMessage());
+            LLOG.e("NetUtils Failed to read ", filePath, " ex=" , ex.getMessage());
         }
 
         return "";

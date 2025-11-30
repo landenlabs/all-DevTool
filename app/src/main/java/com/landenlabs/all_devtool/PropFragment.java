@@ -21,6 +21,8 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.getShellCmd;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -59,8 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import static com.landenlabs.all_devtool.shortcuts.util.SysUtils.getShellCmd;
 
 /**
  * Show system property information
@@ -257,7 +257,7 @@ public class PropFragment extends DevFragment {
                         try {
                             key = f.get(null).toString();
                             String value =
-                                    Settings.Global.getString(getContextSafe().getContentResolver(), key);
+                                    Settings.Global.getString(requireContext().getContentResolver(), key);
                             if (!TextUtils.isEmpty(value)) {
                                 globalList.put(key, value);
                             }
@@ -287,7 +287,7 @@ public class PropFragment extends DevFragment {
                         try {
                             key = f.get(null).toString();
                             String value =
-                                    Settings.Secure.getString(getContextSafe().getContentResolver(), key);
+                                    Settings.Secure.getString(requireContext().getContentResolver(), key);
                             if (!TextUtils.isEmpty(value)) {
                                 secureList.put(key, value);
                             }
@@ -317,7 +317,7 @@ public class PropFragment extends DevFragment {
                         try {
                             key = f.get(null).toString();
                             String value =
-                                    Settings.System.getString(getContextSafe().getContentResolver(), key);
+                                    Settings.System.getString(requireContext().getContentResolver(), key);
                             if (!TextUtils.isEmpty(value)) {
                                 systemList.put(key, value);
                             }
@@ -335,7 +335,7 @@ public class PropFragment extends DevFragment {
 
         if (firstTime ||
                 !(m_listView.getExpandableListAdapter() instanceof  BaseExpandableListAdapter)) {
-            final BuildArrayAdapter adapter = new BuildArrayAdapter(getActivitySafe());
+            final BuildArrayAdapter adapter = new BuildArrayAdapter(requireActivity());
             m_listView.setAdapter(adapter);
 
             int count = adapter.getGroupCount();
@@ -380,7 +380,7 @@ public class PropFragment extends DevFragment {
     private void collapseAll() {
         int count = m_listView.getAdapter().getCount(); // m_list.size();
         for (int position = 0; position < count; position++) {
-            // m_log.d("Collapse " + position);
+            // LLOG.d("Collapse " + position);
             m_listView.collapseGroup(position);
         }
     }

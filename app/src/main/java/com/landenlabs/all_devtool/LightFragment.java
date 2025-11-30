@@ -21,14 +21,14 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -42,7 +42,6 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.util.List;
@@ -60,9 +59,7 @@ import java.util.List;
 public class LightFragment extends DevFragment
         implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
 
-    private final LLog m_log = LLog.DBG;
     public static final String s_name = "Light";
-
 
     private ToggleButton m_cameraLightTb;
 
@@ -111,14 +108,12 @@ public class LightFragment extends DevFragment
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null)
-            m_log.e("onViewCreated savedInstanceState");
-
-        setHasOptionsMenu(true);
+            LLOG.e("onViewCreated savedInstanceState");
 
         View m_rootView = inflater.inflate(R.layout.light_tab, container, false);
 
         m_cameraLightTb =  Ui.viewById(m_rootView, R.id.lightCameraOnTb);
-        if (!getContextSafe().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+        if (!requireContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             m_cameraLightTb.setVisibility(View.GONE);
         }
         m_cameraLightTb.setOnClickListener(this);
@@ -143,7 +138,7 @@ public class LightFragment extends DevFragment
                 // checkPermissions(Manifest.permission.CAMERA);
                 m_camera = Camera.open();
             } catch (Exception ex) {
-                m_log.e(ex.getMessage());
+                LLOG.e(ex.getMessage());
             }
         }
     }
@@ -165,7 +160,7 @@ public class LightFragment extends DevFragment
                 mCameraId = cameraIds[0];
             }
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -247,7 +242,7 @@ public class LightFragment extends DevFragment
                 return true;
             }
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
         return false;
     }
@@ -270,7 +265,7 @@ public class LightFragment extends DevFragment
             }
 
         } catch (Exception ex) {
-            m_log.e(ex.getMessage());
+            LLOG.e(ex.getMessage());
         }
     }
 
@@ -298,7 +293,7 @@ public class LightFragment extends DevFragment
 
     private void setScreenBrightnessAuto(boolean onAuto) {
         if (checkSystemWritePermission()) {
-            Settings.System.putInt(getActivitySafe().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE,
+            Settings.System.putInt(requireActivity().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE,
                     onAuto ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                             :  Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         }
@@ -307,7 +302,7 @@ public class LightFragment extends DevFragment
     private boolean checkSystemWritePermission() {
         boolean retVal = true;
         if (Build.VERSION.SDK_INT >= 23) {
-            retVal = Settings.System.canWrite(getActivitySafe());
+            retVal = Settings.System.canWrite(requireActivity());
         }
         return retVal;
     }
@@ -316,8 +311,8 @@ public class LightFragment extends DevFragment
         /*
         if (Build.VERSION.SDK_INT >= 23) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-            intent.setData(Uri.parse("package:" + getActivitySafe().getPackageName()));
-            getActivitySafe().startActivity(intent);
+            intent.setData(Uri.parse("package:" + requireActivity().getPackageName()));
+            requireActivity().startActivity(intent);
         }
          */
     }

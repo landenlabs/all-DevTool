@@ -48,7 +48,7 @@ import android.widget.TextView;
 import com.landenlabs.all_devtool.R;
 import com.landenlabs.all_devtool.TextFragment;
 import com.landenlabs.all_devtool.TextInfo;
-import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
 
@@ -98,13 +98,13 @@ public class TextInfoDialog extends DialogFragment {
         textInfoDialog.m_textInfoList = textInfoList;
         textInfoDialog.m_idx = idx;
 
-        GoogleAnalyticsHelper.event(textInfoDialog.getActivity(), "", "dialog", textInfoDialog.getClass().getName());
+        SendAnalytics.event("TextInfoDialog", "dialog", "");
         return textInfoDialog;
     }
 
     public static void showDialog(TextFragment textFragment, final ArrayList<TextInfo> textInfoList, final int idx) {
         DialogFragment newFragment = TextInfoDialog.create(textFragment, textInfoList, idx);
-        newFragment.show(textFragment.getActivitySafe().getFragmentManager(), "dialog");
+        newFragment.show(textFragment.requireActivity().getFragmentManager(), "dialog");
     }
 
     void setTouch(View view) {

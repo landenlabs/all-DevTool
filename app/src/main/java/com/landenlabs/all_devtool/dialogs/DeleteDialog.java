@@ -23,9 +23,6 @@ package com.landenlabs.all_devtool.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -36,9 +33,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+
 import com.landenlabs.all_devtool.DevFragment;
 import com.landenlabs.all_devtool.R;
-import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
+import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 
 import java.io.File;
@@ -75,7 +75,7 @@ public class DeleteDialog extends DialogFragment   {
         deleteDialog.m_fileList = fileList;
         deleteDialog.m_idx = idx;
 
-        GoogleAnalyticsHelper.event(deleteDialog.getActivity(), "", "dialog", deleteDialog.getClass().getName());
+        SendAnalytics.event( "DeleteDialog", "create", "");
         return deleteDialog;
     }
 

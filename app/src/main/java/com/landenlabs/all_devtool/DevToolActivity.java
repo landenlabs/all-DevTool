@@ -21,8 +21,11 @@
 
 package com.landenlabs.all_devtool;
 
+import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -34,28 +37,25 @@ import android.os.StrictMode;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ShareActionProvider;
+import android.view.Surface;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.os.ConfigurationCompat;
-import androidx.fragment.app.FragmentActivity;
-import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.android.material.tabs.TabLayout;
 import com.landenlabs.all_devtool.shortcuts.ShortcutUtil;
 import com.landenlabs.all_devtool.shortcuts.util.ALogNotification;
-import com.landenlabs.all_devtool.shortcuts.util.AppCrash;
-import com.landenlabs.all_devtool.shortcuts.util.GoogleAnalyticsHelper;
 import com.landenlabs.all_devtool.shortcuts.util.LLog;
+import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.UncaughtExceptionHandler;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
-
-import net.danlew.android.joda.JodaTimeAndroid;
-
-import java.util.Locale;
-
 
 /**
  * Main activity for Dev Tool
@@ -83,22 +83,22 @@ import java.util.Locale;
  * @version v1.1  Nov-2014 Released
  * @see <a href="https://LanDenLabs.com/android"> Author site </a>
  */
-public class DevToolActivity extends FragmentActivity {
+public class DevToolActivity extends AppCompatActivity {
 
-    protected String m_startFrag;
-    private FirebaseAnalytics firebaseAnalytics;
+    protected String startFrag;
 
-
-    @SuppressWarnings({"FieldCanBeLocal"})
-    private UncaughtExceptionHandler m_uncaughtExceptionHandler;
 
     @SuppressLint("DefaultLocale")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // This tells the app to draw behind the system bars (draw edge-to-edge)
+        // See DevFragment - where padding is restored.
+        // See setOnApplyWindowInsetsListener
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
         boolean DEBUG = (getApplicationInfo().flags & 2) != 0;
-        AppCrash.initalize(getApplication(), DEBUG);
 
         GlobalInfo.s_globalInfo.mainFragActivity = this;
         try {
@@ -111,7 +111,7 @@ public class DevToolActivity extends FragmentActivity {
             GlobalInfo.s_globalInfo.version = "1.3";
         }
 
-        LLog.DBG.d("startup");  // call after global info setup completed.
+        LLOG.d("startup");  // call after global info setup completed.
 
         /*
         // See build.gradle to add
@@ -121,44 +121,48 @@ public class DevToolActivity extends FragmentActivity {
         }
         */
 
-        // See ClockFragment
-        JodaTimeAndroid.init(this); // Load TimeZone database.
-
-
-        // Obtain the FirebaseAnalytics instance.
-        // Optionally -  enable verbose logging
-        //     adb shell setprop log.tag.FA VERBOSE
-        //     adb shell setprop log.tag.FA-SVC VERBOSE
-        //     adb logcat -v time -s FA FA-SVC
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Utils.onActivityCreateSetTheme(this);
 
         setContentView(R.layout.main);
+
+        // Apply a listener to the root view of the fragment's layout
+        View root = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, windowInsets) -> {
+            // Get the insets for the system bars (Status Bar + Navigation Bar)
+            GlobalInfo.s_insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            return windowInsets;
+        });
+
         setTitle(String.format("%s v%s API=%d", GlobalInfo.s_globalInfo.appName, GlobalInfo.s_globalInfo.version,  Build.VERSION.SDK_INT));
         // setTitle(GlobalInfo.s_globalInfo.appName + " v" + BuildConfig.VERSION_NAME + " API" + Build.VERSION.SDK_INT +  (BuildConfig.DEBUG ? " Debug" : ""));
 
-        // Initialization
-        ViewPager viewPager = Ui.viewById(this, R.id.pager);
-        GlobalInfo.s_globalInfo.tabAdapter = new TabPagerAdapter(getSupportFragmentManager(), viewPager, getActionBar());
+        // Initialize tab pager
+        ViewPager2 viewPager = Ui.viewById(this, R.id.pager);
+        // viewPager.setUserInputEnabled(false);       // Disable swipe
 
-        GlobalInfo.grabThemeSetings(this);
+        TabLayout tabLayout = Ui.viewById(this, R.id.tabs);
+        GlobalInfo.s_globalInfo.tabAdapter = new TabPagerAdapter(this, viewPager, tabLayout);
 
-        GoogleAnalyticsHelper.event(this, this.getLocalClassName(), "create", "");
+        GlobalInfo.grabThemeSettings(this);
+
+
+        SendAnalytics.init(this);
+        SendAnalytics.event(  this.getLocalClassName(), "create", "");
 
         Intent intent = this.getIntent();
         if (intent != null) {
             String startupFrag = intent.getStringExtra(GlobalInfo.STARTUP_FRAG);
             if (!TextUtils.isEmpty(startupFrag)) {
-                m_startFrag = startupFrag;
+                startFrag = startupFrag;
             }
         }
 
-        if (!TextUtils.isEmpty(m_startFrag)) {
-            viewPager.setCurrentItem(GlobalInfo.s_globalInfo.tabAdapter.findFragPos(m_startFrag, 0));
+        if (!TextUtils.isEmpty(startFrag)) {
+            viewPager.setCurrentItem(GlobalInfo.s_globalInfo.tabAdapter.findFragPos(startFrag, 0));
         }
 
         // In debug build - enable full StrictMode
-        if (DEBUG) {
+        if (false && DEBUG) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     // .detectDiskReads()
                     // .detectDiskWrites()
@@ -178,13 +182,13 @@ public class DevToolActivity extends FragmentActivity {
         getMenuInflater().inflate(R.menu.menus, menu);
 
         MenuItem m_shareMenuItem = menu.findItem(R.id.menu_share);
-        GlobalInfo.s_globalInfo.shareActionProvider = (ShareActionProvider) m_shareMenuItem.getActionProvider();
-
+        // GlobalInfo.s_globalInfo.shareActionProvider = MenuItemCompat.getActionProvider(m_shareMenuItem);
         menu.findItem( R.id.menu_lock_orientation).setChecked(GlobalInfo.s_globalInfo.isLockedOrientation);
 
         return super.onCreateOptionsMenu(menu);
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
@@ -209,7 +213,11 @@ public class DevToolActivity extends FragmentActivity {
         } else if (itemId == R.id.menu_lock_orientation) {
             item.setChecked(!item.isChecked());
             GlobalInfo.s_globalInfo.isLockedOrientation = item.isChecked();
-            GlobalInfo.s_globalInfo.lockedOrientation = getResources().getConfiguration().orientation;
+            if (GlobalInfo.s_globalInfo.isLockedOrientation) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            } else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            }
             return true;
         }
 
@@ -218,31 +226,19 @@ public class DevToolActivity extends FragmentActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
-        if (GlobalInfo.s_globalInfo.isLockedOrientation) {
-            setRequestedOrientation(GlobalInfo.s_globalInfo.lockedOrientation);
-        }
-
-        // Checks the orientation of the screen
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Toast.makeText(this, "Landscape", Toast.LENGTH_SHORT).show();
-            // GlobalInfo.s_globalInfo.tabAdapter.m_actionBar.hide();
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Toast.makeText(this, "Portrait", Toast.LENGTH_SHORT).show();
-            // GlobalInfo.s_globalInfo.tabAdapter.m_actionBar.show();
-        }
-
-        Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
+        // Because configChanges includes "orientation", this method is called *after* an orientation
+        // change has already occurred. Trying to set the orientation here is too late and
+        // can cause flickering or be ignored. The lock must be established beforehand in onOptionsItemSelected.
     }
 
     @Override
     public void onStart() {
         super.onStart();
         GlobalInfo.s_globalInfo.mainFragActivity = this;
-        m_uncaughtExceptionHandler = new UncaughtExceptionHandler(this);
-        Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
+        new UncaughtExceptionHandler(this);
+        // Locale.setDefault(ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0));
         ALogNotification.init(this);
     }
 
@@ -266,16 +262,14 @@ public class DevToolActivity extends FragmentActivity {
      * Use html web viewer in AlertDialog.
      */
     private void showAbout() {
-        // wv.loadUrl("file:///android_asset/about.html");
         int resId = getResources().getIdentifier("compileSdkVersion", "string", getPackageName());
         String compileSdk = (resId > 0) ? getResources().getString(resId) : "";
         resId = getResources().getIdentifier("buildToolsVersion", "string", getPackageName());
         String buildToolsVersion = (resId > 0) ? getResources().getString(resId) : "";
-
         String htmlStr = String.format(Utils.LoadData(this, "about.html"),
                 getPackageInfo().versionName, "", compileSdk, buildToolsVersion);
         Ui.showWebMessage(this, Ui.HTML_CENTER_BOX, htmlStr);
-        GoogleAnalyticsHelper.event(this, "", "dialog", "about");
+        SendAnalytics.event(getLocalClassName(),  "dialog", "about");
     }
 
     /**
@@ -289,5 +283,4 @@ public class DevToolActivity extends FragmentActivity {
             return new PackageInfo();
         }
     }
-
 }

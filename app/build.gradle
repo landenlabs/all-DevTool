@@ -8,7 +8,7 @@ apply plugin: 'com.android.application'
 android {
     namespace 'com.landenlabs.all_devtool'
 
-    compileSdk rootProject.apiSDK
+    compileSdkVersion rootProject.apiSDK
 
     defaultConfig {
         applicationId 'com.landenlabs.all_devtool'
@@ -106,12 +106,15 @@ android {
         exclude 'META-INF/DEPENDENCIES'
     }
 
-    lint {
+    lintOptions {
         abortOnError false
         checkReleaseBuilds false
-        disable 'DefaultLocale', 'SimpleDateFormat', 'InflateParams', 'SpUsage', 'UseCompoundDrawables', 'HandlerLeak', 'ViewConstructor', 'SetTextI18n', 'RtlSymmetry', 'RtlHardcoded', 'ContentDescription', 'MissingTranslation', 'ValidFragment', 'UnusedAttribute', 'Convert2Lambda', 'Anonymous2MethodRef', 'SpellCheckingInspection', 'HardcodedText'
+        disable 'DefaultLocale', 'SimpleDateFormat', 'InflateParams', 'SpUsage',
+                'UseCompoundDrawables', 'HandlerLeak', 'ViewConstructor', 'SetTextI18n',
+                'RtlSymmetry', 'RtlHardcoded', 'ContentDescription',
+                'MissingTranslation', 'ValidFragment', 'UnusedAttribute',
+                'FieldCanBeLocal', 'LocalSuppress', 'HardcodedText', 'Typos'
     }
-
 
     // Note - Slows build down, -Pqc=1  to enable
     if (project.hasProperty("qc")) {
@@ -129,6 +132,7 @@ android {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
 
     if (rootProject.apiSDK > 30) {
         implementation 'androidx.appcompat:appcompat:1.7.0'
@@ -136,6 +140,7 @@ dependencies {
         implementation 'androidx.appcompat:appcompat:1.3.1'
     }
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
+    implementation 'com.google.android.material:material:1.12.0'
 
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:34.6.0')
@@ -193,7 +198,7 @@ dependencies {
 android.applicationVariants.configureEach {
     variant -> variant.outputs.configureEach {
         def ourName = project.parent.name
-        def buildType = outputFileName.replaceAll(".*(debug|release).*", '$1')
+        def buildType = outputFileName.replaceAll(".*(debug|release).*",'\$1')
         def versionStr = versionName.replaceAll("-.*", "")
         def flavor = variant.mergedFlavor.versionNameSuffix.toString().replace("null", "")
         // ext.flavorName = variant.name
@@ -246,13 +251,13 @@ tasks.register('listFlavors') {
         println("--- Flavors ---")
         /*
         android.productFlavors.all {
-            flavor -> println("  " + flavor.name + "\t" + android.defaultConfig.applicationId + flavor.applicationIdSuffix)
+            flavor -> println("  " + flavor.name + "	" + android.defaultConfig.applicationId + flavor.applicationIdSuffix)
         }
          */
-        printf("   %-20s %-20s %-40s   %s\n", "--Package--", "--Name--", "--Description/Flavor--", "--isMinified--")
+        printf("   %-20s %-20s %-40s   %s", "--Package--", "--Name--", "--Description/Flavor--", "--isMinified--")
         project.android.applicationVariants.all { variant ->
             // def applicationId = [variant.mergedFlavor.applicationId, variant.buildType.applicationIdSuffix].findAll().join()
-            printf("   %-20s %-20s %-40s   %b\n", variant.getApplicationId(), variant.name, variant.description, variant.buildType.isMinifyEnabled())
+            printf("   %-20s %-20s %-40s   %b ", variant.getApplicationId(), variant.name, variant.description, variant.buildType.isMinifyEnabled())
         }
     }
 }

@@ -32,28 +32,37 @@ import com.landenlabs.all_devtool.GlobalInfo;
  * Created by Dennis Lang on 11/28/2015.
  */
 public class LLog {
-
+    
+    public static final LLog LLOG = new LLog(GlobalInfo.s_globalInfo.isDebug);
     public static final String LOG_PREFIX = "all_dev";
-
-    // LLog states OFF or ON, use DBG to auto enable in Debug build.
-    private static final LLog OFF = new LLog(false);
-    private static final LLog ON = new LLog(true);
-    public static final LLog DBG = GlobalInfo.s_globalInfo.isDebug ? ON : OFF;
-
-    // Auxilary 'fmt' meta tags
-    private static final String PID = "{pid}";   // Process ID
-    private static final String TID = "{tid}";   // Thread ID
-
-    private static final String NAME = LLog.class.getCanonicalName();
     private final boolean mEnabled;
-
+    
     public LLog(boolean enabled) {
         mEnabled = enabled;
     }
 
-    public final boolean isOn() {
-        return mEnabled;
+    public final void d(String ... args) {
+        if (mEnabled)
+            Log.d(LOG_PREFIX, String.join(" ", args));
     }
+
+    public final void i(String ... args) {
+        if (mEnabled)
+            Log.i(LOG_PREFIX, String.join(" ", args));
+    }
+
+    public final void w(String ... args) {
+        if (mEnabled)
+            Log.w(LOG_PREFIX, String.join(" ", args));
+    }
+
+    public final void e(String ... args) {
+        if (mEnabled)
+            Log.e(LOG_PREFIX, String.join(" ", args));
+    }
+    
+    /*
+    private static final String NAME = LLog.class.getCanonicalName();
 
     public static String getTag() {
         String tag = "";
@@ -66,56 +75,11 @@ public class LLog {
                     if (!elem.getClassName().equals(NAME))
                         break;
                 }
-                tag = "("+elem.getFileName() + ":" + elem.getLineNumber()+")";
+                tag = "("+elem.getFileName() + ":" + elem.getLineNumber()+") ";
                 return tag;
             }
         }
         return tag;
     }
-
-    private static String fmt(String msg, Object... args) {
-        return fmt(String.format(msg, args));
-    }
-
-    public final void d(String msg) {
-        if (isOn())
-            Log.d(LOG_PREFIX, getTag() +  msg);
-    }
-
-    public final void i(String msg) {
-        if (isOn())
-            Log.i(LOG_PREFIX, getTag() +  msg);
-    }
-
-    public final void e(String msg) {
-        if (isOn())
-            Log.e(LOG_PREFIX, getTag() + msg);
-    }
-
-    private static String fmt(String msg) {
-        msg = msg.replace(PID, String.valueOf(android.os.Process.myPid()));
-        msg = msg.replace(TID, String.valueOf(android.os.Process.myTid()));
-        return msg;
-    }
-
-    public final void d(String msg, Object... args) {
-        if (isOn())
-            Log.d(LOG_PREFIX, getTag() + fmt(msg, args));
-    }
-
-    public final void i(String msg, Object... args) {
-        if (isOn())
-            Log.i(LOG_PREFIX, getTag() + fmt(msg, args));
-    }
-
-
-    public final void e(String msg, Exception ex) {
-        if (isOn())
-            Log.e(LOG_PREFIX, getTag() + fmt(msg), ex);
-    }
-
-    public final void e(String msg, Object... args) {
-        if (isOn())
-            Log.e(LOG_PREFIX, getTag() + fmt(msg, args));
-    }
+    */
 }

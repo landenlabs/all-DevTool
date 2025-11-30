@@ -34,7 +34,7 @@ public class ShortcutFileBrowser extends DevToolActivity {
      * Short cut to FileBrowser page.
      */
     public ShortcutFileBrowser() {
-        m_startFrag = FileBrowserFragment.s_name;
+        startFrag = FileBrowserFragment.s_name;
     }
 }
 

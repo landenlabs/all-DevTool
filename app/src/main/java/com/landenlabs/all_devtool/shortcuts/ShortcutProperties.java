@@ -34,7 +34,7 @@ public class ShortcutProperties extends DevToolActivity {
      * Short cut to Properties page.
      */
     public ShortcutProperties() {
-        m_startFrag = PropFragment.s_name;
+        startFrag = PropFragment.s_name;
     }
 }
 

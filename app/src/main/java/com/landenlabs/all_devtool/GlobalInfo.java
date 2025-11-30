@@ -22,14 +22,14 @@
 package com.landenlabs.all_devtool;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.TypedValue;
-import android.widget.ShareActionProvider;
 
 import androidx.annotation.StyleableRes;
+import androidx.core.graphics.Insets;
 
 /**
  * Manage global app information in singleton class.
@@ -42,6 +42,7 @@ public class GlobalInfo {
     public final static GlobalInfo s_globalInfo = new GlobalInfo();
 
     public final static String STARTUP_FRAG = "StartupFrag";
+    public static Insets s_insets;
 
     // Main global info - set by startup activity DevToolActivity.
     public final String appName = "DevTool";
@@ -49,11 +50,11 @@ public class GlobalInfo {
     public String version;
     public boolean isDebug = false;
     public boolean isLockedOrientation = false;
-    public int lockedOrientation = 0;
+    public int lockedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
     public DevToolActivity mainFragActivity;
     public TabPagerAdapter tabAdapter;
-    public ShareActionProvider shareActionProvider;
+    // public ActionProvider shareActionProvider;
     public String themeName = "Theme.Holo";  // Default theme set in our style.
 
     // Used to draw transparent 'screen' fragment.
@@ -62,24 +63,24 @@ public class GlobalInfo {
     public boolean haveActionBar = false;
     public boolean haveActionBarOverlay = false;
 
-    public static void grabThemeSetings(Activity activity) {
+    public static void grabThemeSettings(Activity activity) {
         GlobalInfo.s_globalInfo.haveActionBar = (activity.getActionBar() != null);
         if (GlobalInfo.s_globalInfo.haveActionBar) {
 
             Theme actionBarTheme = activity.getActionBar().getThemedContext().getTheme();
             {
-                // @StyleableRes
-                int[] attrs = {
+                @StyleableRes int[] attrs = {
                     android.R.attr.actionModeBackground
                 };
-                TypedArray typedArray = actionBarTheme.obtainStyledAttributes(attrs);
-                int cnt = typedArray.getIndexCount();
-                if (cnt != 0) {
-                    int attrIdx = typedArray.getIndex(0);
-                    // String str = typedArray.getString(attrIdx);
-                    GlobalInfo.s_globalInfo.actionBarBackground = typedArray.getDrawable(attrIdx);
+                try (TypedArray typedArray = actionBarTheme.obtainStyledAttributes(attrs)) {
+                    int cnt = typedArray.getIndexCount();
+                    if (cnt != 0) {
+                        int attrIdx = typedArray.getIndex(0);
+                        // String str = typedArray.getString(attrIdx);
+                        GlobalInfo.s_globalInfo.actionBarBackground = typedArray.getDrawable(attrIdx);
+                    }
+                    typedArray.recycle();
                 }
-                typedArray.recycle();
             }
 
             // int[] attrs = { android.R.attr.actionBarSize };
@@ -113,38 +114,29 @@ public class GlobalInfo {
      */
     public static int getThemeResId(int themeIdx) {
         // return themeIdx + R.style.Theme_00;
-        switch (themeIdx) {
-            case 0: return R.style.Theme_00;
-            case 1: return R.style.Theme_01;
-            case 2: return R.style.Theme_02;
-            case 3: return R.style.Theme_03;
-            case 4: return R.style.Theme_04;
-            case 5: return R.style.Theme_05;
-            case 6: return R.style.Theme_06;
-            case 7: return R.style.Theme_07;
-            case 8: return R.style.Theme_08;
-            case 9: return R.style.Theme_09;
-            case 10: return R.style.Theme_10;
-        }
+        return switch (themeIdx) {
+            case 0 -> R.style.Theme_00;
+            case 1 -> R.style.Theme_01;
+            case 2 -> R.style.Theme_02;
+            case 3 -> R.style.Theme_03;
+            case 4 -> R.style.Theme_04;
+            case 5 -> R.style.Theme_05;
+            case 6 -> R.style.Theme_06;
+            case 7 -> R.style.Theme_07;
+            case 8 -> R.style.Theme_08;
+            case 9 -> R.style.Theme_09;
+            case 10 -> R.style.Theme_10;
+            default -> switch (themeIdx) {
+                case 11 -> R.style.Theme_11;
+                case 12 -> R.style.Theme_12;
+                case 13 -> R.style.Theme_13;
+                case 14 -> R.style.Theme_14;
+                case 15 -> R.style.Theme_15;
+                case 16 -> R.style.Theme_16;
+                case 17 -> R.style.Theme_17;
+                default -> R.style.Theme_06;
+            };
+        };
 
-        switch (themeIdx) {
-            case 11:
-                return R.style.Theme_11;
-            case 12:
-                return R.style.Theme_12;
-            case 13:
-                return R.style.Theme_13;
-
-            case 14:
-                return R.style.Theme_14;
-            case 15:
-                return R.style.Theme_15;
-            case 16:
-                return R.style.Theme_16;
-            case 17:
-                return R.style.Theme_17;
-        }
-
-        return R.style.Theme_06;    // Default - see style.xml
     }
 }

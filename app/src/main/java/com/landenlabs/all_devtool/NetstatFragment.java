@@ -35,7 +35,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -51,7 +50,6 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 
 import com.landenlabs.all_devtool.shortcuts.util.ArrayListPair;
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.NetUtils;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.Utils;
@@ -75,8 +73,6 @@ import java.util.concurrent.BlockingQueue;
  */
 @SuppressWarnings({"Convert2Lambda", "FieldCanBeLocal", "SynchronizeOnNonFinalField"})
 public class NetstatFragment extends DevFragment {
-    // Logger - set to LLog.DBG to only log in Debug build, use LLog.On for always log.
-    private final LLog m_log = LLog.DBG;
 
     private ArrayList<NetInfo> m_list = new ArrayList<>();
     private ExpandableListView m_listView;
@@ -86,7 +82,6 @@ public class NetstatFragment extends DevFragment {
     private String m_filter;
 
     private NetArrayAdapter m_adapter;
-    private SubMenu m_menu;
 
     public static final String s_name = "Netstat";
     private static final int m_rowColor1 = 0;
@@ -130,7 +125,7 @@ public class NetstatFragment extends DevFragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+
 
         View rootView = inflater.inflate(R.layout.build_tab, container, false);
 
@@ -197,7 +192,7 @@ public class NetstatFragment extends DevFragment {
         });
 
         m_listView = Ui.viewById(rootView, R.id.buildListView);
-        m_adapter = new NetArrayAdapter(getActivitySafe());
+        m_adapter = new NetArrayAdapter(requireActivity());
         m_listView.setAdapter(m_adapter);
 
         m_adapter.setOnItemLongClickListener1(new AdapterView.OnItemLongClickListener() {
@@ -251,7 +246,7 @@ public class NetstatFragment extends DevFragment {
                             // http://api.ipstack.com/<ip>?access_key=<apiKey>
                             
                             if (mapIntent.resolveActivity(
-                                            getActivitySafe().getPackageManager()) != null) {
+                                            requireActivity().getPackageManager()) != null) {
                                 startActivity(mapIntent);
                             }
                         }
@@ -285,26 +280,14 @@ public class NetstatFragment extends DevFragment {
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
+    public boolean onMenuSelected(MenuItem item) {
+        return super.onMenuSelected(item);
     }
 
 
     @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        m_menu = menu.addSubMenu("Netstat Options");
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        subMenu = menu.addSubMenu("Netstat Options");
     }
 
     private void collapseAll() {
@@ -312,7 +295,7 @@ public class NetstatFragment extends DevFragment {
         synchronized (m_listView) {
             int count = m_listView.getAdapter().getCount(); // m_list.size();
             for (int position = 0; position < count; position++) {
-                // m_log.d("Collapse " + position);
+                // LLOG.d("Collapse " + position);
                 m_listView.collapseGroup(position);
             }
         }
@@ -376,7 +359,7 @@ public class NetstatFragment extends DevFragment {
             // --------------- Network connections ------------
 
             NetUtils.NetConnections netConnections =
-                    NetUtils.getConnetions(getContextSafe());
+                    NetUtils.getConnetions(requireContext());
             if (netConnections.size() > 0) {
                 Map<String, ArrayListPairString> pkgConnections = new TreeMap<>();
 
