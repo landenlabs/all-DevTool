@@ -220,7 +220,7 @@ public class ScreenFragment extends DevFragment {
     }
 
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.screen_clear_menu) {
             m_drawPoints.clear();

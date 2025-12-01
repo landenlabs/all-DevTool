@@ -39,7 +39,6 @@ import com.landenlabs.all_devtool.DevToolActivity;
 import com.landenlabs.all_devtool.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

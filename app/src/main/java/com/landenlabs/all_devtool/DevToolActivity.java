@@ -37,10 +37,10 @@ import android.os.StrictMode;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
@@ -51,7 +51,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.landenlabs.all_devtool.shortcuts.ShortcutUtil;
 import com.landenlabs.all_devtool.shortcuts.util.ALogNotification;
-import com.landenlabs.all_devtool.shortcuts.util.LLog;
 import com.landenlabs.all_devtool.shortcuts.util.SendAnalytics;
 import com.landenlabs.all_devtool.shortcuts.util.Ui;
 import com.landenlabs.all_devtool.shortcuts.util.UncaughtExceptionHandler;
@@ -87,6 +86,16 @@ public class DevToolActivity extends AppCompatActivity {
 
     protected String startFrag;
 
+    // Prepare  permission request launcher
+    private final ActivityResultLauncher<String> requestPerm =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                    isGranted -> {
+                        if (isGranted) {
+                            LLOG.d("Permission granted");
+                        } else {
+                            LLOG.w( "Permission denied.");
+                        }
+                    });
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,6 +108,7 @@ public class DevToolActivity extends AppCompatActivity {
 
         boolean DEBUG = (getApplicationInfo().flags & 2) != 0;
 
+        GlobalInfo.s_globalInfo.requestPerm = requestPerm;
         GlobalInfo.s_globalInfo.mainFragActivity = this;
         try {
             GlobalInfo.s_globalInfo.isDebug =  (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));

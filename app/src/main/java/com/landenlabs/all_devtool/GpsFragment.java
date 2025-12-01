@@ -30,7 +30,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
@@ -381,7 +380,7 @@ public class GpsFragment extends DevFragment implements
     }
 
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.gps_clock_12) {
             s_hourFormat = s_hour12Format;

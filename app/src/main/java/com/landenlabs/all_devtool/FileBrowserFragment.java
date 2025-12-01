@@ -616,7 +616,7 @@ public class FileBrowserFragment extends DevFragment
     }
 
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         int pos;
         int id = item.getItemId();
         int show = m_show;
@@ -677,7 +677,7 @@ public class FileBrowserFragment extends DevFragment
 
 
     @Override
-    public void onMenuCreate(Menu menu, MenuInflater inflater) {
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         subMenu = menu.addSubMenu("File Options");
         inflater.inflate(R.menu.filebrowser_menu, subMenu);
 

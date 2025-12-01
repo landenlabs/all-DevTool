@@ -28,7 +28,8 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 
-import androidx.annotation.StyleableRes;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.AttrRes;
 import androidx.core.graphics.Insets;
 
 /**
@@ -56,6 +57,7 @@ public class GlobalInfo {
     public TabPagerAdapter tabAdapter;
     // public ActionProvider shareActionProvider;
     public String themeName = "Theme.Holo";  // Default theme set in our style.
+    public ActivityResultLauncher<String> requestPerm;
 
     // Used to draw transparent 'screen' fragment.
     public Drawable actionBarBackground;
@@ -69,7 +71,7 @@ public class GlobalInfo {
 
             Theme actionBarTheme = activity.getActionBar().getThemedContext().getTheme();
             {
-                @StyleableRes int[] attrs = {
+                @AttrRes int[] attrs = {
                     android.R.attr.actionModeBackground
                 };
                 try (TypedArray typedArray = actionBarTheme.obtainStyledAttributes(attrs)) {

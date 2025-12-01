@@ -267,13 +267,13 @@ public class SystemFragment extends DevFragment {
     }
 
     @Override
-    protected boolean onMenuSelected(MenuItem item) {
+    protected boolean onMenuSelected(@NonNull MenuItem item) {
         return super.onMenuSelected(item);
     }
 
 
     @Override
-    protected void onMenuCreate(Menu menu, MenuInflater inflater) {
+    protected void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         subMenu = menu.addSubMenu("Sys Options");
         inflater.inflate(R.menu.sys_menu, subMenu);
     }

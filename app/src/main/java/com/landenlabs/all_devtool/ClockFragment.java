@@ -26,7 +26,6 @@ import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.icu.text.TimeZoneNames;
 import android.media.MediaPlayer;
@@ -241,7 +240,7 @@ public class ClockFragment extends DevFragment implements View.OnClickListener  
     }
 
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.gps_clock_12) {
             s_timeFormat = s_time12Format;

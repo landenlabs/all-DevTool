@@ -31,7 +31,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -358,7 +357,7 @@ public class SensorFragment extends DevFragment
     }
 
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         int itemId = item.getItemId();
         if (itemId == R.id.sensor_menu_100_msec
@@ -377,7 +376,7 @@ public class SensorFragment extends DevFragment
     }
 
     @Override
-    public void onMenuCreate(Menu menu, MenuInflater inflater) {
+    public void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         subMenu = menu.addSubMenu("Sensor");
         inflater.inflate(R.menu.sensor_menu, subMenu);
         menu.findItem(m_menuSelected).setChecked(true);

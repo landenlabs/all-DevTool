@@ -656,7 +656,7 @@ public class PackageFragment extends DevFragment
      * <li>android.nonFinalResIds=false
      */
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         int pos;
         int id = item.getItemId();
         int show = m_show;

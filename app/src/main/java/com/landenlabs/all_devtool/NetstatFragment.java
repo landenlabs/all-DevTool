@@ -278,9 +278,8 @@ public class NetstatFragment extends DevFragment {
         }
     }
 
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     @Override
-    public boolean onMenuSelected(MenuItem item) {
+    public boolean onMenuSelected(@NonNull MenuItem item) {
         return super.onMenuSelected(item);
     }
 

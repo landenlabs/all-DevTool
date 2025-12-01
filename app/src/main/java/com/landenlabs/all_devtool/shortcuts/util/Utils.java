@@ -22,7 +22,6 @@
 package com.landenlabs.all_devtool.shortcuts.util;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
-
 import static com.landenlabs.all_devtool.shortcuts.util.LLog.LLOG;
 
 import android.app.Activity;
