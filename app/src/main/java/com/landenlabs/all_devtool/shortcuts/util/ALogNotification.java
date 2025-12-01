@@ -23,6 +23,11 @@ package com.landenlabs.all_devtool.shortcuts.util;
 
 import static android.app.PendingIntent.FLAG_MUTABLE;
 
+import static com.landenlabs.all_devtool.DevFragment.checkPermissions;
+import static com.landenlabs.all_devtool.GlobalInfo.s_globalInfo;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -66,6 +71,8 @@ public class ALogNotification {
         notificationManager.createNotificationChannel(channel);
     }
 
+    // @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    @SuppressLint("MissingPermission")
     public static void updateNotification(Context context, Object... msgs) {
 
         String newMsg = TextUtils.join(" ", msgs);
@@ -97,6 +104,8 @@ public class ALogNotification {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
         // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(notificationId, mBuilder.build());
+        if (checkPermissions(s_globalInfo.mainFragActivity,  Manifest.permission.POST_NOTIFICATIONS)) {
+            notificationManager.notify(notificationId, mBuilder.build());
+        }
     }
 }

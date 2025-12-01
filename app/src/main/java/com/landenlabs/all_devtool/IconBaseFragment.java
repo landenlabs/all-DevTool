@@ -46,7 +46,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -116,7 +118,7 @@ public abstract class IconBaseFragment extends DevFragment {
         m_listView = Ui.viewById(rootView, R.id.iconListView);
         m_listView.removeAllViewsInLayout();
 
-        int[] attrs = {android.R.id.background};
+        @IdRes int[] attrs = {android.R.id.background};
         TypedArray ta = m_context.getTheme().obtainStyledAttributes(attrs);
         m_backgroundColor = ta.getColor(0, -1);
         ta.recycle();

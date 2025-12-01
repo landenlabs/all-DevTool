@@ -553,6 +553,7 @@ public class FileBrowserFragment extends DevFragment
 
     // =============================================================================================
     @SuppressWarnings("UnnecessaryLocalVariable")
+    static
     class DirPathSpinnerAdapter extends ArrayAdapter<String> {
         final List<SpannableString> mSpanList;
         final String[] mNameList;
@@ -620,49 +621,33 @@ public class FileBrowserFragment extends DevFragment
         int pos;
         int id = item.getItemId();
         int show = m_show;
-        switch (id) {
-            case R.id.filebrowser_root:
-            case R.id.filebrowser_sdcard:
-            case R.id.filebrowser_download:
-            case R.id.filebrowser_data:
-            case R.id.filebrowser_dcim:
-            case R.id.filebrowser_documents:
-            case R.id.filebrowser_movies:
-            case R.id.filebrowser_music:
-            case R.id.filebrowser_picture:
-            case R.id.filebrowser_podcast:
-            case R.id.filebrowser_ringtones:
-                show = id;
-                break;
-         
-            case R.id.filebrowser_delete:
-                deleteFiles();
-                break;
-            case R.id.filebrowser_collapseAll:
-                collapseAll();
-                m_expand_collapse_toggle.setChecked(false);
-                break;
-            case R.id.filebrowser_expandAll:
-                expandAll();
-                m_expand_collapse_toggle.setChecked(true);
-                break;
-
-            case R.id.filebrowser_show_extra:
-                item.setChecked(!item.isChecked());
-                m_showExtra = item.isChecked();
-                m_handler.sendMessage(m_handler.obtainMessage(MSG_SORT_LIST));
-                break;
-
-            case 0:
-                break;
-            default:
-                item.setChecked(true);
-                pos = Arrays.asList(getResources().getStringArray(R.array.fb_sort_array)).indexOf(item.getTitle().toString());
-                m_sortSpinner.setSelection(pos);
-                this.m_sortBy = id;
-                Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
-                m_handler.sendMessage(msgObj);
-                break;
+        if (id == R.id.filebrowser_root || id == R.id.filebrowser_sdcard
+                || id == R.id.filebrowser_download || id == R.id.filebrowser_data
+                || id == R.id.filebrowser_dcim || id == R.id.filebrowser_documents
+                || id == R.id.filebrowser_movies || id == R.id.filebrowser_music
+                || id == R.id.filebrowser_picture || id == R.id.filebrowser_podcast
+                || id == R.id.filebrowser_ringtones) {
+            show = id;
+        } else if (id == R.id.filebrowser_delete) {
+            deleteFiles();
+        } else if (id == R.id.filebrowser_collapseAll) {
+            collapseAll();
+            m_expand_collapse_toggle.setChecked(false);
+        } else if (id == R.id.filebrowser_expandAll) {
+            expandAll();
+            m_expand_collapse_toggle.setChecked(true);
+        } else if (id == R.id.filebrowser_show_extra) {
+            item.setChecked(!item.isChecked());
+            m_showExtra = item.isChecked();
+            m_handler.sendMessage(m_handler.obtainMessage(MSG_SORT_LIST));
+        } else if (id == 0) {
+        } else {
+            item.setChecked(true);
+            pos = Arrays.asList(getResources().getStringArray(R.array.fb_sort_array)).indexOf(item.getTitle().toString());
+            m_sortSpinner.setSelection(pos);
+            this.m_sortBy = id;
+            Message msgObj = m_handler.obtainMessage(MSG_SORT_LIST);
+            m_handler.sendMessage(msgObj);
         }
 
         if (m_show != show) {
@@ -695,16 +680,13 @@ public class FileBrowserFragment extends DevFragment
     public void onClick(View v) {
 
         int id = v.getId();
-        switch (id) {
-            case R.id.fb_delete:
-                deleteFiles();
-                break;
-            case R.id.fb_plus_minus_toggle:
-                if (m_expand_collapse_toggle.isChecked())
-                    expandAll();
-                else
-                    collapseAll();
-                break;
+        if (id == R.id.fb_delete) {
+            deleteFiles();
+        } else if (id == R.id.fb_plus_minus_toggle) {
+            if (m_expand_collapse_toggle.isChecked())
+                expandAll();
+            else
+                collapseAll();
         }
     }
 
@@ -830,43 +812,31 @@ public class FileBrowserFragment extends DevFragment
     }
 
     private void setShowDir() {
-        switch (m_show) {
-            case R.id.filebrowser_root:
-                m_dir = File.listRoots()[0];
-                break;
-            case R.id.filebrowser_sdcard:
-                m_dir = Environment.getExternalStorageDirectory();
-                break;
-            case R.id.filebrowser_download:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                break;
-            case R.id.filebrowser_data:
-                m_dir = Environment.getDataDirectory();
-                if (OsUtils.getPermissions(m_dir) == -1) {
-                    m_dir = Environment.getExternalStoragePublicDirectory("data");
-                }
-                break;
-            case R.id.filebrowser_dcim:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                break;
-            case R.id.filebrowser_documents:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-                break;
-            case R.id.filebrowser_movies:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-                break;
-            case R.id.filebrowser_music:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-                break;
-            case R.id.filebrowser_picture:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                break;
-            case R.id.filebrowser_podcast:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PODCASTS);
-                break;
-            case R.id.filebrowser_ringtones:
-                m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES);
-                break;
+        if (m_show == R.id.filebrowser_root) {
+            m_dir = File.listRoots()[0];
+        } else if (m_show == R.id.filebrowser_sdcard) {
+            m_dir = Environment.getExternalStorageDirectory();
+        } else if (m_show == R.id.filebrowser_download) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        } else if (m_show == R.id.filebrowser_data) {
+            m_dir = Environment.getDataDirectory();
+            if (OsUtils.getPermissions(m_dir) == -1) {
+                m_dir = Environment.getExternalStoragePublicDirectory("data");
+            }
+        } else if (m_show == R.id.filebrowser_dcim) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        } else if (m_show == R.id.filebrowser_documents) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        } else if (m_show == R.id.filebrowser_movies) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        } else if (m_show == R.id.filebrowser_music) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+        } else if (m_show == R.id.filebrowser_picture) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        } else if (m_show == R.id.filebrowser_podcast) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PODCASTS);
+        } else if (m_show == R.id.filebrowser_ringtones) {
+            m_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES);
         }
 
         LLOG.d(m_dir.getAbsolutePath());
@@ -1271,15 +1241,12 @@ public class FileBrowserFragment extends DevFragment
             Ui.<TextView>viewById(summaryView, R.id.fb_aux).setText(perm.toString());
 
 
-            switch (m_sortBy) {
-                case R.id.filebrowser_sort_by_date:
-                    Ui.<TextView>viewById(summaryView, R.id.fb_size).setText(s_timeFormat.format(fileItem.lastModified()));
-                    break;
-                default:
-                    Ui.<TextView>viewById(summaryView, R.id.fb_size).setText(
-                            fileItem.isDirectory() ? "" :
-                            NumberFormat.getNumberInstance(Locale.getDefault()).format(fileItem.length()));
-                    break;
+            if (m_sortBy == R.id.filebrowser_sort_by_date) {
+                Ui.<TextView>viewById(summaryView, R.id.fb_size).setText(s_timeFormat.format(fileItem.lastModified()));
+            } else {
+                Ui.<TextView>viewById(summaryView, R.id.fb_size).setText(
+                        fileItem.isDirectory() ? "" :
+                                NumberFormat.getNumberInstance(Locale.getDefault()).format(fileItem.length()));
             }
 
             CheckBox checkBox = Ui.viewById(summaryView, R.id.fb_checked);

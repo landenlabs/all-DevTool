@@ -30,6 +30,7 @@ import android.util.TypedValue;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.AttrRes;
+import androidx.annotation.StyleableRes;
 import androidx.core.graphics.Insets;
 
 /**
@@ -71,7 +72,7 @@ public class GlobalInfo {
 
             Theme actionBarTheme = activity.getActionBar().getThemedContext().getTheme();
             {
-                @AttrRes int[] attrs = {
+                int[] attrs = {
                     android.R.attr.actionModeBackground
                 };
                 try (TypedArray typedArray = actionBarTheme.obtainStyledAttributes(attrs)) {

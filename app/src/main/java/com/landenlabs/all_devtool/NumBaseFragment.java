@@ -225,7 +225,7 @@ public abstract class NumBaseFragment extends DevFragment {
     // ============================================================================================
     // Internal class(es)
 
-    private class NumInfo {
+    private static class NumInfo {
         final String m_fieldStr;
         final String m_value;
         final String m_fieldType;

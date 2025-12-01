@@ -70,7 +70,7 @@ public abstract class DevFragment extends Fragment {
     public abstract  List<String> getListAsCsv();
 
     // Menu methods
-    protected MenuProvider menuProvider = new MenuProvider() {
+    protected final MenuProvider menuProvider = new MenuProvider() {
         @Override
         public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
             MenuCompat.setGroupDividerEnabled(menu, true);
@@ -92,20 +92,6 @@ public abstract class DevFragment extends Fragment {
     };
     protected void onMenuCreate(@NonNull Menu menu, @NonNull MenuInflater menuInflater) { }
     protected boolean onMenuSelected(@NonNull MenuItem menuItem) { return false; }
-
-
-    /*
-    // Permissions
-    // Must register before onCreate
-    public ActivityResultCallback<ActivityResult> onResultCallback;
-    public ActivityResultLauncher<IntentSenderRequest> launcher = registerForActivityResult(
-            new ActivityResultContracts.StartIntentSenderForResult(),
-            result -> {
-                if (onResultCallback != null) {
-                    onResultCallback.onActivityResult(result);
-                }
-            });
-    */
 
     // ============================================================================================
     // Fragment methods
@@ -156,8 +142,6 @@ public abstract class DevFragment extends Fragment {
      */
     public void onSelected() {
         SendAnalytics.event( getClass().getSimpleName(), "selected", getName());
-        // GlobalInfo.s_globalInfo.mainFragActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        // GlobalInfo.s_globalInfo.mainFragActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     // ============================================================================================
@@ -188,20 +172,19 @@ public abstract class DevFragment extends Fragment {
     // ============================================================================================
     protected static final int MY_PERMISSIONS_REQUEST = 27;
     protected boolean checkPermissions(String... needPermissions) {
-        boolean okay = true;
+        return checkPermissions(requireActivity(), needPermissions);
+    }
+
+    public static boolean checkPermissions(@NonNull Activity activity, String... needPermissions) {
         List<String> requestPermissions = new ArrayList<>();
         for (String needPermission : needPermissions) {
-            if (requireContext() .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
+            if (activity.checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions.add(needPermission);
-                getPerm(requireActivity(), needPermission);
+                getPerm(activity, needPermission);
             }
         }
-        if (! requestPermissions.isEmpty()) {
-            okay = false;
-            // requestPermissions(requestPermissions.toArray(new String[0]), MY_PERMISSIONS_REQUEST);
-        }
 
-        return okay;
+        return requestPermissions.isEmpty();
     }
 
     public static  void getPerm(
@@ -228,30 +211,4 @@ public abstract class DevFragment extends Fragment {
             // initiateBluetoothConnection();
         }
     }
-
-    /*
-    // Permissions
-    protected static final int MY_PERMISSIONS_REQUEST = 27;
-    protected boolean checkPermissions(String... needPermissions) {
-        boolean okay = true;
-        List<String> requestPermissions = new ArrayList<>();
-        for (String needPermission : needPermissions) {
-            if (requireContext()
-                    .checkSelfPermission(needPermission) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions.add(needPermission);
-            }
-        }
-        if (! requestPermissions.isEmpty()) {
-            okay = false;
-            requestPermissions(requestPermissions.toArray(new String[0]), MY_PERMISSIONS_REQUEST);
-        }
-
-        return okay;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d("DevFragment", " requestPermissionResult for " + requestCode);
-    }
-     */
 }

@@ -2217,7 +2217,7 @@ public class PackageFragment extends DevFragment
     /**
      * Hold Package information
      */
-    class PackingItem {
+    static class PackingItem {
         final String m_fieldStr;
         final String m_valueStr;
         final ArrayListPairString m_valueList;
@@ -2423,23 +2423,19 @@ public class PackageFragment extends DevFragment
             if (m_show == SHOW_PREF) {
                 Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(packingItem.typeStr());
             } else {
-                switch (m_sortBy) {
-                    case R.id.package_sort_by_update_date:
-                            Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(s_timeFormat.format(packingItem.m_packInfo.lastUpdateTime));
-                        break;
-                    case R.id.package_sort_by_install_date:
-                            Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(s_timeFormat.format(packingItem.m_packInfo.firstInstallTime));
-                        break;
-                    default:
-                        TextView sizeTv = Ui.viewById(summaryView, R.id.pkgSize);
-                        sizeTv.setText(
-                                NumberFormat.getNumberInstance(Locale.getDefault()).format(packingItem.m_pkgSize));
-                        int color = 0xff800000;
-                        if (packingItem.m_packInfo.installLocation != PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY
+                if (m_sortBy == R.id.package_sort_by_update_date) {
+                    Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(s_timeFormat.format(packingItem.m_packInfo.lastUpdateTime));
+                } else if (m_sortBy == R.id.package_sort_by_install_date) {
+                    Ui.<TextView>viewById(summaryView, R.id.pkgSize).setText(s_timeFormat.format(packingItem.m_packInfo.firstInstallTime));
+                } else {
+                    TextView sizeTv = Ui.viewById(summaryView, R.id.pkgSize);
+                    sizeTv.setText(
+                            NumberFormat.getNumberInstance(Locale.getDefault()).format(packingItem.m_pkgSize));
+                    int color = 0xff800000;
+                    if (packingItem.m_packInfo.installLocation != PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY
                             && packingItem.m_packInfo.applicationInfo.sourceDir.startsWith("/mnt"))
-                            color = 0xff008000;
-                        sizeTv.setTextColor(color);
-                        break;
+                        color = 0xff008000;
+                    sizeTv.setTextColor(color);
                 }
             }
 

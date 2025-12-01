@@ -141,18 +141,6 @@ dependencies {
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
 
-    // Standard flavor
-    // standardImplementation "com.google.android.gms:play-services-auth:20.4.1"
-    // standardImplementation "com.google.firebase:firebase-core:19.0.0" // 21.1.1"
-
-
-    // Legacy flavor
- //   def  legacyPlayServiceVersion = '17.0.0'
- //   legacyImplementation "com.google.android.gms:play-services-auth:$legacyPlayServiceVersion"
- //   legacyImplementation "com.google.firebase:firebase-core:$legacyPlayServiceVersion"
-
-    // implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
-    // implementation "com.google.android.gms:play-services-analytics:18.1.1"
 
     implementation "com.google.android.gms:play-services-location:21.3.0"
 

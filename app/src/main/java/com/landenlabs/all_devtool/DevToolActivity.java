@@ -272,6 +272,7 @@ public class DevToolActivity extends AppCompatActivity {
      * Use html web viewer in AlertDialog.
      */
     private void showAbout() {
+        @SuppressLint("DiscouragedApi")
         int resId = getResources().getIdentifier("compileSdkVersion", "string", getPackageName());
         String compileSdk = (resId > 0) ? getResources().getString(resId) : "";
         resId = getResources().getIdentifier("buildToolsVersion", "string", getPackageName());

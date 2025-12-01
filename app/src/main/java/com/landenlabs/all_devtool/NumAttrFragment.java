@@ -734,13 +734,9 @@ public class NumAttrFragment extends NumBaseFragment {
         addNum("defaultValue", android.R.attr.defaultValue, "string");
 
         AddToListLevel19();
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            AddToListLevel21();
-        }
+        AddToListLevel21();
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     void AddToListLevel19() {
         // Api 19
         addNum("apduServiceBanner", android.R.attr.apduServiceBanner);
@@ -797,7 +793,6 @@ public class NumAttrFragment extends NumBaseFragment {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     void AddToListLevel21() {
         // Api 21
         // TODO - most of these attributes don't have the correct type

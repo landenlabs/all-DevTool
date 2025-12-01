@@ -91,6 +91,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.landenlabs.all_devtool.shortcuts.util.ListInfo;
@@ -120,7 +121,7 @@ import java.util.Set;
  *
  * @author Dennis Lang
  */
-@SuppressWarnings({"StatementWithEmptyBody", "Convert2Lambda"})
+@SuppressWarnings({"StatementWithEmptyBody"})
 public class NetFragment extends DevFragment {
     private final ArrayList<ListInfo> m_list = new ArrayList<>();
     private ExpandableListView m_listView;
@@ -142,27 +143,27 @@ public class NetFragment extends DevFragment {
     private boolean m_updateTime = true;
 
     // =============================================================================================
-    @SuppressWarnings("Convert2Lambda")
     class NetBroadcastReceiver extends BroadcastReceiver {
         final WifiManager mWifiMgr;
 
         public NetBroadcastReceiver(WifiManager wifiMgr) {
             mWifiMgr = wifiMgr;
         }
+
+        @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            m_listView.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
+            m_listView.post(() -> {
+                try {
+                    if (checkPermissions(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
                         List<ScanResult> listWifi = mWifiMgr.getScanResults();
                         Log.d("Net", "Wifi size=" + listWifi.size());
                         if (!listWifi.isEmpty()) {
                         }
-                        updateList();
-                    } catch (Exception ignore) {
                     }
+                    updateList();
+                } catch (Exception ignore) {
                 }
             });
         }
@@ -899,57 +900,61 @@ public class NetFragment extends DevFragment {
     void addConfigNetworks() {
 
         try {
-            List<WifiConfiguration> listWifiCfg = wifiMgr.getConfiguredNetworks();
+            if (checkPermissions(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                @SuppressLint("MissingPermission")
+                List<WifiConfiguration> listWifiCfg = wifiMgr.getConfiguredNetworks();
 
-            for (WifiConfiguration wifiCfg : listWifiCfg) {
-                Map<String, String> wifiCfgListStr = new LinkedHashMap<>();
-                if (Build.VERSION.SDK_INT >= 23) {
+                for (WifiConfiguration wifiCfg : listWifiCfg) {
+                    Map<String, String> wifiCfgListStr = new LinkedHashMap<>();
                     wifiCfgListStr.put("Name", wifiCfg.providerFriendlyName);
-                }
-                wifiCfgListStr.put("SSID", wifiCfg.SSID);
-                String netStatus = "";
-                switch (wifiCfg.status) {
-                    case WifiConfiguration.Status.CURRENT:
-                        netStatus = "Connected"; break;
-                    case WifiConfiguration.Status.DISABLED:
-                        netStatus = "Disabled"; break;
-                    case WifiConfiguration.Status.ENABLED:
-                        netStatus = "Enabled"; break;
-                }
-                wifiCfgListStr.put(" Status", netStatus);
-                wifiCfgListStr.put(" Priority", String.valueOf(wifiCfg.priority));
-                if (null != wifiCfg.wepKeys) {
-                     // wifiCfgListStr.put(" wepKeys", TextUtils.join(",", wifiCfg.wepKeys));
-                }
-                String protocols = "";
-                if (wifiCfg.allowedProtocols.get(WifiConfiguration.Protocol.RSN))
-                    protocols = "RSN ";
-                if (wifiCfg.allowedProtocols.get(WifiConfiguration.Protocol.WPA))
-                    protocols = protocols + "WPA ";
-                wifiCfgListStr.put(" Protocols", protocols);
+                    wifiCfgListStr.put("SSID", wifiCfg.SSID);
+                    String netStatus = "";
+                    switch (wifiCfg.status) {
+                        case WifiConfiguration.Status.CURRENT:
+                            netStatus = "Connected";
+                            break;
+                        case WifiConfiguration.Status.DISABLED:
+                            netStatus = "Disabled";
+                            break;
+                        case WifiConfiguration.Status.ENABLED:
+                            netStatus = "Enabled";
+                            break;
+                    }
+                    wifiCfgListStr.put(" Status", netStatus);
+                    wifiCfgListStr.put(" Priority", String.valueOf(wifiCfg.priority));
+                    if (null != wifiCfg.wepKeys) {
+                        // wifiCfgListStr.put(" wepKeys", TextUtils.join(",", wifiCfg.wepKeys));
+                    }
+                    String protocols = "";
+                    if (wifiCfg.allowedProtocols.get(WifiConfiguration.Protocol.RSN))
+                        protocols = "RSN ";
+                    if (wifiCfg.allowedProtocols.get(WifiConfiguration.Protocol.WPA))
+                        protocols = protocols + "WPA ";
+                    wifiCfgListStr.put(" Protocols", protocols);
 
-                String keyProt = "";
-                if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE))
-                    keyProt = "none";
-                if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_EAP))
-                    keyProt = "WPA+EAP ";
-                if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK))
-                    keyProt = "WPA+PSK ";
-                wifiCfgListStr.put(" Keys", keyProt);
+                    String keyProt = "";
+                    if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE))
+                        keyProt = "none";
+                    if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_EAP))
+                        keyProt = "WPA+EAP ";
+                    if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK))
+                        keyProt = "WPA+PSK ";
+                    wifiCfgListStr.put(" Keys", keyProt);
 
-                if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
-                    // Remove network connections with no Password.
-                    // wifiMgr.removeNetwork(wifiCfg.networkId);
+                    if (wifiCfg.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
+                        // Remove network connections with no Password.
+                        // wifiMgr.removeNetwork(wifiCfg.networkId);
+                    }
+
+                    String wifiCfgStr = wifiCfg.toString().replace("\n", " ");
+                    // " cuid=" + creatorUid);
+                    // " cname=" + creatorName);
+                    String creator = wifiCfgStr.replaceAll(".* cname=([^ ]+) .*", "$1");
+                    wifiCfgListStr.put(" Creator", creator);
+
+                    addBuild(String.format("WiFiCfg#%s %s",
+                            wifiCfg.networkId, wifiCfg.SSID), wifiCfgListStr);
                 }
-
-                String wifiCfgStr = wifiCfg.toString().replace("\n", " ");
-                // " cuid=" + creatorUid);
-                // " cname=" + creatorName);
-                String creator =  wifiCfgStr.replaceAll(".* cname=([^ ]+) .*", "$1");
-                wifiCfgListStr.put(" Creator", creator);
-
-                addBuild(String.format("WiFiCfg#%s %s",
-                        wifiCfg.networkId, wifiCfg.SSID), wifiCfgListStr);
             }
 
         } catch (Exception ex) {

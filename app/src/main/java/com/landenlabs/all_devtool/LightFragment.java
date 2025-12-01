@@ -195,13 +195,10 @@ public class LightFragment extends DevFragment
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         int id = seekBar.getId();
-        switch (id) {
-            case R.id.screenBrightnessSB:
-                setScreenBrightness(progress / 100.0f);
-                break;
-            case R.id.lightCameraSB:
-                m_cameraPercent = progress / 100.0f;
-                break;
+        if (id == R.id.screenBrightnessSB) {
+            setScreenBrightness(progress / 100.0f);
+        } else if (id == R.id.lightCameraSB) {
+            m_cameraPercent = progress / 100.0f;
         }
     }
 
