@@ -5,17 +5,17 @@ apply plugin: 'com.android.application'
 // File javaDocDstDir = file('../javadoc')
 
 android {
-    namespace 'com.landenlabs.all_devtool'
+    namespace = 'com.landenlabs.all_devtool'
 
-    compileSdkVersion rootProject.apiSDK
+    compileSdk = rootProject.apiSDK
 
     defaultConfig {
-        applicationId 'com.landenlabs.all_devtool'
-        minSdkVersion rootProject.minSDK
-        targetSdkVersion rootProject.apiSDK
+        applicationId = 'com.landenlabs.all_devtool'
+        minSdk = rootProject.minSDK
+        targetSdk = rootProject.apiSDK
 
-        versionCode 71129
-        versionName '7.11.29'
+        versionCode = 71129
+        versionName = '7.11.29'
 
         // signingConfig signingConfigs.release
         resValue "string", "targetSdkVersion", targetSdkVersion.apiString
@@ -24,10 +24,6 @@ android {
 
         // Limit languages to following list.
         // resConfigs "en", "es"
-    }
-
-    applicationVariants.configureEach { variant ->
-        variant.resValue "string", "versionName", "version " + variant.versionName
     }
 
     signingConfigs {
@@ -62,16 +58,17 @@ android {
     }
 
     buildFeatures.buildConfig = true
+    buildFeatures.resValues = true
 
     buildTypes {
         release {
-            shrinkResources true
-            minifyEnabled true
-            debuggable false
+            shrinkResources = true
+            minifyEnabled = true
+            debuggable = false
             jniDebuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
 
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
             // productFlavors.legacy.signingConfig signingConfigs.release
             // productFlavors.standard.signingConfig signingConfigs.release
             ndk {
@@ -80,9 +77,9 @@ android {
             }
         }
         debug {
-            minifyEnabled false
+            minifyEnabled = false
             jniDebuggable true
-            debuggable true
+            debuggable = true
             aaptOptions.cruncherEnabled = false
         }
     }
@@ -95,8 +92,8 @@ android {
 
     /*
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
      */
 
@@ -106,8 +103,8 @@ android {
     }
 
     lintOptions {
-        abortOnError false
-        checkReleaseBuilds false
+        abortOnError = false
+        checkReleaseBuilds = false
         disable 'DefaultLocale', 'SimpleDateFormat', 'InflateParams', 'SpUsage',
                 'UseCompoundDrawables', 'HandlerLeak', 'ViewConstructor', 'SetTextI18n',
                 'RtlSymmetry', 'RtlHardcoded', 'ContentDescription',
@@ -130,19 +127,19 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.8.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.android.material:material:1.14.0'
 
     // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:34.6.0')
+    implementation platform('com.google.firebase:firebase-bom:34.17.0')
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
 
 
-    implementation "com.google.android.gms:play-services-location:21.3.0"
+    implementation "com.google.android.gms:play-services-location:21.4.0"
 
     /*
         // Google Drive API services
@@ -169,7 +166,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.androidplot/androidplot-core
     implementation 'com.androidplot:androidplot-core:1.5.11'
     // https://mvnrepository.com/artifact/net.danlew/android.joda
-    implementation 'net.danlew:android.joda:2.13.1'
+    implementation 'net.danlew:android.joda:2.14.2'
 }
 
 // Rename app
@@ -177,23 +174,30 @@ dependencies {
 //  Ex:
 //           app-release.apk -> allDevTool-release-X.YY.ZZZ.apk
 //           app-release.aab -> allDevTool-release-X.Y.ZZZ.aab
-android.applicationVariants.configureEach {
-    variant -> variant.outputs.configureEach {
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.resValues.put(
+                variant.makeResValueKey("string", "versionName"),
+                new com.android.build.api.variant.ResValue("version " + variant.outputs[0].versionName.get(), null)
+        )
+
         def ourName = project.parent.name
-        def buildType = outputFileName.replaceAll(".*(debug|release).*",'\$1')
-        def versionStr = versionName.replaceAll("-.*", "")
-        def flavor = variant.mergedFlavor.versionNameSuffix.toString().replace("null", "")
-        // ext.flavorName = variant.name
+        def buildType = variant.buildType
+        def versionStr = variant.outputs[0].versionName.get().replaceAll("-.*", "")
+        def flavor = ""
         def newNameRoot = "${ourName}${flavor}-${buildType}-${versionStr}"
-        outputFileName = "${newNameRoot}.apk"
+
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("${newNameRoot}.apk")
+        }
 
         // sign{flavor}{buildType}Bundle
         //   Ex: signAppDebugBundle
         def bundleFinalizeTaskName = "sign${variant.name.capitalize()}Bundle"
-        tasks.named(bundleFinalizeTaskName) {
-            def file = finalBundleFile.asFile.get()
+        tasks.matching { it.name == bundleFinalizeTaskName }.configureEach { task ->
+            def file = task.finalBundleFile.asFile.get()
             def finalFile = new File(file.parentFile, "${newNameRoot}.aab")
-            finalBundleFile.set(finalFile)
+            task.finalBundleFile.set(finalFile)
         }
     }
 }

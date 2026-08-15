@@ -1,4 +1,4 @@
-### a LanDen Labs - DevTool
+### LanDen Labs - DevTool
 Android Developer Tool
 
 ***apk v2.12.22  available in app directory.***
@@ -6,7 +6,8 @@ Android Developer Tool
 <br>API 29  AndroidX
 
   [![Build status](https://travis-ci.org/landenlabs/all_DevTool.svg?branch=master)](https://travis-ci.org/landenlabs/all_DevTool)
-  
+  [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 
 WebSite
 [https://landenlabs.com/android/devstuff/index.html](https://LanDenLabs.com/android/devstuff/index.html)
@@ -29,7 +30,7 @@ The app contains the following pages:
 
 >   6. Packages \- List installed, defaults, cached, and libraries
 
->   7. Text \- Display of sample text using available Fonts, Styles and Poinst
+>   7. Text \- Display of sample text using available Fonts, Styles and Points
 size.  
 Click on text row to get detailed display showing pixel height for 10 rows.
 
@@ -70,7 +71,7 @@ Sensor page - reall time graph of values returned from sensor:
 ![sensor](https://LanDenLabs.com//android/devstuff/sensor.jpg)
 
 ***
-Screen page - shows screen size in pixels ([x) and density independent pixels (dp or dip):
+Screen page - shows screen size in pixels (px) and density independent pixels (dp or dip):
 ***
 ![screen Landscape](https://LanDenLabs.com//android/devstuff/screen-landscape.jpg)
 
@@ -110,3 +111,21 @@ Icon pages - show available icons which are part of install OS:
 
 ***
 ![Misc Attributes](https://LanDenLabs.com//android/devstuff/miscattr.jpg)
+
+### License
+
+```
+Copyright 2026 Dennis Lang (LanDen Labs)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+See [LICENSE](LICENSE) for the full license text.
