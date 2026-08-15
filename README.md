@@ -12,7 +12,7 @@ Android Developer Tool
 WebSite
 [https://landenlabs.com/android/devstuff/index.html](https://LanDenLabs.com/android/devstuff/index.html)
 
-![DevTool](https://landenlabs.com//android/devstuff/dev_stuff.png)
+![DevTool](screens/dev_stuff.png)
 
 Dev Stuff is a general purpose developer tool to display resources and assets
 available to Android developers.  
@@ -58,12 +58,12 @@ System page - shows system state and available services:
 ***
 Text Page - shows default fonts and sample sizes:
 
-![Text](https://LanDenLabs.com//android/devstuff/text.jpg)
+![Text](screens/text.jpg)
 
 ***
 Text details page - shows pixels required to render 10 rows:
 ***
-![textdetail1](https://LanDenLabs.com//android/devstuff/text-detail1.jpg)
+![textdetail1](screens/text-detail1.jpg)
 
 ***
 Sensor page - reall time graph of values returned from sensor:
@@ -78,39 +78,39 @@ Screen page - shows screen size in pixels (px) and density independent pixels (d
 ***
 Screen page - also allows you to draw to verify glass touch is working:
 ***
-![screen Portrait](https://LanDenLabs.com//android/devstuff/screen-portrait.jpg)
+![screen Portrait](screens/screen-portrait.jpg)
 
 ***
 Theme page - show sample of some themes:
 ***
-![Themes](https://LanDenLabs.com//android/devstuff/theme-menu.jpg)
+![Themes](screens/theme-menu.jpg)
 
 ***
 Package page - view installed pages:
 ***
-![User Packages](https://LanDenLabs.com//android/devstuff/package-user.jpg)
+![User Packages](screens/package-user.jpg)
 
-![Installed Libraries](https://LanDenLabs.com//android/devstuff/package-libs.jpg)
+![Installed Libraries](screens/package-libs.jpg)
 
-![Package directories](https://LanDenLabs.com//android/devstuff/package-cache.jpg)
+![Package directories](screens/package-cache.jpg)
 
-![Package actions1](https://LanDenLabs.com//android/devstuff/package-pref.jpg)
-![Package actions2](https://LanDenLabs.com//android/devstuff/package-pref2.jpg)
-![Package actions3](https://LanDenLabs.com//android/devstuff/package-pref3.jpg)
+![Package actions1](screens/package-pref.jpg)
+![Package actions2](screens/package-pref2.jpg)
+![Package actions3](screens/package-pref3.jpg)
 
 ***
 Icon pages - show available icons which are part of install OS:
 ***
-![icon attributes](https://LanDenLabs.com//android/devstuff/iconattr1.jpg)
+![icon attributes](screens/iconattr1.jpg)
 
-![icon attr detail view](https://LanDenLabs.com//android/devstuff/iconattr-detail.jpg)
+![icon attr detail view](screens/iconattr-detail.jpg)
 
-![icons](https://LanDenLabs.com//android/devstuff/icondraw1.jpg)
+![icons](screens/icondraw1.jpg)
 
-![icons detail view](https://LanDenLabs.com//android/devstuff/icondraw-detail.jpg)
+![icons detail view](screens/icondraw-detail.jpg)
 
 ***
-![Misc Attributes](https://LanDenLabs.com//android/devstuff/miscattr.jpg)
+![Misc Attributes](screens/miscattr.jpg)
 
 ### License
 
